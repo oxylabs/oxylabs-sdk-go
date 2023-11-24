@@ -7,24 +7,22 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-type YandexSearchOpts struct {
+type BaiduSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
 	Pages       int
 	Limit       int
-	Locale      string
-	GeoLocation string
 	UserAgent   oxylabs.UserAgent
 	CallbackUrl string
 }
 
-// Scrapes Yandex via its search engine.
-func (c *SerpClient) ScrapeYandexSearch(
+// Scrapes Baidu via its search engine.
+func (c *SerpClient) ScrapeBaiduSearch(
 	query string,
-	opts ...*YandexSearchOpts,
+	opts ...*BaiduSearchOpts,
 ) (*Response, error) {
 	// Prepare options
-	opt := &YandexSearchOpts{}
+	opt := &BaiduSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -38,14 +36,12 @@ func (c *SerpClient) ScrapeYandexSearch(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex_search",
+		"source":          "baidu_search",
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
-		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
@@ -62,25 +58,24 @@ func (c *SerpClient) ScrapeYandexSearch(
 	}
 }
 
-type YandexUrlOpts struct {
+type BaiduUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
-	Render      oxylabs.Render
 	CallbackUrl string
 }
 
-// Scrapes Yandex via provided url.
-func (c *SerpClient) ScrapeYandexUrl(
+// Scrapes Baidu via its url.
+func (c *SerpClient) ScrapeBaiduUrl(
 	url string,
-	opts ...*YandexUrlOpts,
+	opts ...*BaiduUrlOpts,
 ) (*Response, error) {
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "yandex")
+	err := oxylabs.ValidateURL(url, "baidu")
 	if err != nil {
 		return nil, err
 	}
 
-	// Prepare options.
-	opt := &YandexUrlOpts{}
+	// Prepare options
+	opt := &BaiduUrlOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -94,10 +89,9 @@ func (c *SerpClient) ScrapeYandexUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex",
+		"source":          "baidu",
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
-		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
 	jsonPayload, err := json.Marshal(payload)

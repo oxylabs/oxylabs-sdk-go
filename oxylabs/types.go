@@ -17,8 +17,8 @@ var (
 	UA_TABLET_IOS      UserAgent = "tablet_ios"
 )
 
-func IsUserAgentValid(ua string) bool {
-	switch UserAgent(ua) {
+func IsUserAgentValid(ua UserAgent) bool {
+	switch ua {
 	case
 		UA_DESKTOP,
 		UA_DESKTOP_CHROME,
@@ -65,6 +65,7 @@ var (
 	DOMAIN_BY  Domain = "by"
 	DOMAIN_KZ  Domain = "kz"
 	DOMAIN_TR  Domain = "tr"
+	DOMAIN_CN  Domain = "cn"
 )
 
 type Locale string

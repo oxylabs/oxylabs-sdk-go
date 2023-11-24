@@ -7,7 +7,7 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-type YandexSearchOpts struct {
+type BingSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
 	Pages       int
@@ -16,15 +16,16 @@ type YandexSearchOpts struct {
 	GeoLocation string
 	UserAgent   oxylabs.UserAgent
 	CallbackUrl string
+	Render      oxylabs.Render
 }
 
-// Scrapes Yandex via its search engine.
-func (c *SerpClient) ScrapeYandexSearch(
+// Scrapes Bing via its search engine.
+func (c *SerpClient) ScrapeBingSearch(
 	query string,
-	opts ...*YandexSearchOpts,
+	opts ...*BingSearchOpts,
 ) (*Response, error) {
 	// Prepare options
-	opt := &YandexSearchOpts{}
+	opt := &BingSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -38,7 +39,7 @@ func (c *SerpClient) ScrapeYandexSearch(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex_search",
+		"source":          "bing_search",
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
@@ -48,6 +49,7 @@ func (c *SerpClient) ScrapeYandexSearch(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
+		"render":          opt.Render,
 	}
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -62,25 +64,25 @@ func (c *SerpClient) ScrapeYandexSearch(
 	}
 }
 
-type YandexUrlOpts struct {
+type BingUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
 	CallbackUrl string
 }
 
-// Scrapes Yandex via provided url.
-func (c *SerpClient) ScrapeYandexUrl(
+// Scrapes Bing via provided url.
+func (c *SerpClient) ScrapeBingUrl(
 	url string,
-	opts ...*YandexUrlOpts,
+	opts ...*BingUrlOpts,
 ) (*Response, error) {
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "yandex")
+	err := oxylabs.ValidateURL(url, "bing")
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare options.
-	opt := &YandexUrlOpts{}
+	opt := &BingUrlOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -94,7 +96,7 @@ func (c *SerpClient) ScrapeYandexUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex",
+		"source":          "bing",
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
@@ -111,5 +113,4 @@ func (c *SerpClient) ScrapeYandexUrl(
 	} else {
 		return res, nil
 	}
-
 }

@@ -1,29 +1,43 @@
 package serp
 
-import "github.com/mslmio/oxylabs-sdk-go/oxylabs"
+import (
+	"reflect"
 
-// Default values for Yandex search source.
-func (opt *YandexSearchOpts) setDefaults() {
-	if opt.Domain == "" {
-		opt.Domain = oxylabs.DOMAIN_COM
-	}
-	if opt.StartPage == 0 {
-		opt.StartPage = 1
-	}
-	if opt.Pages == 0 {
-		opt.Pages = 1
-	}
-	if opt.Limit == 0 {
-		opt.Limit = 10
-	}
-	if opt.UserAgent == "" {
-		opt.UserAgent = oxylabs.UA_DESKTOP
-	}
-}
+	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
+)
 
-// Default values for Yandex url source.
-func (opt *YandexUrlOpts) setDefaults() {
-	if opt.UserAgent == "" {
-		opt.UserAgent = oxylabs.UA_DESKTOP
+// Function to set default values for serp scrapers.
+func SetDefaults(opt interface{}) {
+	val := reflect.ValueOf(opt).Elem()
+
+	// Loop through the fields of the struct.
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		fieldType := val.Type().Field(i)
+
+		// Set domain.
+		if fieldType.Name == "Domain" && field.String() == "" {
+			field.SetString(string(oxylabs.DOMAIN_COM))
+		}
+
+		// Set start page.
+		if fieldType.Name == "StartPage" && field.Int() == 0 {
+			field.SetInt(1)
+		}
+
+		// Set pages.
+		if fieldType.Name == "Pages" && field.Int() == 0 {
+			field.SetInt(1)
+		}
+
+		// Set limit.
+		if fieldType.Name == "Limit" && field.Int() == 0 {
+			field.SetInt(10)
+		}
+
+		// Set user agent.
+		if fieldType.Name == "UserAgent" && field.String() == "" {
+			field.SetString(string(oxylabs.UA_DESKTOP))
+		}
 	}
 }

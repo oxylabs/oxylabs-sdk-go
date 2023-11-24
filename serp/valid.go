@@ -40,7 +40,7 @@ func (opt *YandexSearchOpts) checkParameterValidity() error {
 		return fmt.Errorf("invalid locale parameter: %s", opt.Locale)
 	}
 
-	if !oxylabs.IsUserAgentValid(string(opt.UserAgent)) {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
 
@@ -50,7 +50,7 @@ func (opt *YandexSearchOpts) checkParameterValidity() error {
 // Function to check validity of yandex url parameters.
 func (opt *YandexUrlOpts) checkParameterValidity() error {
 
-	if !oxylabs.IsUserAgentValid(string(opt.UserAgent)) {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
 
@@ -61,7 +61,73 @@ func (opt *YandexUrlOpts) checkParameterValidity() error {
 	return nil
 }
 
-// Functions to check other sources wll be here.
+// Accepted parameters for bing.
+var BingSearchAcceptedDomainParameters = []oxylabs.Domain{
+	oxylabs.DOMAIN_COM,
+	oxylabs.DOMAIN_RU,
+	oxylabs.DOMAIN_UA,
+	oxylabs.DOMAIN_BY,
+	oxylabs.DOMAIN_KZ,
+	oxylabs.DOMAIN_TR,
+}
+
+// Function to check validity of bing search parameters.
+func (opt *BingSearchOpts) checkParameterValidity() error {
+
+	if opt.Domain != "" && !inSlice(opt.Domain, BingSearchAcceptedDomainParameters) {
+		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
+	}
+
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if !oxylabs.IsRenderValid(opt.Render) {
+		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+	return nil
+}
+
+// Function to check validity of bing url parameters.
+func (opt *BingUrlOpts) checkParameterValidity() error {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
+		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	return nil
+}
+
+// Accepted parameters for baidu.
+var BaiduSearchAcceptedDomainParameters = []oxylabs.Domain{
+	oxylabs.DOMAIN_COM,
+	oxylabs.DOMAIN_CN,
+}
+
+// Function to check validity of baidu search parameters.
+func (opt *BaiduSearchOpts) checkParameterValidity() error {
+	if opt.Domain != "" && !inSlice(opt.Domain, BaiduSearchAcceptedDomainParameters) {
+		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
+	}
+
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	return nil
+}
+
+// Function to check validity of baidu url parameters.
+func (opt *BaiduUrlOpts) checkParameterValidity() error {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	return nil
+}
 
 // inSlice checks if a value is in the slice.
 func inSlice(val interface{}, list interface{}) bool {
