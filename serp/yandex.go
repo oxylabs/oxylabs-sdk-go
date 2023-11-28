@@ -7,12 +7,64 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
+// Accepted parameters for yandex.
+var yandexSearchAcceptedDomainParameters = []oxylabs.Domain{
+	oxylabs.DOMAIN_COM,
+	oxylabs.DOMAIN_RU,
+	oxylabs.DOMAIN_UA,
+	oxylabs.DOMAIN_BY,
+	oxylabs.DOMAIN_KZ,
+	oxylabs.DOMAIN_TR,
+}
+var yandexSearchAcceptedLocaleParameters = []oxylabs.Locale{
+	oxylabs.LOCALE_EN,
+	oxylabs.LOCALE_RU,
+	oxylabs.LOCALE_BY,
+	oxylabs.LOCALE_DE,
+	oxylabs.LOCALE_FR,
+	oxylabs.LOCALE_ID,
+	oxylabs.LOCALE_KK,
+	oxylabs.LOCALE_TT,
+	oxylabs.LOCALE_TR,
+	oxylabs.LOCALE_UK,
+}
+
+// checkParameterValidity checks validity of yandex search parameters.
+func (opt *YandexSearchOpts) checkParameterValidity() error {
+	if !inList(opt.Domain, yandexSearchAcceptedDomainParameters) {
+		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
+	}
+
+	if opt.Locale != "" && !inList(opt.Locale, yandexSearchAcceptedLocaleParameters) {
+		return fmt.Errorf("invalid locale parameter: %s", opt.Locale)
+	}
+
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	return nil
+}
+
+// checkParameterValidity checks validity of yandex url parameters.
+func (opt *YandexUrlOpts) checkParameterValidity() error {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
+		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	return nil
+}
+
 type YandexSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
 	Pages       int
 	Limit       int
-	Locale      string
+	Locale      oxylabs.Locale
 	GeoLocation string
 	UserAgent   oxylabs.UserAgent
 	CallbackUrl string
@@ -28,7 +80,13 @@ func (c *SerpClient) ScrapeYandexSearch(
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
-	SetDefaults(opt)
+
+	// Set defaults.
+	SetDefaultDomain(&opt.Domain)
+	SetDefaultStartPage(&opt.StartPage)
+	SetDefaultLimit(&opt.Limit)
+	SetDefaultPages(&opt.Pages)
+	SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -84,7 +142,9 @@ func (c *SerpClient) ScrapeYandexUrl(
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
-	SetDefaults(opt)
+
+	// Set defaults.
+	SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()

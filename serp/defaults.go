@@ -1,43 +1,35 @@
 package serp
 
 import (
-	"reflect"
-
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// Function to set default values for serp scrapers.
-func SetDefaults(opt interface{}) {
-	val := reflect.ValueOf(opt).Elem()
+func SetDefaultDomain(domain *oxylabs.Domain) {
+	if *domain == "" {
+		*domain = oxylabs.DOMAIN_COM
+	}
+}
 
-	// Loop through the fields of the struct.
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
-		fieldType := val.Type().Field(i)
+func SetDefaultStartPage(startPage *int) {
+	if *startPage == 0 {
+		*startPage = 1
+	}
+}
 
-		// Set domain.
-		if fieldType.Name == "Domain" && field.String() == "" {
-			field.SetString(string(oxylabs.DOMAIN_COM))
-		}
+func SetDefaultPages(pages *int) {
+	if *pages == 0 {
+		*pages = 1
+	}
+}
 
-		// Set start page.
-		if fieldType.Name == "StartPage" && field.Int() == 0 {
-			field.SetInt(1)
-		}
+func SetDefaultLimit(limit *int) {
+	if *limit == 0 {
+		*limit = 10
+	}
+}
 
-		// Set pages.
-		if fieldType.Name == "Pages" && field.Int() == 0 {
-			field.SetInt(1)
-		}
-
-		// Set limit.
-		if fieldType.Name == "Limit" && field.Int() == 0 {
-			field.SetInt(10)
-		}
-
-		// Set user agent.
-		if fieldType.Name == "UserAgent" && field.String() == "" {
-			field.SetString(string(oxylabs.UA_DESKTOP))
-		}
+func SetDefaultUserAgent(userAgent *oxylabs.UserAgent) {
+	if *userAgent == "" {
+		*userAgent = oxylabs.UA_DESKTOP
 	}
 }

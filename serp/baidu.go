@@ -7,6 +7,34 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
+// Accepted parameters for baidu.
+var BaiduSearchAcceptedDomainParameters = []oxylabs.Domain{
+	oxylabs.DOMAIN_COM,
+	oxylabs.DOMAIN_CN,
+}
+
+// checkParameterValidity checks validity of baidu search parameters.
+func (opt *BaiduSearchOpts) checkParameterValidity() error {
+	if !inList(opt.Domain, BaiduSearchAcceptedDomainParameters) {
+		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
+	}
+
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	return nil
+}
+
+// checkParameterValidity checks validity of baidu url parameters.
+func (opt *BaiduUrlOpts) checkParameterValidity() error {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	return nil
+}
+
 type BaiduSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -26,7 +54,12 @@ func (c *SerpClient) ScrapeBaiduSearch(
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
-	SetDefaults(opt)
+
+	// Set defaults.
+	SetDefaultDomain(&opt.Domain)
+	SetDefaultStartPage(&opt.StartPage)
+	SetDefaultLimit(&opt.Limit)
+	SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -79,7 +112,9 @@ func (c *SerpClient) ScrapeBaiduUrl(
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
-	SetDefaults(opt)
+
+	// Set defaults.
+	SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()

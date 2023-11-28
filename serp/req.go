@@ -13,7 +13,8 @@ func (c *SerpClient) Req(
 	jsonPayload []byte,
 ) (*Response, error) {
 	// Prepare requst.
-	request, _ := http.NewRequest("POST",
+	request, _ := http.NewRequest(
+		"POST",
 		c.BaseUrl,
 		bytes.NewBuffer(jsonPayload),
 	)

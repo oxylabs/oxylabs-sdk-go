@@ -7,12 +7,51 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
+// Accepted parameters for bing.
+var BingSearchAcceptedDomainParameters = []oxylabs.Domain{
+	oxylabs.DOMAIN_COM,
+	oxylabs.DOMAIN_RU,
+	oxylabs.DOMAIN_UA,
+	oxylabs.DOMAIN_BY,
+	oxylabs.DOMAIN_KZ,
+	oxylabs.DOMAIN_TR,
+}
+
+// checkParameterValidity checks validity of bing search parameters.
+func (opt *BingSearchOpts) checkParameterValidity() error {
+	if opt.Domain != "" && !inList(opt.Domain, BingSearchAcceptedDomainParameters) {
+		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
+	}
+
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
+		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+	return nil
+}
+
+// checkParameterValidity checks validity of bing url parameters.
+func (opt *BingUrlOpts) checkParameterValidity() error {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
+		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	return nil
+}
+
 type BingSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
 	Pages       int
 	Limit       int
-	Locale      string
+	Locale      oxylabs.Locale
 	GeoLocation string
 	UserAgent   oxylabs.UserAgent
 	CallbackUrl string
@@ -29,7 +68,13 @@ func (c *SerpClient) ScrapeBingSearch(
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
-	SetDefaults(opt)
+
+	// Set defaults.
+	SetDefaultDomain(&opt.Domain)
+	SetDefaultStartPage(&opt.StartPage)
+	SetDefaultLimit(&opt.Limit)
+	SetDefaultPages(&opt.Pages)
+	SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -66,6 +111,7 @@ func (c *SerpClient) ScrapeBingSearch(
 
 type BingUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
+	GeoLocation string
 	Render      oxylabs.Render
 	CallbackUrl string
 }
@@ -86,7 +132,9 @@ func (c *SerpClient) ScrapeBingUrl(
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
-	SetDefaults(opt)
+
+	// Set defaults.
+	SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -99,6 +147,7 @@ func (c *SerpClient) ScrapeBingUrl(
 		"source":          "bing",
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
+		"geo_location":    opt.GeoLocation,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
