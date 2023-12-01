@@ -74,7 +74,7 @@ type YandexSearchOpts struct {
 func (c *SerpClient) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
-) (*Response, error) {
+) (interface{}, error) {
 	// Prepare options
 	opt := &YandexSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -112,7 +112,7 @@ func (c *SerpClient) ScrapeYandexSearch(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload)
+	res, err := c.Req(jsonPayload, false)
 	if err != nil {
 		return nil, err
 	} else {
@@ -130,7 +130,7 @@ type YandexUrlOpts struct {
 func (c *SerpClient) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
-) (*Response, error) {
+) (interface{}, error) {
 	// Check validity of url.
 	err := oxylabs.ValidateURL(url, "yandex")
 	if err != nil {
@@ -165,7 +165,7 @@ func (c *SerpClient) ScrapeYandexUrl(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload)
+	res, err := c.Req(jsonPayload, false)
 	if err != nil {
 		return nil, err
 	} else {

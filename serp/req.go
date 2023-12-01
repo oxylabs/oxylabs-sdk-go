@@ -11,7 +11,8 @@ import (
 // Request to the API.
 func (c *SerpClient) Req(
 	jsonPayload []byte,
-) (*Response, error) {
+	parse bool,
+) (interface{}, error) {
 	// Prepare requst.
 	request, _ := http.NewRequest(
 		"POST",
@@ -33,15 +34,33 @@ func (c *SerpClient) Req(
 		return nil, err
 	}
 
+	// Send back error message.
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("error with status code: %s : %s", response.Status, responseBody)
+	}
+
 	// Unmarshal the JSON object.
-	resp := &Response{}
+	var resp interface{}
+	if parse {
+		resp = &ParseTrueResponse{}
+	} else {
+		resp = &ParseFalseResponse{}
+	}
 	if err := json.Unmarshal(responseBody, resp); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON object: %v", err)
 	}
 
-	// Set status.
-	resp.StatusCode = response.StatusCode
-	resp.Status = response.Status
+	// Use type assertion to check the type and set status fields.
+	switch r := resp.(type) {
+	case *ParseTrueResponse:
+		r.StatusCode = response.StatusCode
+		r.Status = response.Status
+	case *ParseFalseResponse:
+		r.StatusCode = response.StatusCode
+		r.Status = response.Status
+	default:
+		return nil, fmt.Errorf("unexpected response type")
+	}
 
 	return resp, nil
 }
