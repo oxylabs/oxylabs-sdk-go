@@ -10,6 +10,11 @@ func ValidateURL(
 	inputURL string,
 	host string,
 ) error {
+	// Check if url is empty.
+	if inputURL == "" {
+		return fmt.Errorf("url parameter is empty")
+	}
+
 	// Parse the URL
 	parsedURL, err := url.ParseRequestURI(inputURL)
 	if err != nil {

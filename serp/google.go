@@ -41,6 +41,19 @@ func (opt *GoogleSearchOpts) checkParameterValidity(ctx ContextOption) error {
 	return nil
 }
 
+// checkParameterValidity checks validity of google search parameters.
+func (opt *GoogleUrlOpts) checkParameterValidity() error {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
+		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	return nil
+}
+
 type GoogleSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -54,6 +67,7 @@ type GoogleSearchOpts struct {
 	Context     []func(ContextOption)
 }
 
+// Scrapes Google via its search engine.
 func (c *SerpClient) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
@@ -181,6 +195,63 @@ func (c *SerpClient) ScrapeGoogleSearch(
 		}
 	}
 
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	res, err := c.Req(jsonPayload, opt.Parse)
+	if err != nil {
+		return nil, err
+	} else {
+		return res, nil
+	}
+}
+
+type GoogleUrlOpts struct {
+	GeoLocation string
+	UserAgent   oxylabs.UserAgent
+	Render      oxylabs.Render
+	Parse       bool
+	CallbackUrl string
+}
+
+// Scrapes Google via provided url.
+func (c *SerpClient) ScrapeGoogleUrl(
+	url string,
+	opts ...*GoogleUrlOpts,
+) (interface{}, error) {
+	// Check validity of url.
+	err := oxylabs.ValidateURL(url, "google")
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare options.
+	opt := &GoogleUrlOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Set defaults.
+	SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err = opt.checkParameterValidity()
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload.
+	payload := map[string]interface{}{
+		"source":          "google",
+		"url":             url,
+		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackUrl,
+		"geo_location":    opt.GeoLocation,
+		"parse":           opt.Parse,
+	}
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)

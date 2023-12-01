@@ -171,5 +171,4 @@ func (c *SerpClient) ScrapeYandexUrl(
 	} else {
 		return res, nil
 	}
-
 }
