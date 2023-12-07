@@ -54,3 +54,45 @@ func Tbs(tbs string) func(ContextOption) {
 		ctx["tbs"] = tbs
 	}
 }
+
+func HotelOccupancy(num int) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["hotel_occupancy"] = num
+	}
+}
+
+func HotelDates(dates string) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["hotel_dates"] = dates
+	}
+}
+
+func HotelClasses(classes []int) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["hotel_classes"] = classes
+	}
+}
+
+func SearchType(searchType string) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["search_type"] = searchType
+	}
+}
+
+func DateFrom(dateFrom string) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["date_from"] = dateFrom
+	}
+}
+
+func DateTo(dateTo string) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["date_to"] = dateTo
+	}
+}
+
+func CategoryId(categoryId int) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["category_id"] = categoryId
+	}
+}
