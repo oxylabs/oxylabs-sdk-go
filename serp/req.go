@@ -2,7 +2,6 @@ package serp
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,10 +11,11 @@ import (
 func (c *SerpClient) Req(
 	jsonPayload []byte,
 	parse bool,
-) (interface{}, error) {
+	method string,
+) (*Response, error) {
 	// Prepare requst.
 	request, _ := http.NewRequest(
-		"POST",
+		method,
 		c.BaseUrl,
 		bytes.NewBuffer(jsonPayload),
 	)
@@ -36,31 +36,19 @@ func (c *SerpClient) Req(
 
 	// Send back error message.
 	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("error with status code: %s : %s", response.Status, responseBody)
+		return nil, fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
 	}
 
 	// Unmarshal the JSON object.
-	var resp interface{}
-	if parse {
-		resp = &ParseTrueResponse{}
-	} else {
-		resp = &ParseFalseResponse{}
-	}
-	if err := json.Unmarshal(responseBody, resp); err != nil {
+	resp := &Response{}
+	resp.Parse = parse
+	if err := resp.UnmarshalJSON(responseBody); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON object: %v", err)
 	}
 
-	// Use type assertion to check the type and set status fields.
-	switch r := resp.(type) {
-	case *ParseTrueResponse:
-		r.StatusCode = response.StatusCode
-		r.Status = response.Status
-	case *ParseFalseResponse:
-		r.StatusCode = response.StatusCode
-		r.Status = response.Status
-	default:
-		return nil, fmt.Errorf("unexpected response type")
-	}
+	// Set status code and status.
+	resp.StatusCode = response.StatusCode
+	resp.Status = response.Status
 
 	return resp, nil
 }

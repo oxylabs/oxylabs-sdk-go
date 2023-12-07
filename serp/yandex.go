@@ -31,11 +31,11 @@ var yandexSearchAcceptedLocaleParameters = []oxylabs.Locale{
 
 // checkParameterValidity checks validity of yandex search parameters.
 func (opt *YandexSearchOpts) checkParameterValidity() error {
-	if !inList(opt.Domain, yandexSearchAcceptedDomainParameters) {
+	if !oxylabs.InList(opt.Domain, yandexSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
 	}
 
-	if opt.Locale != "" && !inList(opt.Locale, yandexSearchAcceptedLocaleParameters) {
+	if opt.Locale != "" && !oxylabs.InList(opt.Locale, yandexSearchAcceptedLocaleParameters) {
 		return fmt.Errorf("invalid locale parameter: %s", opt.Locale)
 	}
 
@@ -74,7 +74,7 @@ type YandexSearchOpts struct {
 func (c *SerpClient) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
-) (interface{}, error) {
+) (*Response, error) {
 	// Prepare options
 	opt := &YandexSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -112,12 +112,12 @@ func (c *SerpClient) ScrapeYandexSearch(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, false)
+	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
-	} else {
-		return res, nil
 	}
+
+	return res, nil
 }
 
 type YandexUrlOpts struct {
@@ -130,7 +130,7 @@ type YandexUrlOpts struct {
 func (c *SerpClient) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
-) (interface{}, error) {
+) (*Response, error) {
 	// Check validity of url.
 	err := oxylabs.ValidateURL(url, "yandex")
 	if err != nil {
@@ -165,10 +165,10 @@ func (c *SerpClient) ScrapeYandexUrl(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, false)
+	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
-	} else {
-		return res, nil
 	}
+
+	return res, nil
 }

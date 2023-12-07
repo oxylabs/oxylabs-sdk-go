@@ -15,7 +15,7 @@ var BaiduSearchAcceptedDomainParameters = []oxylabs.Domain{
 
 // checkParameterValidity checks validity of baidu search parameters.
 func (opt *BaiduSearchOpts) checkParameterValidity() error {
-	if !inList(opt.Domain, BaiduSearchAcceptedDomainParameters) {
+	if !oxylabs.InList(opt.Domain, BaiduSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
 	}
 
@@ -48,7 +48,7 @@ type BaiduSearchOpts struct {
 func (c *SerpClient) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
-) (interface{}, error) {
+) (*Response, error) {
 	// Prepare options
 	opt := &BaiduSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -83,12 +83,12 @@ func (c *SerpClient) ScrapeBaiduSearch(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, false)
+	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
-	} else {
-		return res, nil
 	}
+
+	return res, nil
 }
 
 type BaiduUrlOpts struct {
@@ -100,7 +100,7 @@ type BaiduUrlOpts struct {
 func (c *SerpClient) ScrapeBaiduUrl(
 	url string,
 	opts ...*BaiduUrlOpts,
-) (interface{}, error) {
+) (*Response, error) {
 	// Check validity of url.
 	err := oxylabs.ValidateURL(url, "baidu")
 	if err != nil {
@@ -134,11 +134,10 @@ func (c *SerpClient) ScrapeBaiduUrl(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, false)
+	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
-	} else {
-		return res, nil
 	}
 
+	return res, nil
 }

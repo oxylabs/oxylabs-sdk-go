@@ -23,12 +23,12 @@ func ValidateURL(
 
 	// Check if the scheme (protocol) is present and non-empty.
 	if parsedURL.Scheme == "" {
-		return fmt.Errorf("url is missing scheme.")
+		return fmt.Errorf("url is missing scheme")
 	}
 
 	// Check if the Host is present and non-empty.
 	if parsedURL.Host == "" {
-		return fmt.Errorf("url is missing a host.")
+		return fmt.Errorf("url is missing a host")
 	}
 
 	// Check if the Host matches the expected domain/host.

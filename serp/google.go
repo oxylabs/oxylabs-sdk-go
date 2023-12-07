@@ -34,7 +34,7 @@ func (opt *GoogleSearchOpts) checkParameterValidity(ctx ContextOption) error {
 		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
 	}
 
-	if ctx["tbm"] != nil && !inList(ctx["tbm"].(string), AcceptedTbmParameters) {
+	if ctx["tbm"] != nil && !oxylabs.InList(ctx["tbm"].(string), AcceptedTbmParameters) {
 		return fmt.Errorf("invalid tbm parameter: %v", ctx["tbm"])
 	}
 
@@ -71,7 +71,7 @@ type GoogleSearchOpts struct {
 func (c *SerpClient) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
-) (interface{}, error) {
+) (*Response, error) {
 	// Prepare options.
 	opt := &GoogleSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -111,7 +111,7 @@ func (c *SerpClient) ScrapeGoogleSearch(
 			"source":          "google_search",
 			"domain":          opt.Domain,
 			"query":           query,
-			"geolocation":     opt.Geolocation,
+			"geo_location":    opt.Geolocation,
 			"user_agent_type": opt.UserAgent,
 			"parse":           opt.Parse,
 			"render":          opt.Render,
@@ -158,7 +158,7 @@ func (c *SerpClient) ScrapeGoogleSearch(
 			"start_page":      opt.StartPage,
 			"pages":           opt.Pages,
 			"limit":           opt.Limit,
-			"geolocation":     opt.Geolocation,
+			"geo_location":    opt.Geolocation,
 			"user_agent_type": opt.UserAgent,
 			"parse":           opt.Parse,
 			"render":          opt.Render,
@@ -200,12 +200,12 @@ func (c *SerpClient) ScrapeGoogleSearch(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, opt.Parse)
+	res, err := c.Req(jsonPayload, opt.Parse, "POST")
 	if err != nil {
 		return nil, err
-	} else {
-		return res, nil
 	}
+
+	return res, nil
 }
 
 type GoogleUrlOpts struct {
@@ -220,7 +220,7 @@ type GoogleUrlOpts struct {
 func (c *SerpClient) ScrapeGoogleUrl(
 	url string,
 	opts ...*GoogleUrlOpts,
-) (interface{}, error) {
+) (*Response, error) {
 	// Check validity of url.
 	err := oxylabs.ValidateURL(url, "google")
 	if err != nil {
@@ -257,10 +257,10 @@ func (c *SerpClient) ScrapeGoogleUrl(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, opt.Parse)
+	res, err := c.Req(jsonPayload, opt.Parse, "POST")
 	if err != nil {
 		return nil, err
-	} else {
-		return res, nil
 	}
+
+	return res, nil
 }

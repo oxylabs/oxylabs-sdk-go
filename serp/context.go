@@ -12,6 +12,7 @@ func LimitPerPage(limits []PageLimit) func(ContextOption) {
 		ctx["limit_per_page"] = limits
 	}
 }
+
 func ResultsLanguage(lang string) func(ContextOption) {
 	return func(ctx ContextOption) {
 		ctx["results_language"] = lang

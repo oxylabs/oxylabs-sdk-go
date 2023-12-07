@@ -19,7 +19,7 @@ var BingSearchAcceptedDomainParameters = []oxylabs.Domain{
 
 // checkParameterValidity checks validity of bing search parameters.
 func (opt *BingSearchOpts) checkParameterValidity() error {
-	if opt.Domain != "" && !inList(opt.Domain, BingSearchAcceptedDomainParameters) {
+	if opt.Domain != "" && !oxylabs.InList(opt.Domain, BingSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
 	}
 
@@ -62,7 +62,7 @@ type BingSearchOpts struct {
 func (c *SerpClient) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (interface{}, error) {
+) (*Response, error) {
 	// Prepare options
 	opt := &BingSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -101,12 +101,12 @@ func (c *SerpClient) ScrapeBingSearch(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, false)
+	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
-	} else {
-		return res, nil
 	}
+
+	return res, nil
 }
 
 type BingUrlOpts struct {
@@ -120,7 +120,7 @@ type BingUrlOpts struct {
 func (c *SerpClient) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (interface{}, error) {
+) (*Response, error) {
 	// Check validity of url.
 	err := oxylabs.ValidateURL(url, "bing")
 	if err != nil {
@@ -156,10 +156,10 @@ func (c *SerpClient) ScrapeBingUrl(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, false)
+	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
-	} else {
-		return res, nil
 	}
+
+	return res, nil
 }
