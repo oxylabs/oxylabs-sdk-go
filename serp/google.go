@@ -7,6 +7,7 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
+// Accepted Parameters for context options in google.
 var AcceptedTbmParameters = []string{
 	"app",
 	"bks",
@@ -19,7 +20,6 @@ var AcceptedTbmParameters = []string{
 	"rcp",
 	"lcl",
 }
-
 var AcceptedSearchTypeParameters = []string{
 	"web_search",
 	"image_search",
@@ -109,11 +109,18 @@ func (opt *GoogleHotelsOpts) checkParameterValidity(ctx ContextOption) error {
 		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
 	}
 
+	if ctx["hotel_occupancy"] != nil && ctx["hotel_occupancy"].(int) < 0 {
+		return fmt.Errorf("invalid hotel_occupancy parameter: %v", ctx["hotel_occupancy"])
+	}
+
 	return nil
 }
 
 // checkParameterValidity checks validity of google travel hotels parameters.
 func (opt *GoogleTravelHotelsOpts) checkParameterValidity(ctx ContextOption) error {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
 
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
@@ -123,18 +130,33 @@ func (opt *GoogleTravelHotelsOpts) checkParameterValidity(ctx ContextOption) err
 		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
 	}
 
+	if ctx["hotel_occupancy"] != nil && ctx["hotel_occupancy"].(int) < 0 {
+		return fmt.Errorf("invalid hotel_occupancy parameter: %v", ctx["hotel_occupancy"])
+	}
+
+	if ctx["hotel_classes"] != nil {
+		for _, value := range ctx["hotel_classes"].([]int) {
+			if value < 2 || value > 5 {
+				return fmt.Errorf("invalid hotel_classes parameter: %v", value)
+			}
+		}
+	}
+
 	return nil
 }
 
 // checkParameterValidity checks validity of google trends explore parameters.
 func (opt *GoogleTrendsExploreOpts) checkParameterValidity(ctx ContextOption) error {
-
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
 
 	if ctx["search_type"] != nil && !oxylabs.InList(ctx["search_type"].(string), AcceptedSearchTypeParameters) {
 		return fmt.Errorf("invalid search_type parameter: %v", ctx["search_type"])
+	}
+
+	if ctx["category_id"] != nil && ctx["category_id"].(int) < 0 {
+		return fmt.Errorf("invalid category_id")
 	}
 
 	return nil
@@ -591,6 +613,7 @@ type GoogleTravelHotelsOpts struct {
 	Limit       int
 	Locale      string
 	GeoLocation string
+	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
 	CallbackURL string
 	Context     []func(ContextOption)
@@ -627,16 +650,17 @@ func (c *SerpClient) ScrapeGoogleTravelHotels(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":       "google_travel_hotels",
-		"domain":       opt.Domain,
-		"query":        query,
-		"start_page":   opt.StartPage,
-		"pages":        opt.Pages,
-		"limit":        opt.Limit,
-		"locale":       opt.Locale,
-		"geo_location": opt.GeoLocation,
-		"render":       opt.Render,
-		"callback_url": opt.CallbackURL,
+		"source":          "google_travel_hotels",
+		"domain":          opt.Domain,
+		"query":           query,
+		"start_page":      opt.StartPage,
+		"pages":           opt.Pages,
+		"limit":           opt.Limit,
+		"locale":          opt.Locale,
+		"geo_location":    opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackURL,
 		"context": []map[string]interface{}{
 			{
 				"key":   "hotel_occupancy",
@@ -765,6 +789,15 @@ func (c *SerpClient) ScrapeGoogleTrendsExplore(
 		modifier(context)
 	}
 
+	// Set defaults.
+	SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity(context)
+	if err != nil {
+		return nil, err
+	}
+
 	// Prepare payload.
 	payload := map[string]interface{}{
 		"source":       "google_trends_explore",
@@ -795,7 +828,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExplore(
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
-	fmt.Printf("%+v\n\n", payload)
+
 	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err

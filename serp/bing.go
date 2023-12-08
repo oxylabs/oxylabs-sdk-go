@@ -58,7 +58,7 @@ type BingSearchOpts struct {
 	Render      oxylabs.Render
 }
 
-// Scrapes Bing via its search engine.
+// ScraperBingSearch scrapes bing with bing_search as source.
 func (c *SerpClient) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
@@ -116,7 +116,7 @@ type BingUrlOpts struct {
 	CallbackUrl string
 }
 
-// Scrapes Bing via provided url.
+// ScrapeBingUrl scrapes bing with bing as source.
 func (c *SerpClient) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,

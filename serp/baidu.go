@@ -44,7 +44,7 @@ type BaiduSearchOpts struct {
 	CallbackUrl string
 }
 
-// Scrapes Baidu via its search engine.
+// ScrapeBaiduSearch scrapes baidu with baidu_search as source.
 func (c *SerpClient) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
@@ -96,7 +96,7 @@ type BaiduUrlOpts struct {
 	CallbackUrl string
 }
 
-// Scrapes Baidu via its url.
+// ScrapeBaiduUrl scrapes baidu with baidu as source.
 func (c *SerpClient) ScrapeBaiduUrl(
 	url string,
 	opts ...*BaiduUrlOpts,

@@ -70,7 +70,7 @@ type YandexSearchOpts struct {
 	CallbackUrl string
 }
 
-// Scrapes Yandex via its search engine.
+// ScrapYandexSearch scrapes yandex with yandex_search as source.
 func (c *SerpClient) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
@@ -126,7 +126,7 @@ type YandexUrlOpts struct {
 	CallbackUrl string
 }
 
-// Scrapes Yandex via provided url.
+// ScapeYandexUrl scrapes yandex with yandex as source.
 func (c *SerpClient) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
