@@ -30,12 +30,18 @@ func Init(
 	}
 }
 
+type SerpClientAsync struct {
+	HttpClient     *http.Client
+	ApiCredentials *ApiCredentials
+	BaseUrl        string
+}
+
 // Init for Async runtime model.
 func InitAsync(
 	username string,
 	password string,
-) *SerpClient {
-	return &SerpClient{
+) *SerpClientAsync {
+	return &SerpClientAsync{
 		ApiCredentials: &ApiCredentials{
 			Username: username,
 			Password: password,
