@@ -4,6 +4,12 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
+)
+
+var (
+	DefaultTimeout  = 30 * time.Second
+	DefaultWaitTime = 2 * time.Second
 )
 
 func ValidateURL(
