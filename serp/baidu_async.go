@@ -11,14 +11,15 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// ScrapeYandexSearch scrapes yandex with yandex_search as source with async polling runtime.
-func (c *SerpClientAsync) ScrapeYandexSearch(
+// ScrapeBingSearch scrapes bing with bing_search as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeBaiduSearch(
 	query string,
-	opts ...*YandexSearchOpts,
+	opts ...*BaiduSearchOpts,
 ) (chan *Response, error) {
 	responseChan := make(chan *Response)
 
-	opt := &YandexSearchOpts{}
+	// Prepare options
+	opt := &BaiduSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -38,14 +39,12 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex_search",
+		"source":          "baidu_search",
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
-		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
@@ -71,7 +70,10 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 
 	// Unmarshal into job.
 	job := &Job{}
-	json.Unmarshal(responseBody, &job)
+	err = json.Unmarshal(responseBody, &job)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling response body: %v", err)
+	}
 
 	go func() {
 		startNow := time.Now()
@@ -152,20 +154,21 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 	return responseChan, nil
 }
 
-// ScrapeYandexUrl scrapes yandex with yandex as source with async polling runtime.
-func (c *SerpClientAsync) ScrapeYandexUrl(
+// ScrapeBingUrl scrapes bing with bing as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeBaiduUrl(
 	url string,
-	opts ...*YandexUrlOpts,
+	opts ...*BaiduUrlOpts,
 ) (chan *Response, error) {
 	responseChan := make(chan *Response)
 
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "yandex")
+	err := oxylabs.ValidateURL(url, "baidu")
 	if err != nil {
 		return nil, err
 	}
 
-	opt := &YandexUrlOpts{}
+	// Prepare options
+	opt := &BaiduUrlOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -181,10 +184,9 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex",
+		"source":          "baidu",
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
-		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
 	jsonPayload, err := json.Marshal(payload)
@@ -239,6 +241,7 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
 					nil,
 				)
+
 				request.Header.Add("Content-type", "application/json")
 				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
 				response, err = c.HttpClient.Do(request)

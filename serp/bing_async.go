@@ -11,14 +11,15 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// ScrapeYandexSearch scrapes yandex with yandex_search as source with async polling runtime.
-func (c *SerpClientAsync) ScrapeYandexSearch(
+// ScrapeBingSearch scrapes bing with bing_search as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeBingSearch(
 	query string,
-	opts ...*YandexSearchOpts,
+	opts ...*BingSearchOpts,
 ) (chan *Response, error) {
 	responseChan := make(chan *Response)
 
-	opt := &YandexSearchOpts{}
+	// Prepare options
+	opt := &BingSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -38,7 +39,7 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex_search",
+		"source":          "bing_search",
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
@@ -48,6 +49,7 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
+		"render":          opt.Render,
 	}
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -59,6 +61,7 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 		c.BaseUrl,
 		bytes.NewBuffer(jsonPayload),
 	)
+
 	request.Header.Add("Content-type", "application/json")
 	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
 	response, err := c.HttpClient.Do(request)
@@ -101,6 +104,7 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
 					nil,
 				)
+
 				request.Header.Add("Content-type", "application/json")
 				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
 				response, err = c.HttpClient.Do(request)
@@ -152,20 +156,21 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 	return responseChan, nil
 }
 
-// ScrapeYandexUrl scrapes yandex with yandex as source with async polling runtime.
-func (c *SerpClientAsync) ScrapeYandexUrl(
+// ScrapeBingUrl scrapes bing with bing as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeBingUrl(
 	url string,
-	opts ...*YandexUrlOpts,
+	opts ...*BingUrlOpts,
 ) (chan *Response, error) {
 	responseChan := make(chan *Response)
 
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "yandex")
+	err := oxylabs.ValidateURL(url, "bing")
 	if err != nil {
 		return nil, err
 	}
 
-	opt := &YandexUrlOpts{}
+	// Prepare options.
+	opt := &BingUrlOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -181,9 +186,10 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex",
+		"source":          "bing",
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
+		"geo_location":    opt.GeoLocation,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
@@ -197,6 +203,7 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 		c.BaseUrl,
 		bytes.NewBuffer(jsonPayload),
 	)
+
 	request.Header.Add("Content-type", "application/json")
 	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
 	response, err := c.HttpClient.Do(request)

@@ -23,6 +23,10 @@ func (opt *BaiduSearchOpts) checkParameterValidity() error {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
 
+	if opt.Limit <= 0 || opt.Pages <= 0 || opt.StartPage <= 0 {
+		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
+	}
+
 	return nil
 }
 
@@ -59,6 +63,7 @@ func (c *SerpClient) ScrapeBaiduSearch(
 	SetDefaultDomain(&opt.Domain)
 	SetDefaultStartPage(&opt.StartPage)
 	SetDefaultLimit(&opt.Limit)
+	SetDefaultPages(&opt.Pages)
 	SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
