@@ -11,18 +11,29 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// ScrapeYandexSearch scrapes yandex with yandex_search as source with async polling runtime.
-func (c *SerpClientAsync) ScrapeYandexSearch(
+// ScrapeGoogleSearch scrapes google with google_search as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeGoogleSearch(
 	query string,
-	opts ...*YandexSearchOpts,
+	opts ...*GoogleSearchOpts,
 ) (chan *Response, error) {
 	responseChan := make(chan *Response)
 	errChan := make(chan error)
 
 	// Prepare options.
-	opt := &YandexSearchOpts{}
+	opt := &GoogleSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
+	}
+
+	// Initialize the context map and apply each provided context modifier function.
+	context := make(ContextOption)
+	for _, modifier := range opt.Context {
+		modifier(context)
+	}
+
+	// Check if limit_per_page context parameter is used together with limit, start_page or pages parameters.
+	if (opt.Limit != 0 || opt.StartPage != 0 || opt.Pages != 0) && context["limit_per_page"] != nil {
+		return nil, fmt.Errorf("limit, start_page and pages parameters cannot be used together with limit_per_page context parameter")
 	}
 
 	// Set defaults.
@@ -33,24 +44,104 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 	SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
-	err := opt.checkParameterValidity()
+	err := opt.checkParameterValidity(context)
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare payload.
-	payload := map[string]interface{}{
-		"source":          "yandex_search",
-		"domain":          opt.Domain,
-		"query":           query,
-		"start_page":      opt.StartPage,
-		"pages":           opt.Pages,
-		"limit":           opt.Limit,
-		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
-		"user_agent_type": opt.UserAgent,
-		"callback_url":    opt.CallbackUrl,
+	var payload map[string]interface{}
+
+	// If user sends limit_per_page context parameter, use it instead of limit, start_page and pages parameters.
+	if context["limit_per_page"] != nil {
+		payload = map[string]interface{}{
+			"source":          "google_search",
+			"domain":          opt.Domain,
+			"query":           query,
+			"geo_location":    opt.Geolocation,
+			"user_agent_type": opt.UserAgent,
+			"parse":           opt.Parse,
+			"render":          opt.Render,
+			"context": []map[string]interface{}{
+				{
+					"key":   "results_language",
+					"value": context["results_language"],
+				},
+				{
+					"key":   "filter",
+					"value": context["filter"],
+				},
+				{
+					"key":   "limit_per_page",
+					"value": context["limit_per_page"],
+				},
+				{
+					"key":   "nfpr",
+					"value": context["nfpr"],
+				},
+				{
+					"key":   "safe_search",
+					"value": context["safe_search"],
+				},
+				{
+					"key":   "fpstate",
+					"value": context["fpstate"],
+				},
+				{
+					"key":   "tbm",
+					"value": context["tbm"],
+				},
+				{
+					"key":   "tbs",
+					"value": context["tbs"],
+				},
+			},
+		}
+	} else {
+		payload = map[string]interface{}{
+			"source":          "google_search",
+			"domain":          opt.Domain,
+			"query":           query,
+			"start_page":      opt.StartPage,
+			"pages":           opt.Pages,
+			"limit":           opt.Limit,
+			"geo_location":    opt.Geolocation,
+			"user_agent_type": opt.UserAgent,
+			"parse":           opt.Parse,
+			"render":          opt.Render,
+			"context": []map[string]interface{}{
+				{
+					"key":   "results_language",
+					"value": context["results_language"],
+				},
+				{
+					"key":   "filter",
+					"value": context["filter"],
+				},
+				{
+					"key":   "nfpr",
+					"value": context["nfpr"],
+				},
+				{
+					"key":   "safe_search",
+					"value": context["safe_search"],
+				},
+				{
+					"key":   "fpstate",
+					"value": context["fpstate"],
+				},
+				{
+					"key":   "tbm",
+					"value": context["tbm"],
+				},
+				{
+					"key":   "tbs",
+					"value": context["tbs"],
+				},
+			},
+		}
 	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -179,22 +270,22 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 	return responseChan, nil
 }
 
-// ScrapeYandexUrl scrapes yandex with yandex as source with async polling runtime.
-func (c *SerpClientAsync) ScrapeYandexUrl(
+// ScrapeGoogleUrl scrapes google with google as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeGoogleUrl(
 	url string,
-	opts ...*YandexUrlOpts,
+	opts ...*GoogleUrlOpts,
 ) (chan *Response, error) {
 	responseChan := make(chan *Response)
 	errChan := make(chan error)
 
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "yandex")
+	err := oxylabs.ValidateURL(url, "google")
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare options.
-	opt := &YandexUrlOpts{}
+	opt := &GoogleUrlOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -210,11 +301,13 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex",
+		"source":          "google",
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"geo_location":    opt.GeoLocation,
+		"parse":           opt.Parse,
 	}
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -261,7 +354,13 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 				return
 			}
 
-			responseBody, _ = io.ReadAll(response.Body)
+			responseBody, err = io.ReadAll(response.Body)
+			if err != nil {
+				err = fmt.Errorf("error reading response body: %v", err)
+				errChan <- err
+				close(responseChan)
+				return
+			}
 			response.Body.Close()
 
 			json.Unmarshal(responseBody, &job)

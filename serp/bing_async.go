@@ -17,6 +17,7 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 	opts ...*BingSearchOpts,
 ) (chan *Response, error) {
 	responseChan := make(chan *Response)
+	errChan := make(chan error)
 
 	// Prepare options
 	opt := &BingSearchOpts{}
@@ -69,7 +70,10 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 		return nil, err
 	}
 
-	responseBody, _ := io.ReadAll(response.Body)
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %v", err)
+	}
 	response.Body.Close()
 
 	// Unmarshal into job.
@@ -89,10 +93,18 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 			request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
 			response, err = c.HttpClient.Do(request)
 			if err != nil {
+				errChan <- err
+				close(responseChan)
 				return
 			}
 
-			responseBody, _ = io.ReadAll(response.Body)
+			responseBody, err = io.ReadAll(response.Body)
+			if err != nil {
+				err = fmt.Errorf("error reading response body: %v", err)
+				errChan <- err
+				close(responseChan)
+				return
+			}
 			response.Body.Close()
 
 			json.Unmarshal(responseBody, &job)
@@ -104,11 +116,12 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
 					nil,
 				)
-
 				request.Header.Add("Content-type", "application/json")
 				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
 				response, err = c.HttpClient.Do(request)
 				if err != nil {
+					errChan <- err
+					close(responseChan)
 					return
 				}
 
@@ -116,6 +129,8 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 				responseBody, err := io.ReadAll(response.Body)
 				if err != nil {
 					err = fmt.Errorf("error reading response body: %v", err)
+					errChan <- err
+					close(responseChan)
 					return
 				}
 				response.Body.Close()
@@ -123,6 +138,8 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 				// Send back error message.
 				if response.StatusCode != 200 {
 					err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+					errChan <- err
+					close(responseChan)
 					return
 				}
 
@@ -130,18 +147,25 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 				resp := &Response{}
 				if err := resp.UnmarshalJSON(responseBody); err != nil {
 					err = fmt.Errorf("failed to parse JSON object: %v", err)
+					errChan <- err
+					close(responseChan)
 					return
 				}
 				resp.StatusCode = response.StatusCode
 				resp.Status = response.Status
+				close(errChan)
 				responseChan <- resp
-			} else if job.Status == "failed" {
-				err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+			} else if job.Status == "faulted" {
+				err = fmt.Errorf("There was an error processing your query")
+				errChan <- err
+				close(responseChan)
 				return
 			}
 
 			if time.Since(startNow) > oxylabs.DefaultTimeout {
 				err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
+				errChan <- err
+				close(responseChan)
 				return
 			}
 
@@ -149,6 +173,7 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 		}
 	}()
 
+	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
@@ -162,6 +187,7 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 	opts ...*BingUrlOpts,
 ) (chan *Response, error) {
 	responseChan := make(chan *Response)
+	errChan := make(chan error)
 
 	// Check validity of url.
 	err := oxylabs.ValidateURL(url, "bing")
@@ -211,7 +237,10 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 		return nil, err
 	}
 
-	responseBody, _ := io.ReadAll(response.Body)
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %v", err)
+	}
 	response.Body.Close()
 
 	// Unmarshal into job.
@@ -231,10 +260,18 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 			request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
 			response, err = c.HttpClient.Do(request)
 			if err != nil {
+				errChan <- err
+				close(responseChan)
 				return
 			}
 
-			responseBody, _ = io.ReadAll(response.Body)
+			responseBody, err = io.ReadAll(response.Body)
+			if err != nil {
+				err = fmt.Errorf("error reading response body: %v", err)
+				errChan <- err
+				close(responseChan)
+				return
+			}
 			response.Body.Close()
 
 			json.Unmarshal(responseBody, &job)
@@ -250,6 +287,8 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
 				response, err = c.HttpClient.Do(request)
 				if err != nil {
+					errChan <- err
+					close(responseChan)
 					return
 				}
 
@@ -257,6 +296,8 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 				responseBody, err := io.ReadAll(response.Body)
 				if err != nil {
 					err = fmt.Errorf("error reading response body: %v", err)
+					errChan <- err
+					close(responseChan)
 					return
 				}
 				response.Body.Close()
@@ -264,6 +305,8 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 				// Send back error message.
 				if response.StatusCode != 200 {
 					err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+					errChan <- err
+					close(responseChan)
 					return
 				}
 
@@ -271,18 +314,25 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 				resp := &Response{}
 				if err := resp.UnmarshalJSON(responseBody); err != nil {
 					err = fmt.Errorf("failed to parse JSON object: %v", err)
+					errChan <- err
+					close(responseChan)
 					return
 				}
 				resp.StatusCode = response.StatusCode
 				resp.Status = response.Status
+				close(errChan)
 				responseChan <- resp
-			} else if job.Status == "failed" {
-				err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+			} else if job.Status == "faulted" {
+				err = fmt.Errorf("There was an error processing your query")
+				errChan <- err
+				close(responseChan)
 				return
 			}
 
 			if time.Since(startNow) > oxylabs.DefaultTimeout {
 				err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
+				errChan <- err
+				close(responseChan)
 				return
 			}
 
@@ -290,6 +340,7 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 		}
 	}()
 
+	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
