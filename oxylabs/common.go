@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	DefaultTimeout  = 30 * time.Second
+	DefaultTimeout  = 50 * time.Second
 	DefaultWaitTime = 2 * time.Second
 )
 

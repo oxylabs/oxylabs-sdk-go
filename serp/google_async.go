@@ -436,3 +436,1105 @@ func (c *SerpClientAsync) ScrapeGoogleUrl(
 
 	return responseChan, nil
 }
+
+// ScrapeGoogleAds scrapes google with google_ads as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeGoogleAds(
+	query string,
+	opts ...*GoogleAdsOpts,
+) (chan *Response, error) {
+	responseChan := make(chan *Response)
+	errChan := make(chan error)
+
+	// Prepare options.
+	opt := &GoogleAdsOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Initialize the context map apply each provided context modifier function.
+	context := make(ContextOption)
+	for _, modifier := range opt.Context {
+		modifier(context)
+	}
+
+	// Set defaults.
+	SetDefaultDomain(&opt.Domain)
+	SetDefaultStartPage(&opt.StartPage)
+	SetDefaultLimit(&opt.Limit)
+	SetDefaultPages(&opt.Pages)
+	SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity(context)
+	if err != nil {
+		return nil, err
+	}
+
+	payload := map[string]interface{}{
+		"source":          "google_search",
+		"domain":          opt.Domain,
+		"query":           query,
+		"geo_location":    opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"parse":           opt.Parse,
+		"render":          opt.Render,
+		"context": []map[string]interface{}{
+			{
+				"key":   "results_language",
+				"value": context["results_language"],
+			},
+			{
+				"key":   "nfpr",
+				"value": context["nfpr"],
+			},
+			{
+				"key":   "tbm",
+				"value": context["tbm"],
+			},
+			{
+				"key":   "tbs",
+				"value": context["tbs"],
+			},
+		},
+	}
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	request, _ := http.NewRequest(
+		"POST",
+		c.BaseUrl,
+		bytes.NewBuffer(jsonPayload),
+	)
+	request.Header.Add("Content-type", "application/json")
+	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+	response, err := c.HttpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %v", err)
+	}
+	response.Body.Close()
+
+	// Unmarshal into job.
+	job := &Job{}
+	json.Unmarshal(responseBody, &job)
+
+	go func() {
+		startNow := time.Now()
+
+		for {
+			request, _ = http.NewRequest(
+				"GET",
+				fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", job.ID),
+				nil,
+			)
+			request.Header.Add("Content-type", "application/json")
+			request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+			response, err = c.HttpClient.Do(request)
+			if err != nil {
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			responseBody, err = io.ReadAll(response.Body)
+			if err != nil {
+				err = fmt.Errorf("error reading response body: %v", err)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+			response.Body.Close()
+
+			json.Unmarshal(responseBody, &job)
+
+			if job.Status == "done" {
+				JobId := job.ID
+				request, _ = http.NewRequest(
+					"GET",
+					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
+					nil,
+				)
+				request.Header.Add("Content-type", "application/json")
+				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+				response, err = c.HttpClient.Do(request)
+				if err != nil {
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Read the response body into a buffer.
+				responseBody, err := io.ReadAll(response.Body)
+				if err != nil {
+					err = fmt.Errorf("error reading response body: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				response.Body.Close()
+
+				// Send back error message.
+				if response.StatusCode != 200 {
+					err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Unmarshal the JSON object.
+				resp := &Response{}
+				if err := resp.UnmarshalJSON(responseBody); err != nil {
+					err = fmt.Errorf("failed to parse JSON object: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				resp.StatusCode = response.StatusCode
+				resp.Status = response.Status
+				close(errChan)
+				responseChan <- resp
+			} else if job.Status == "faulted" {
+				err = fmt.Errorf("There was an error processing your query")
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			if time.Since(startNow) > oxylabs.DefaultTimeout {
+				err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			time.Sleep(oxylabs.DefaultWaitTime)
+		}
+	}()
+
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	return responseChan, nil
+}
+
+// ScrapeGoogleSuggestions scrapes google with google_suggestions as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeGoogleSuggestions(
+	query string,
+	opts ...*GoogleSuggestionsOpts,
+) (chan *Response, error) {
+	responseChan := make(chan *Response)
+	errChan := make(chan error)
+
+	// Prepare options.
+	opt := &GoogleSuggestionsOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Set defaults.
+	SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity()
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload.
+	payload := map[string]interface{}{
+		"source":          "google_suggestions",
+		"query":           query,
+		"geo_location":    opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackUrl,
+	}
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	request, _ := http.NewRequest(
+		"POST",
+		c.BaseUrl,
+		bytes.NewBuffer(jsonPayload),
+	)
+	request.Header.Add("Content-type", "application/json")
+	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+	response, err := c.HttpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %v", err)
+	}
+	response.Body.Close()
+
+	// Unmarshal into job.
+	job := &Job{}
+	json.Unmarshal(responseBody, &job)
+
+	go func() {
+		startNow := time.Now()
+
+		for {
+			request, _ = http.NewRequest(
+				"GET",
+				fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", job.ID),
+				nil,
+			)
+			request.Header.Add("Content-type", "application/json")
+			request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+			response, err = c.HttpClient.Do(request)
+			if err != nil {
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			responseBody, err = io.ReadAll(response.Body)
+			if err != nil {
+				err = fmt.Errorf("error reading response body: %v", err)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+			response.Body.Close()
+
+			json.Unmarshal(responseBody, &job)
+
+			if job.Status == "done" {
+				JobId := job.ID
+				request, _ = http.NewRequest(
+					"GET",
+					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
+					nil,
+				)
+				request.Header.Add("Content-type", "application/json")
+				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+				response, err = c.HttpClient.Do(request)
+				if err != nil {
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Read the response body into a buffer.
+				responseBody, err := io.ReadAll(response.Body)
+				if err != nil {
+					err = fmt.Errorf("error reading response body: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				response.Body.Close()
+
+				// Send back error message.
+				if response.StatusCode != 200 {
+					err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Unmarshal the JSON object.
+				resp := &Response{}
+				if err := resp.UnmarshalJSON(responseBody); err != nil {
+					err = fmt.Errorf("failed to parse JSON object: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				resp.StatusCode = response.StatusCode
+				resp.Status = response.Status
+				close(errChan)
+				responseChan <- resp
+			} else if job.Status == "faulted" {
+				err = fmt.Errorf("There was an error processing your query")
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			if time.Since(startNow) > oxylabs.DefaultTimeout {
+				err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			time.Sleep(oxylabs.DefaultWaitTime)
+		}
+	}()
+
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	return responseChan, nil
+}
+
+// ScrapeGoogleTravelHotels scrapes google with google_hotels as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeGoogleHotels(
+	query string,
+	opts ...*GoogleHotelsOpts,
+) (chan *Response, error) {
+	responseChan := make(chan *Response)
+	errChan := make(chan error)
+
+	// Prepare options.
+	opt := &GoogleHotelsOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Initialize the context map apply each provided context modifier function.
+	context := make(ContextOption)
+	for _, modifier := range opt.Context {
+		modifier(context)
+	}
+
+	// Set defaults.
+	SetDefaultDomain(&opt.Domain)
+	SetDefaultStartPage(&opt.StartPage)
+	SetDefaultLimit(&opt.Limit)
+	SetDefaultPages(&opt.Pages)
+	SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity(context)
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload.
+	payload := map[string]interface{}{
+		"source":           "google_hotels",
+		"domain":           opt.Domain,
+		"query":            query,
+		"start_page":       opt.StartPage,
+		"pages":            opt.Pages,
+		"limit":            opt.Limit,
+		"locale":           opt.Locale,
+		"results_language": opt.ResultsLanguage,
+		"geo_location":     opt.GeoLocation,
+		"user_agent_type":  opt.UserAgent,
+		"render":           opt.Render,
+		"callback_url":     opt.CallbackURL,
+		"context": []map[string]interface{}{
+			{
+				"key":   "nfpr",
+				"value": context["nfpr"],
+			},
+			{
+				"key":   "hotel_occupancy",
+				"value": context["hotel_occupancy"],
+			},
+			{
+				"key":   "hotel_dates",
+				"value": context["hotel_dates"],
+			},
+		},
+	}
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	request, _ := http.NewRequest(
+		"POST",
+		c.BaseUrl,
+		bytes.NewBuffer(jsonPayload),
+	)
+	request.Header.Add("Content-type", "application/json")
+	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+	response, err := c.HttpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %v", err)
+	}
+	response.Body.Close()
+
+	// Unmarshal into job.
+	job := &Job{}
+	json.Unmarshal(responseBody, &job)
+
+	go func() {
+		startNow := time.Now()
+
+		for {
+			request, _ = http.NewRequest(
+				"GET",
+				fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", job.ID),
+				nil,
+			)
+			request.Header.Add("Content-type", "application/json")
+			request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+			response, err = c.HttpClient.Do(request)
+			if err != nil {
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			responseBody, err = io.ReadAll(response.Body)
+			if err != nil {
+				err = fmt.Errorf("error reading response body: %v", err)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+			response.Body.Close()
+
+			json.Unmarshal(responseBody, &job)
+
+			if job.Status == "done" {
+				JobId := job.ID
+				request, _ = http.NewRequest(
+					"GET",
+					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
+					nil,
+				)
+				request.Header.Add("Content-type", "application/json")
+				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+				response, err = c.HttpClient.Do(request)
+				if err != nil {
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Read the response body into a buffer.
+				responseBody, err := io.ReadAll(response.Body)
+				if err != nil {
+					err = fmt.Errorf("error reading response body: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				response.Body.Close()
+
+				// Send back error message.
+				if response.StatusCode != 200 {
+					err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Unmarshal the JSON object.
+				resp := &Response{}
+				if err := resp.UnmarshalJSON(responseBody); err != nil {
+					err = fmt.Errorf("failed to parse JSON object: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				resp.StatusCode = response.StatusCode
+				resp.Status = response.Status
+				close(errChan)
+				responseChan <- resp
+			} else if job.Status == "faulted" {
+				err = fmt.Errorf("There was an error processing your query")
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			if time.Since(startNow) > oxylabs.DefaultTimeout {
+				err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			time.Sleep(oxylabs.DefaultWaitTime)
+		}
+	}()
+
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	return responseChan, nil
+}
+
+// ScrapeGoogleTravelHotels scrapes google with google_travel_hotels as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
+	query string,
+	opts ...*GoogleTravelHotelsOpts,
+) (chan *Response, error) {
+	responseChan := make(chan *Response)
+	errChan := make(chan error)
+
+	// Prepare options.
+	opt := &GoogleTravelHotelsOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Initialize the context map apply each provided context modifier function.
+	context := make(ContextOption)
+	for _, modifier := range opt.Context {
+		modifier(context)
+	}
+
+	// Set defaults.
+	SetDefaultDomain(&opt.Domain)
+	SetDefaultStartPage(&opt.StartPage)
+	SetDefaultLimit(&opt.Limit)
+	SetDefaultPages(&opt.Pages)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity(context)
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload.
+	payload := map[string]interface{}{
+		"source":          "google_travel_hotels",
+		"domain":          opt.Domain,
+		"query":           query,
+		"start_page":      opt.StartPage,
+		"pages":           opt.Pages,
+		"limit":           opt.Limit,
+		"locale":          opt.Locale,
+		"geo_location":    opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackURL,
+		"context": []map[string]interface{}{
+			{
+				"key":   "hotel_occupancy",
+				"value": context["hotel_occupancy"],
+			},
+			{
+				"key":   "hotel_classes",
+				"value": context["hotel_classes"],
+			},
+			{
+				"key":   "hotel_dates",
+				"value": context["hotel_dates"],
+			},
+		},
+	}
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	request, _ := http.NewRequest(
+		"POST",
+		c.BaseUrl,
+		bytes.NewBuffer(jsonPayload),
+	)
+	request.Header.Add("Content-type", "application/json")
+	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+	response, err := c.HttpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %v", err)
+	}
+	response.Body.Close()
+
+	// Unmarshal into job.
+	job := &Job{}
+	json.Unmarshal(responseBody, &job)
+
+	go func() {
+		startNow := time.Now()
+
+		for {
+			request, _ = http.NewRequest(
+				"GET",
+				fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", job.ID),
+				nil,
+			)
+			request.Header.Add("Content-type", "application/json")
+			request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+			response, err = c.HttpClient.Do(request)
+			if err != nil {
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			responseBody, err = io.ReadAll(response.Body)
+			if err != nil {
+				err = fmt.Errorf("error reading response body: %v", err)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+			response.Body.Close()
+
+			json.Unmarshal(responseBody, &job)
+
+			if job.Status == "done" {
+				JobId := job.ID
+				request, _ = http.NewRequest(
+					"GET",
+					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
+					nil,
+				)
+				request.Header.Add("Content-type", "application/json")
+				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+				response, err = c.HttpClient.Do(request)
+				if err != nil {
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Read the response body into a buffer.
+				responseBody, err := io.ReadAll(response.Body)
+				if err != nil {
+					err = fmt.Errorf("error reading response body: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				response.Body.Close()
+
+				// Send back error message.
+				if response.StatusCode != 200 {
+					err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Unmarshal the JSON object.
+				resp := &Response{}
+				if err := resp.UnmarshalJSON(responseBody); err != nil {
+					err = fmt.Errorf("failed to parse JSON object: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				resp.StatusCode = response.StatusCode
+				resp.Status = response.Status
+				close(errChan)
+				responseChan <- resp
+			} else if job.Status == "faulted" {
+				err = fmt.Errorf("There was an error processing your query")
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			if time.Since(startNow) > oxylabs.DefaultTimeout {
+				err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			time.Sleep(oxylabs.DefaultWaitTime)
+		}
+	}()
+
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	return responseChan, nil
+}
+
+// ScrapeGoogleImages scrapes google with google_images as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeGoogleImages(
+	url string,
+	opts ...*GoogleImagesOpts,
+) (chan *Response, error) {
+	responseChan := make(chan *Response)
+	errChan := make(chan error)
+
+	// Check validity of url.
+	err := oxylabs.ValidateURL(url, "google")
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare options.
+	opt := &GoogleImagesOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Initialize the context map apply each provided context modifier function.
+	context := make(ContextOption)
+	for _, modifier := range opt.Context {
+		modifier(context)
+	}
+
+	// Set defaults.
+	SetDefaultDomain(&opt.Domain)
+	SetDefaultStartPage(&opt.StartPage)
+	SetDefaultPages(&opt.Pages)
+
+	// Check validity of parameters.
+	err = opt.checkParameterValidity(context)
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload.
+	payload := map[string]interface{}{
+		"source":          "google_images",
+		"domain":          opt.Domain,
+		"query":           url,
+		"start_page":      opt.StartPage,
+		"pages":           opt.Pages,
+		"locale":          opt.Locale,
+		"geo_location":    opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackURL,
+		"context": []map[string]interface{}{
+			{
+				"key":   "nfpr",
+				"value": context["nfpr"],
+			},
+			{
+				"key":   "results_language",
+				"value": context["results_language"],
+			},
+		},
+	}
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	request, _ := http.NewRequest(
+		"POST",
+		c.BaseUrl,
+		bytes.NewBuffer(jsonPayload),
+	)
+	request.Header.Add("Content-type", "application/json")
+	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+	response, err := c.HttpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %v", err)
+	}
+	response.Body.Close()
+
+	// Unmarshal into job.
+	job := &Job{}
+	json.Unmarshal(responseBody, &job)
+
+	go func() {
+		startNow := time.Now()
+
+		for {
+			request, _ = http.NewRequest(
+				"GET",
+				fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", job.ID),
+				nil,
+			)
+			request.Header.Add("Content-type", "application/json")
+			request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+			response, err = c.HttpClient.Do(request)
+			if err != nil {
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			responseBody, err = io.ReadAll(response.Body)
+			if err != nil {
+				err = fmt.Errorf("error reading response body: %v", err)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+			response.Body.Close()
+
+			json.Unmarshal(responseBody, &job)
+
+			if job.Status == "done" {
+				JobId := job.ID
+				request, _ = http.NewRequest(
+					"GET",
+					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
+					nil,
+				)
+				request.Header.Add("Content-type", "application/json")
+				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+				response, err = c.HttpClient.Do(request)
+				if err != nil {
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Read the response body into a buffer.
+				responseBody, err := io.ReadAll(response.Body)
+				if err != nil {
+					err = fmt.Errorf("error reading response body: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				response.Body.Close()
+
+				// Send back error message.
+				if response.StatusCode != 200 {
+					err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Unmarshal the JSON object.
+				resp := &Response{}
+				if err := resp.UnmarshalJSON(responseBody); err != nil {
+					err = fmt.Errorf("failed to parse JSON object: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				resp.StatusCode = response.StatusCode
+				resp.Status = response.Status
+				close(errChan)
+				responseChan <- resp
+			} else if job.Status == "faulted" {
+				err = fmt.Errorf("There was an error processing your query")
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			if time.Since(startNow) > oxylabs.DefaultTimeout {
+				err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			time.Sleep(oxylabs.DefaultWaitTime)
+		}
+	}()
+
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	return responseChan, nil
+}
+
+// ScrapeGoogleTrendsExplore scrapes google with google_trends_explore as source with async polling runtime.
+func (c *SerpClientAsync) ScrapeGoogleTrendsExplore(
+	query string,
+	opts ...*GoogleTrendsExploreOpts,
+) (chan *Response, error) {
+	responseChan := make(chan *Response)
+	errChan := make(chan error)
+
+	// Prepare options.
+	opt := &GoogleTrendsExploreOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Initialize the context map apply each provided context modifier function.
+	context := make(ContextOption)
+	for _, modifier := range opt.Context {
+		modifier(context)
+	}
+
+	// Set defaults.
+	SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity(context)
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload.
+	payload := map[string]interface{}{
+		"source":       "google_trends_explore",
+		"query":        query,
+		"geo_location": &opt.GeoLocation,
+		"context": []map[string]interface{}{
+			{
+				"key":   "search_type",
+				"value": context["search_type"],
+			},
+			{
+				"key":   "date_from",
+				"value": context["date_from"],
+			},
+			{
+				"key":   "date_to",
+				"value": context["date_to"],
+			},
+			{
+				"key":   "category_id",
+				"value": context["category_id"],
+			},
+		},
+		"user_agent_type": opt.UserAgent,
+		"callback_url":    opt.CallbackURL,
+	}
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	request, _ := http.NewRequest(
+		"POST",
+		c.BaseUrl,
+		bytes.NewBuffer(jsonPayload),
+	)
+	request.Header.Add("Content-type", "application/json")
+	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+	response, err := c.HttpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %v", err)
+	}
+
+	if response.StatusCode == 400 {
+		return nil, fmt.Errorf("error with status code %v: %v", response.StatusCode, string(responseBody))
+	}
+
+	response.Body.Close()
+
+	// Unmarshal into job.
+	job := &Job{}
+	json.Unmarshal(responseBody, &job)
+
+	go func() {
+		startNow := time.Now()
+
+		for {
+			request, _ = http.NewRequest(
+				"GET",
+				fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", job.ID),
+				nil,
+			)
+			request.Header.Add("Content-type", "application/json")
+			request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+			response, err = c.HttpClient.Do(request)
+			if err != nil {
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			responseBody, err = io.ReadAll(response.Body)
+			if err != nil {
+				err = fmt.Errorf("error reading response body: %v", err)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+			response.Body.Close()
+
+			json.Unmarshal(responseBody, &job)
+
+			if job.Status == "done" {
+				JobId := job.ID
+				request, _ = http.NewRequest(
+					"GET",
+					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
+					nil,
+				)
+				request.Header.Add("Content-type", "application/json")
+				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+				response, err = c.HttpClient.Do(request)
+				if err != nil {
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Read the response body into a buffer.
+				responseBody, err := io.ReadAll(response.Body)
+				if err != nil {
+					err = fmt.Errorf("error reading response body: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				response.Body.Close()
+
+				// Send back error message.
+				if response.StatusCode != 200 {
+					err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+
+				// Unmarshal the JSON object.
+				resp := &Response{}
+				if err := resp.UnmarshalJSON(responseBody); err != nil {
+					err = fmt.Errorf("failed to parse JSON object: %v", err)
+					errChan <- err
+					close(responseChan)
+					return
+				}
+				resp.StatusCode = response.StatusCode
+				resp.Status = response.Status
+				close(errChan)
+				responseChan <- resp
+			} else if job.Status == "faulted" {
+				err = fmt.Errorf("There was an error processing your query")
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			if time.Since(startNow) > oxylabs.DefaultTimeout {
+				err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
+				errChan <- err
+				close(responseChan)
+				return
+			}
+
+			time.Sleep(oxylabs.DefaultWaitTime)
+		}
+	}()
+
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	return responseChan, nil
+}

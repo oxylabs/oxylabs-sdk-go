@@ -703,9 +703,15 @@ type GoogleImagesOpts struct {
 
 // ScrapeGoogleImages scrapes google via the google_images source.
 func (c *SerpClient) ScrapeGoogleImages(
-	query string,
+	url string,
 	opts ...*GoogleImagesOpts,
 ) (*Response, error) {
+	// Check validity of url.
+	err := oxylabs.ValidateURL(url, "google")
+	if err != nil {
+		return nil, err
+	}
+
 	// Prepare options.
 	opt := &GoogleImagesOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -724,16 +730,16 @@ func (c *SerpClient) ScrapeGoogleImages(
 	SetDefaultPages(&opt.Pages)
 
 	// Check validity of parameters.
-	err := opt.checkParameterValidity(context)
+	err = opt.checkParameterValidity(context)
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "google_travel_hotels",
+		"source":          "google_images",
 		"domain":          opt.Domain,
-		"query":           query,
+		"query":           url,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
 		"locale":          opt.Locale,
@@ -766,7 +772,7 @@ func (c *SerpClient) ScrapeGoogleImages(
 }
 
 type GoogleTrendsExploreOpts struct {
-	GeoLocation string
+	GeoLocation *string
 	Context     []func(ContextOption)
 	UserAgent   oxylabs.UserAgent
 	CallbackURL string
