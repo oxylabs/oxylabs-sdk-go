@@ -91,6 +91,13 @@ type Response struct {
 	Status     string   `json:"status"`
 }
 
+type ResponseProxy struct {
+	ContentParsed Content
+	Content       string
+	StatusCode    int
+	Status        string
+}
+
 type Job struct {
 	CallbackURL         string        `json:"callback_url"`
 	ClientID            int           `json:"client_id"`
