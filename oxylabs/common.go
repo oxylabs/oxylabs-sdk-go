@@ -21,7 +21,7 @@ func ValidateURL(
 		return fmt.Errorf("url parameter is empty")
 	}
 
-	// Parse the URL
+	// Parse the URL.
 	parsedURL, err := url.ParseRequestURI(inputURL)
 	if err != nil {
 		return fmt.Errorf("failed to parse URL: %v", err)

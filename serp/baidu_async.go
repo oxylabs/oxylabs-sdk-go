@@ -19,7 +19,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearch(
 	responseChan := make(chan *Response)
 	errChan := make(chan error)
 
-	// Prepare options
+	// Prepare options.
 	opt := &BaiduSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
@@ -194,7 +194,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrl(
 		return nil, err
 	}
 
-	// Prepare options
+	// Prepare options.
 	opt := &BaiduUrlOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]

@@ -234,6 +234,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearch(
 
 				// Unmarshal the JSON object.
 				resp := &Response{}
+				resp.Parse = opt.Parse
 				if err := resp.UnmarshalJSON(responseBody); err != nil {
 					err = fmt.Errorf("failed to parse JSON object: %v", err)
 					errChan <- err
@@ -401,6 +402,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrl(
 
 				// Unmarshal the JSON object.
 				resp := &Response{}
+				resp.Parse = opt.Parse
 				if err := resp.UnmarshalJSON(responseBody); err != nil {
 					err = fmt.Errorf("failed to parse JSON object: %v", err)
 					errChan <- err
@@ -589,6 +591,7 @@ func (c *SerpClientAsync) ScrapeGoogleAds(
 
 				// Unmarshal the JSON object.
 				resp := &Response{}
+				resp.Parse = opt.Parse
 				if err := resp.UnmarshalJSON(responseBody); err != nil {
 					err = fmt.Errorf("failed to parse JSON object: %v", err)
 					errChan <- err

@@ -19,7 +19,7 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 	responseChan := make(chan *Response)
 	errChan := make(chan error)
 
-	// Prepare options
+	// Prepare options.
 	opt := &BingSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
