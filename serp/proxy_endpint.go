@@ -10,10 +10,11 @@ import (
 )
 
 type ScrapeProxyOpts struct {
-	UserAgent   oxylabs.UserAgent
-	GeoLocation string
-	Render      oxylabs.Render
-	Parser      *string
+	UserAgent     oxylabs.UserAgent
+	GeoLocation   string
+	Render        oxylabs.Render
+	Parser        *string
+	CustomHeaders map[string]string
 }
 
 // checkParameterValidity checks validity of google search parameters.
@@ -68,6 +69,11 @@ func (c *SerpClientProxy) ScrapeProxyUrl(
 	if opt.Parser != nil {
 		request.Header.Add("x-oxylabs-parse", "1")
 		request.Header.Add("x-oxylabs-parser", *opt.Parser)
+	}
+	if opt.CustomHeaders != nil {
+		for key, value := range opt.CustomHeaders {
+			request.Header.Add(key, value)
+		}
 	}
 
 	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
