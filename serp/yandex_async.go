@@ -1,12 +1,8 @@
 package serp
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"time"
 
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
@@ -47,7 +43,7 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
+		"geo_location":    &opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
@@ -56,120 +52,14 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	request, _ := http.NewRequest(
-		"POST",
-		c.BaseUrl,
-		bytes.NewBuffer(jsonPayload),
-	)
-	request.Header.Add("Content-type", "application/json")
-	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
-	response, err := c.HttpClient.Do(request)
+	// Get job ID.
+	jobID, err := c.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
-	responseBody, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, fmt.Errorf("error reading response body: %v", err)
-	}
-	response.Body.Close()
-
-	// Unmarshal into job.
-	job := &Job{}
-	json.Unmarshal(responseBody, &job)
-
-	go func() {
-		startNow := time.Now()
-
-		for {
-			request, _ = http.NewRequest(
-				"GET",
-				fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", job.ID),
-				nil,
-			)
-			request.Header.Add("Content-type", "application/json")
-			request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
-			response, err = c.HttpClient.Do(request)
-			if err != nil {
-				errChan <- err
-				close(responseChan)
-				return
-			}
-
-			responseBody, err = io.ReadAll(response.Body)
-			if err != nil {
-				err = fmt.Errorf("error reading response body: %v", err)
-				errChan <- err
-				close(responseChan)
-				return
-			}
-			response.Body.Close()
-
-			json.Unmarshal(responseBody, &job)
-
-			if job.Status == "done" {
-				JobId := job.ID
-				request, _ = http.NewRequest(
-					"GET",
-					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
-					nil,
-				)
-				request.Header.Add("Content-type", "application/json")
-				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
-				response, err = c.HttpClient.Do(request)
-				if err != nil {
-					errChan <- err
-					close(responseChan)
-					return
-				}
-
-				// Read the response body into a buffer.
-				responseBody, err := io.ReadAll(response.Body)
-				if err != nil {
-					err = fmt.Errorf("error reading response body: %v", err)
-					errChan <- err
-					close(responseChan)
-					return
-				}
-				response.Body.Close()
-
-				// Send back error message.
-				if response.StatusCode != 200 {
-					err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
-					errChan <- err
-					close(responseChan)
-					return
-				}
-
-				// Unmarshal the JSON object.
-				resp := &Response{}
-				if err := resp.UnmarshalJSON(responseBody); err != nil {
-					err = fmt.Errorf("failed to parse JSON object: %v", err)
-					errChan <- err
-					close(responseChan)
-					return
-				}
-				resp.StatusCode = response.StatusCode
-				resp.Status = response.Status
-				close(errChan)
-				responseChan <- resp
-			} else if job.Status == "faulted" {
-				err = fmt.Errorf("There was an error processing your query")
-				errChan <- err
-				close(responseChan)
-				return
-			}
-
-			if time.Since(startNow) > oxylabs.DefaultTimeout {
-				err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
-				errChan <- err
-				close(responseChan)
-				return
-			}
-
-			time.Sleep(oxylabs.DefaultWaitTime)
-		}
-	}()
+	// Poll job status.
+	go c.PollJobStatus(jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -221,114 +111,14 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	request, _ := http.NewRequest(
-		"POST",
-		c.BaseUrl,
-		bytes.NewBuffer(jsonPayload),
-	)
-	request.Header.Add("Content-type", "application/json")
-	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
-	response, err := c.HttpClient.Do(request)
+	// Get job ID.
+	jobID, err := c.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
-	responseBody, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, fmt.Errorf("error reading response body: %v", err)
-	}
-	response.Body.Close()
-
-	// Unmarshal into job.
-	job := &Job{}
-	json.Unmarshal(responseBody, &job)
-
-	go func() {
-		startNow := time.Now()
-
-		for {
-			request, _ = http.NewRequest(
-				"GET",
-				fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", job.ID),
-				nil,
-			)
-			request.Header.Add("Content-type", "application/json")
-			request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
-			response, err = c.HttpClient.Do(request)
-			if err != nil {
-				errChan <- err
-				close(responseChan)
-				return
-			}
-
-			responseBody, _ = io.ReadAll(response.Body)
-			response.Body.Close()
-
-			json.Unmarshal(responseBody, &job)
-
-			if job.Status == "done" {
-				JobId := job.ID
-				request, _ = http.NewRequest(
-					"GET",
-					fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", JobId),
-					nil,
-				)
-				request.Header.Add("Content-type", "application/json")
-				request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
-				response, err = c.HttpClient.Do(request)
-				if err != nil {
-					errChan <- err
-					close(responseChan)
-					return
-				}
-
-				// Read the response body into a buffer.
-				responseBody, err := io.ReadAll(response.Body)
-				if err != nil {
-					err = fmt.Errorf("error reading response body: %v", err)
-					errChan <- err
-					close(responseChan)
-					return
-				}
-				response.Body.Close()
-
-				// Send back error message.
-				if response.StatusCode != 200 {
-					err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
-					errChan <- err
-					close(responseChan)
-					return
-				}
-
-				// Unmarshal the JSON object.
-				resp := &Response{}
-				if err := resp.UnmarshalJSON(responseBody); err != nil {
-					err = fmt.Errorf("failed to parse JSON object: %v", err)
-					errChan <- err
-					close(responseChan)
-					return
-				}
-				resp.StatusCode = response.StatusCode
-				resp.Status = response.Status
-				close(errChan)
-				responseChan <- resp
-			} else if job.Status == "faulted" {
-				err = fmt.Errorf("There was an error processing your query")
-				errChan <- err
-				close(responseChan)
-				return
-			}
-
-			if time.Since(startNow) > oxylabs.DefaultTimeout {
-				err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
-				errChan <- err
-				close(responseChan)
-				return
-			}
-
-			time.Sleep(oxylabs.DefaultWaitTime)
-		}
-	}()
+	// Poll job status.
+	go c.PollJobStatus(jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {

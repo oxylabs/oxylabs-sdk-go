@@ -91,7 +91,7 @@ func (c *SerpClient) ScrapeBingSearch(
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
+		"geo_location":    &opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 		"render":          opt.Render,
@@ -147,7 +147,7 @@ func (c *SerpClient) ScrapeBingUrl(
 		"source":          "bing",
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
-		"geo_location":    opt.GeoLocation,
+		"geo_location":    &opt.GeoLocation,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
