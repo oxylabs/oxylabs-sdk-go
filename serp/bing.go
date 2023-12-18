@@ -52,7 +52,7 @@ type BingSearchOpts struct {
 	Pages       int
 	Limit       int
 	Locale      oxylabs.Locale
-	GeoLocation string
+	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
 	CallbackUrl string
 	Render      oxylabs.Render
@@ -111,7 +111,7 @@ func (c *SerpClient) ScrapeBingSearch(
 
 type BingUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
-	GeoLocation string
+	GeoLocation *string
 	Render      oxylabs.Render
 	CallbackUrl string
 }

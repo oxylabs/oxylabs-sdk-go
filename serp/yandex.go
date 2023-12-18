@@ -65,7 +65,7 @@ type YandexSearchOpts struct {
 	Pages       int
 	Limit       int
 	Locale      oxylabs.Locale
-	GeoLocation string
+	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
 	CallbackUrl string
 }

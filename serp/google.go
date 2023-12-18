@@ -168,7 +168,7 @@ type GoogleSearchOpts struct {
 	Pages       int
 	Limit       int
 	Locale      oxylabs.Locale
-	Geolocation string
+	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
 	Parse       bool
@@ -219,7 +219,7 @@ func (c *SerpClient) ScrapeGoogleSearch(
 			"source":          "google_search",
 			"domain":          opt.Domain,
 			"query":           query,
-			"geo_location":    opt.Geolocation,
+			"geo_location":    opt.GeoLocation,
 			"user_agent_type": opt.UserAgent,
 			"parse":           opt.Parse,
 			"render":          opt.Render,
@@ -266,7 +266,7 @@ func (c *SerpClient) ScrapeGoogleSearch(
 			"start_page":      opt.StartPage,
 			"pages":           opt.Pages,
 			"limit":           opt.Limit,
-			"geo_location":    opt.Geolocation,
+			"geo_location":    opt.GeoLocation,
 			"user_agent_type": opt.UserAgent,
 			"parse":           opt.Parse,
 			"render":          opt.Render,
@@ -317,7 +317,7 @@ func (c *SerpClient) ScrapeGoogleSearch(
 }
 
 type GoogleUrlOpts struct {
-	GeoLocation string
+	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
 	Parse       bool
@@ -393,7 +393,7 @@ type GoogleAdsOpts struct {
 	Pages       int
 	Limit       int
 	Locale      string
-	GeoLocation string
+	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
 	Parse       bool
@@ -472,7 +472,7 @@ func (c *SerpClient) ScrapeGoogleAds(
 
 type GoogleSuggestionsOpts struct {
 	Locale      string
-	GeoLocation string
+	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
 	CallbackUrl string
@@ -612,7 +612,7 @@ type GoogleTravelHotelsOpts struct {
 	Pages       int
 	Limit       int
 	Locale      string
-	GeoLocation string
+	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
 	CallbackURL string
@@ -694,7 +694,7 @@ type GoogleImagesOpts struct {
 	StartPage   int
 	Pages       int
 	Locale      string
-	GeoLocation string
+	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
 	CallbackURL string
