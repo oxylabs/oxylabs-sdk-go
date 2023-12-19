@@ -8,7 +8,7 @@ import (
 )
 
 // Accepted parameters for yandex.
-var yandexSearchAcceptedDomainParameters = []oxylabs.Domain{
+var YandexSearchAcceptedDomainParameters = []oxylabs.Domain{
 	oxylabs.DOMAIN_COM,
 	oxylabs.DOMAIN_RU,
 	oxylabs.DOMAIN_UA,
@@ -16,7 +16,7 @@ var yandexSearchAcceptedDomainParameters = []oxylabs.Domain{
 	oxylabs.DOMAIN_KZ,
 	oxylabs.DOMAIN_TR,
 }
-var yandexSearchAcceptedLocaleParameters = []oxylabs.Locale{
+var YandexSearchAcceptedLocaleParameters = []oxylabs.Locale{
 	oxylabs.LOCALE_EN,
 	oxylabs.LOCALE_RU,
 	oxylabs.LOCALE_BY,
@@ -29,13 +29,13 @@ var yandexSearchAcceptedLocaleParameters = []oxylabs.Locale{
 	oxylabs.LOCALE_UK,
 }
 
-// checkParameterValidity checks validity of yandex search parameters.
+// checkParameterValidity checks validity of ScrapeYandexSearch parameters.
 func (opt *YandexSearchOpts) checkParameterValidity() error {
-	if !oxylabs.InList(opt.Domain, yandexSearchAcceptedDomainParameters) {
+	if !oxylabs.InList(opt.Domain, YandexSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
 	}
 
-	if opt.Locale != "" && !oxylabs.InList(opt.Locale, yandexSearchAcceptedLocaleParameters) {
+	if opt.Locale != "" && !oxylabs.InList(opt.Locale, YandexSearchAcceptedLocaleParameters) {
 		return fmt.Errorf("invalid locale parameter: %s", opt.Locale)
 	}
 
@@ -46,7 +46,7 @@ func (opt *YandexSearchOpts) checkParameterValidity() error {
 	return nil
 }
 
-// checkParameterValidity checks validity of yandex url parameters.
+// checkParameterValidity checks validity of ScrapeYandexUrl parameters.
 func (opt *YandexUrlOpts) checkParameterValidity() error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -59,6 +59,7 @@ func (opt *YandexUrlOpts) checkParameterValidity() error {
 	return nil
 }
 
+// YandexSearchOpts contains all the query parameters available for yandex_search.
 type YandexSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -70,7 +71,7 @@ type YandexSearchOpts struct {
 	CallbackUrl string
 }
 
-// ScrapYandexSearch scrapes yandex with yandex_search as source.
+// ScrapeYandexSearch scrapes yandex via Oxylabs SERP API with yandex_search as source.
 func (c *SerpClient) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
@@ -120,13 +121,14 @@ func (c *SerpClient) ScrapeYandexSearch(
 	return res, nil
 }
 
+// YandexUrlOpts contains all the query parameters available for yandex.
 type YandexUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
 	CallbackUrl string
 }
 
-// ScapeYandexUrl scrapes yandex with yandex as source.
+// ScapeYandexUrl scrapes a yandex url via Oxylabs SERP API with yandex as source.
 func (c *SerpClient) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,

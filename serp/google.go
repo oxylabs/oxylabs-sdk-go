@@ -27,7 +27,7 @@ var AcceptedSearchTypeParameters = []string{
 	"youtube_search",
 }
 
-// checkParameterValidity checks validity of google search parameters.
+// checkParameterValidity checks validity of ScrapeGoogleSearch parameters.
 func (opt *GoogleSearchOpts) checkParameterValidity(ctx ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -48,7 +48,7 @@ func (opt *GoogleSearchOpts) checkParameterValidity(ctx ContextOption) error {
 	return nil
 }
 
-// checkParameterValidity checks validity of google url parameters.
+// checkParameterValidity checks validity of ScrapeGoogleUrl parameters.
 func (opt *GoogleUrlOpts) checkParameterValidity() error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -61,7 +61,7 @@ func (opt *GoogleUrlOpts) checkParameterValidity() error {
 	return nil
 }
 
-// checkParameterValidity checks validity of google ads parameters.
+// checkParameterValidity checks validity of ScrapeGoogleAds parameters.
 func (opt *GoogleAdsOpts) checkParameterValidity(ctx ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -82,7 +82,7 @@ func (opt *GoogleAdsOpts) checkParameterValidity(ctx ContextOption) error {
 	return nil
 }
 
-// checkParameterValidity checks validity of google suggestions parameters.
+// checkParameterValidity checks validity of ScrapeGoogleSuggestions parameters.
 func (opt *GoogleSuggestionsOpts) checkParameterValidity() error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -95,7 +95,7 @@ func (opt *GoogleSuggestionsOpts) checkParameterValidity() error {
 	return nil
 }
 
-// checkParameterValidity checks validity of google hotels parameters.
+// checkParameterValidity checks validity of ScrapeGoogleHotels parameters.
 func (opt *GoogleHotelsOpts) checkParameterValidity(ctx ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -116,7 +116,7 @@ func (opt *GoogleHotelsOpts) checkParameterValidity(ctx ContextOption) error {
 	return nil
 }
 
-// checkParameterValidity checks validity of google travel hotels parameters.
+// checkParameterValidity checks validity of ScrapeGoogleTravelHotels parameters.
 func (opt *GoogleTravelHotelsOpts) checkParameterValidity(ctx ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -145,7 +145,7 @@ func (opt *GoogleTravelHotelsOpts) checkParameterValidity(ctx ContextOption) err
 	return nil
 }
 
-// checkParameterValidity checks validity of google trends explore parameters.
+// checkParameterValidity checks validity of ScrapeGoogleTrendsExplore parameters.
 func (opt *GoogleTrendsExploreOpts) checkParameterValidity(ctx ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -162,6 +162,21 @@ func (opt *GoogleTrendsExploreOpts) checkParameterValidity(ctx ContextOption) er
 	return nil
 }
 
+// checkParameterValidity checks validity of google images parameters.
+func (opt *GoogleImagesOpts) checkParameterValidity(ctx ContextOption) error {
+
+	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
+		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	if opt.Pages <= 0 || opt.StartPage <= 0 {
+		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
+	}
+
+	return nil
+}
+
+// GoogleSearchOpts contains all the query parameters available for google_search.
 type GoogleSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -175,7 +190,7 @@ type GoogleSearchOpts struct {
 	Context     []func(ContextOption)
 }
 
-// Scrapes Google via its search engine.
+// ScrapeGoogleSearch scrapes google via Oxylabs SERP API with google_search as source.
 func (c *SerpClient) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
@@ -273,6 +288,7 @@ func (c *SerpClient) ScrapeGoogleSearch(
 	return res, nil
 }
 
+// GoogleUrlOpts contains all the query parameters available for google.
 type GoogleUrlOpts struct {
 	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
@@ -281,7 +297,7 @@ type GoogleUrlOpts struct {
 	CallbackUrl string
 }
 
-// ScrapeGoogleUrl scrapes google vith google as source.
+// ScrapeGoogleUrl scrapes google via Oxylabs SERP API with google as source.
 func (c *SerpClient) ScrapeGoogleUrl(
 	url string,
 	opts ...*GoogleUrlOpts,
@@ -330,20 +346,7 @@ func (c *SerpClient) ScrapeGoogleUrl(
 	return res, nil
 }
 
-// checkParameterValidity checks validity of google images parameters.
-func (opt *GoogleImagesOpts) checkParameterValidity(ctx ContextOption) error {
-
-	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
-		return fmt.Errorf("invalid render parameter: %v", opt.Render)
-	}
-
-	if opt.Pages <= 0 || opt.StartPage <= 0 {
-		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
-	}
-
-	return nil
-}
-
+// GoogleAdsOpts contains all the query parameters available for google_ads.
 type GoogleAdsOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -357,7 +360,7 @@ type GoogleAdsOpts struct {
 	Context     []func(ContextOption)
 }
 
-// SrcapeGoogleAds scrapes google via the google_ads source.
+// SrcapeGoogleAds scrapes google via Oxylabs SERP API with google_ads as source.
 func (c *SerpClient) ScrapeGoogleAds(
 	query string,
 	opts ...*GoogleAdsOpts,
@@ -427,6 +430,7 @@ func (c *SerpClient) ScrapeGoogleAds(
 	return res, nil
 }
 
+// GoogleShoppingOpts contains all the query parameters available for google_shopping.
 type GoogleSuggestionsOpts struct {
 	Locale      string
 	GeoLocation *string
@@ -435,7 +439,7 @@ type GoogleSuggestionsOpts struct {
 	CallbackUrl string
 }
 
-// ScrapeGoogleSuggestions scrapes google via the google_suggestions source.
+// ScrapeGoogleSuggestions scrapes google via  Oxylabs SERP API with google_suggestions as source.
 func (c *SerpClient) ScrapeGoogleSuggestions(
 	query string,
 	opts ...*GoogleSuggestionsOpts,
@@ -477,6 +481,7 @@ func (c *SerpClient) ScrapeGoogleSuggestions(
 	return res, nil
 }
 
+// GoogleHotelsOpts contains all the query parameters available for google_hotels.
 type GoogleHotelsOpts struct {
 	Domain          oxylabs.Domain
 	StartPage       int
@@ -563,6 +568,7 @@ func (c *SerpClient) ScrapeGoogleHotels(
 	return res, nil
 }
 
+// GoogleTravelHotelsOpts contains all the query parameters available for google_travel_hotels.
 type GoogleTravelHotelsOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -576,7 +582,7 @@ type GoogleTravelHotelsOpts struct {
 	Context     []func(ContextOption)
 }
 
-// ScrapeGoogleTravelHotels scrapes google via the google_travel_hotels source.
+// ScrapeGoogleTravelHotels scrapes google via Oxylabs SERP API with google_travel_hotels as source.
 func (c *SerpClient) ScrapeGoogleTravelHotels(
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
@@ -646,6 +652,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotels(
 	return res, nil
 }
 
+// GoogleImagesOpts contains all the query parameters available for google_images.
 type GoogleImagesOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -658,7 +665,7 @@ type GoogleImagesOpts struct {
 	Context     []func(ContextOption)
 }
 
-// ScrapeGoogleImages scrapes google via the google_images source.
+// ScrapeGoogleImages scrapes google via Oxylabs SERP API with google_images as source.
 func (c *SerpClient) ScrapeGoogleImages(
 	url string,
 	opts ...*GoogleImagesOpts,
@@ -728,6 +735,7 @@ func (c *SerpClient) ScrapeGoogleImages(
 	return res, nil
 }
 
+// GoogleTrendsExploreOpts contains all the query parameters available for google_trends_explore.
 type GoogleTrendsExploreOpts struct {
 	GeoLocation *string
 	Context     []func(ContextOption)
@@ -735,7 +743,7 @@ type GoogleTrendsExploreOpts struct {
 	CallbackURL string
 }
 
-// ScrapeGoogleTrendsExplore scrapes google via the google_trends_explore source.
+// ScrapeGoogleTrendsExplore scrapes google via Oxylabs SERP API with google_trends_explore as source.
 func (c *SerpClient) ScrapeGoogleTrendsExplore(
 	query string,
 	opts ...*GoogleTrendsExploreOpts,

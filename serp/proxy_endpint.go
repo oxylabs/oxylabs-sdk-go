@@ -9,6 +9,8 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
+// ScrapeProxyOpts contains all the query paramaters available when scraping
+// via Oxylabs proxy endpoint.
 type ScrapeProxyOpts struct {
 	UserAgent     oxylabs.UserAgent
 	GeoLocation   string
@@ -17,7 +19,7 @@ type ScrapeProxyOpts struct {
 	CustomHeaders map[string]string
 }
 
-// checkParameterValidity checks validity of google search parameters.
+// checkParameterValidity checks validity of ScrapeProxyUrl parameters.
 func (opt *ScrapeProxyOpts) checkParameterValidity() error {
 	if opt.UserAgent != "" && !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -30,7 +32,7 @@ func (opt *ScrapeProxyOpts) checkParameterValidity() error {
 	return nil
 }
 
-// ScrapeProxyUrl scrapes via proxy endpoint.
+// ScrapeProxyUrl scrapes a URL via Oxylabs proxy endpoint.
 func (c *SerpClientProxy) ScrapeProxyUrl(
 	url string,
 	opts ...*ScrapeProxyOpts,

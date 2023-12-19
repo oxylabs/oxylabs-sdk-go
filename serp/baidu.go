@@ -13,7 +13,7 @@ var BaiduSearchAcceptedDomainParameters = []oxylabs.Domain{
 	oxylabs.DOMAIN_CN,
 }
 
-// checkParameterValidity checks validity of baidu search parameters.
+// checkParameterValidity checks validity of ScrapeBaiduSearch parameters.
 func (opt *BaiduSearchOpts) checkParameterValidity() error {
 	if !oxylabs.InList(opt.Domain, BaiduSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
@@ -30,7 +30,7 @@ func (opt *BaiduSearchOpts) checkParameterValidity() error {
 	return nil
 }
 
-// checkParameterValidity checks validity of baidu url parameters.
+// checkParameterValidity checks validity of ScrapeBaiduUrl parameters.
 func (opt *BaiduUrlOpts) checkParameterValidity() error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -39,6 +39,7 @@ func (opt *BaiduUrlOpts) checkParameterValidity() error {
 	return nil
 }
 
+// BaiduSearchOpts contains all the query paramaters available for baidu_search.
 type BaiduSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -48,7 +49,7 @@ type BaiduSearchOpts struct {
 	CallbackUrl string
 }
 
-// ScrapeBaiduSearch scrapes baidu with baidu_search as source.
+// ScrapeBaiduSearch scrapes baidu via Oxylabs SERP API with baidu_search as source.
 func (c *SerpClient) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
@@ -96,12 +97,13 @@ func (c *SerpClient) ScrapeBaiduSearch(
 	return res, nil
 }
 
+// BaiduUrlOpts contains all the query paramaters available for baidu.
 type BaiduUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
 	CallbackUrl string
 }
 
-// ScrapeBaiduUrl scrapes baidu with baidu as source.
+// ScrapeBaiduUrl scrapes baidu via Oxylabs SERP API with baidu as source.
 func (c *SerpClient) ScrapeBaiduUrl(
 	url string,
 	opts ...*BaiduUrlOpts,

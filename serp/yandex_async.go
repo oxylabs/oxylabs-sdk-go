@@ -7,7 +7,8 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// ScrapeYandexSearch scrapes yandex with yandex_search as source with async polling runtime.
+// ScrapeYandexSearch scrapes yandex with async polling runtime via Oxylabs SERP API
+// and yandex_search as source.
 func (c *SerpClientAsync) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
@@ -69,7 +70,8 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 	return responseChan, nil
 }
 
-// ScrapeYandexUrl scrapes yandex with yandex as source with async polling runtime.
+// ScrapeYandexUrl scrapes yandex with async polling runtime via Oxylabs SERP API
+// and yandex as source.
 func (c *SerpClientAsync) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,

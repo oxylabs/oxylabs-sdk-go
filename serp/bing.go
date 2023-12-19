@@ -17,7 +17,7 @@ var BingSearchAcceptedDomainParameters = []oxylabs.Domain{
 	oxylabs.DOMAIN_TR,
 }
 
-// checkParameterValidity checks validity of bing search parameters.
+// checkParameterValidity checks validity of ScrapeBingSearch parameters.
 func (opt *BingSearchOpts) checkParameterValidity() error {
 	if opt.Domain != "" && !oxylabs.InList(opt.Domain, BingSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
@@ -33,7 +33,7 @@ func (opt *BingSearchOpts) checkParameterValidity() error {
 	return nil
 }
 
-// checkParameterValidity checks validity of bing url parameters.
+// checkParameterValidity checks validity of ScrapeBingUrl parameters.
 func (opt *BingUrlOpts) checkParameterValidity() error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
@@ -46,6 +46,7 @@ func (opt *BingUrlOpts) checkParameterValidity() error {
 	return nil
 }
 
+// BingSearchOpts contains all the query paramaters available for bing_search.
 type BingSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -58,7 +59,7 @@ type BingSearchOpts struct {
 	Render      oxylabs.Render
 }
 
-// ScraperBingSearch scrapes bing with bing_search as source.
+// ScrapeBingSearch scrapes bing via Oxylabs SERP API with bing_search as source.
 func (c *SerpClient) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
@@ -109,6 +110,7 @@ func (c *SerpClient) ScrapeBingSearch(
 	return res, nil
 }
 
+// BingUrlOpts contains all the query paramaters available for bing.
 type BingUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
 	GeoLocation *string
@@ -116,7 +118,7 @@ type BingUrlOpts struct {
 	CallbackUrl string
 }
 
-// ScrapeBingUrl scrapes bing with bing as source.
+// ScrapeBingUrl scrapes bing via Oxylabs SERP API with bing as source.
 func (c *SerpClient) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,

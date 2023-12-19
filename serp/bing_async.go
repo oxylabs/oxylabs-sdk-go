@@ -7,7 +7,8 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// ScrapeBingSearch scrapes bing with bing_search as source with async polling runtime.
+// ScrapeBingSearch scrapes bing with async polling runtime via Oxylabs SERP API
+// and bing_search as source.
 func (c *SerpClientAsync) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
@@ -70,7 +71,8 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 	return responseChan, nil
 }
 
-// ScrapeBingUrl scrapes bing with bing as source with async polling runtime.
+// ScrapeBingUrl scrapes bing with async polling runtime via Oxylabs SERP API
+// and bing as source.
 func (c *SerpClientAsync) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,

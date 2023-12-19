@@ -7,7 +7,8 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// ScrapeGoogleSearch scrapes google with google_search as source with async polling runtime.
+// ScrapeGoogleSearch scrapes google with async polling runtime via Oxylabs SERP API
+// and google_search as source.
 func (c *SerpClientAsync) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
@@ -117,7 +118,8 @@ func (c *SerpClientAsync) ScrapeGoogleSearch(
 	return responseChan, nil
 }
 
-// ScrapeGoogleUrl scrapes google with google as source with async polling runtime.
+// ScrapeGoogleUrl scrapes google with async polling runtime via Oxylabs SERP API
+// and google as source.
 func (c *SerpClientAsync) ScrapeGoogleUrl(
 	url string,
 	opts ...*GoogleUrlOpts,
@@ -178,7 +180,8 @@ func (c *SerpClientAsync) ScrapeGoogleUrl(
 	return responseChan, nil
 }
 
-// ScrapeGoogleAds scrapes google with google_ads as source with async polling runtime.
+// ScrapeGoogleAds scrapes google with async polling runtime via Oxylabs SERP API
+// and google_ads as source.
 func (c *SerpClientAsync) ScrapeGoogleAds(
 	query string,
 	opts ...*GoogleAdsOpts,
@@ -260,7 +263,8 @@ func (c *SerpClientAsync) ScrapeGoogleAds(
 	return responseChan, nil
 }
 
-// ScrapeGoogleSuggestions scrapes google with google_suggestions as source with async polling runtime.
+// ScrapeGoogleSuggestions scrapes google with async polling runtime via Oxylabs SERP API
+// and google_suggestions as source
 func (c *SerpClientAsync) ScrapeGoogleSuggestions(
 	query string,
 	opts ...*GoogleSuggestionsOpts,
@@ -314,7 +318,8 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestions(
 	return responseChan, nil
 }
 
-// ScrapeGoogleTravelHotels scrapes google with google_hotels as source with async polling runtime.
+// ScrapeGoogleTHotels scrapes google with async polling runtime via Oxylabs SERP API
+// and google_hotels as source.
 func (c *SerpClientAsync) ScrapeGoogleHotels(
 	query string,
 	opts ...*GoogleHotelsOpts,
@@ -398,7 +403,8 @@ func (c *SerpClientAsync) ScrapeGoogleHotels(
 	return responseChan, nil
 }
 
-// ScrapeGoogleTravelHotels scrapes google with google_travel_hotels as source with async polling runtime.
+// ScrapeGoogleTravelHotels scrapes google with async polling runtime via Oxylabs SERP API
+// and google_travel_hotels as source.
 func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
@@ -480,7 +486,8 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
 	return responseChan, nil
 }
 
-// ScrapeGoogleImages scrapes google with google_images as source with async polling runtime.
+// ScrapeGoogleImages scrapes google with async polling runtime via Oxylabs SERP API
+// and google_images as source.
 func (c *SerpClientAsync) ScrapeGoogleImages(
 	url string,
 	opts ...*GoogleImagesOpts,
@@ -562,7 +569,8 @@ func (c *SerpClientAsync) ScrapeGoogleImages(
 	return responseChan, nil
 }
 
-// ScrapeGoogleTrendsExplore scrapes google with google_trends_explore as source with async polling runtime.
+// ScrapeGoogleTrendsExplore scrapes google with async polling runtime via Oxylabs SERP API
+// and google_trends_explore as source.
 func (c *SerpClientAsync) ScrapeGoogleTrendsExplore(
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
