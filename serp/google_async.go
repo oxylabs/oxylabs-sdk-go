@@ -45,97 +45,54 @@ func (c *SerpClientAsync) ScrapeGoogleSearch(
 		return nil, err
 	}
 
-	// Prepare payload.
-	var payload map[string]interface{}
+	// Prepare payload with common parameters.
+	payload := map[string]interface{}{
+		"source":          "google_search",
+		"domain":          opt.Domain,
+		"query":           query,
+		"geo_location":    &opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"parse":           opt.Parse,
+		"render":          opt.Render,
+		"context": []map[string]interface{}{
+			{
+				"key":   "results_language",
+				"value": context["results_language"],
+			},
+			{
+				"key":   "filter",
+				"value": context["filter"],
+			},
+			{
+				"key":   "nfpr",
+				"value": context["nfpr"],
+			},
+			{
+				"key":   "safe_search",
+				"value": context["safe_search"],
+			},
+			{
+				"key":   "fpstate",
+				"value": context["fpstate"],
+			},
+			{
+				"key":   "tbm",
+				"value": context["tbm"],
+			},
+			{
+				"key":   "tbs",
+				"value": context["tbs"],
+			},
+		},
+	}
 
-	// If user sends limit_per_page context parameter, use it instead of limit, start_page and pages parameters.
+	// If user sends limit_per_page context parameter, use it instead of limit, start_page, and pages parameters.
 	if context["limit_per_page"] != nil {
-		payload = map[string]interface{}{
-			"source":          "google_search",
-			"domain":          opt.Domain,
-			"query":           query,
-			"geo_location":    &opt.GeoLocation,
-			"user_agent_type": opt.UserAgent,
-			"parse":           opt.Parse,
-			"render":          opt.Render,
-			"context": []map[string]interface{}{
-				{
-					"key":   "results_language",
-					"value": context["results_language"],
-				},
-				{
-					"key":   "filter",
-					"value": context["filter"],
-				},
-				{
-					"key":   "limit_per_page",
-					"value": context["limit_per_page"],
-				},
-				{
-					"key":   "nfpr",
-					"value": context["nfpr"],
-				},
-				{
-					"key":   "safe_search",
-					"value": context["safe_search"],
-				},
-				{
-					"key":   "fpstate",
-					"value": context["fpstate"],
-				},
-				{
-					"key":   "tbm",
-					"value": context["tbm"],
-				},
-				{
-					"key":   "tbs",
-					"value": context["tbs"],
-				},
-			},
-		}
+		payload["limit_per_page"] = context["limit_per_page"]
 	} else {
-		payload = map[string]interface{}{
-			"source":          "google_search",
-			"domain":          opt.Domain,
-			"query":           query,
-			"start_page":      opt.StartPage,
-			"pages":           opt.Pages,
-			"limit":           opt.Limit,
-			"geo_location":    &opt.GeoLocation,
-			"user_agent_type": opt.UserAgent,
-			"parse":           opt.Parse,
-			"render":          opt.Render,
-			"context": []map[string]interface{}{
-				{
-					"key":   "results_language",
-					"value": context["results_language"],
-				},
-				{
-					"key":   "filter",
-					"value": context["filter"],
-				},
-				{
-					"key":   "nfpr",
-					"value": context["nfpr"],
-				},
-				{
-					"key":   "safe_search",
-					"value": context["safe_search"],
-				},
-				{
-					"key":   "fpstate",
-					"value": context["fpstate"],
-				},
-				{
-					"key":   "tbm",
-					"value": context["tbm"],
-				},
-				{
-					"key":   "tbs",
-					"value": context["tbs"],
-				},
-			},
-		}
+		payload["start_page"] = opt.StartPage
+		payload["pages"] = opt.Pages
+		payload["limit"] = opt.Limit
 	}
 
 	jsonPayload, err := json.Marshal(payload)
