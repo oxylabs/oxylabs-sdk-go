@@ -6,7 +6,7 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// Helper functions to add headers to request object.s
+// Helper functions to add headers to request object.
 
 func AddGeoLocationHeader(request *http.Request, geoLocation string) {
 	request.Header.Add("x-oxylabs-geo-location", geoLocation)
