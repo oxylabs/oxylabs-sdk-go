@@ -39,7 +39,7 @@ func (opt *BaiduUrlOpts) checkParameterValidity() error {
 	return nil
 }
 
-// BaiduSearchOpts contains all the query paramaters available for baidu_search.
+// BaiduSearchOpts contains all the query parameters available for baidu_search.
 type BaiduSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -97,7 +97,7 @@ func (c *SerpClient) ScrapeBaiduSearch(
 	return res, nil
 }
 
-// BaiduUrlOpts contains all the query paramaters available for baidu.
+// BaiduUrlOpts contains all the query parameters available for baidu.
 type BaiduUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
 	CallbackUrl string

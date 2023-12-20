@@ -42,7 +42,7 @@ func (c *SerpClientAsync) GetJobID(
 	return job.ID, nil
 }
 
-// Helper function to handle response parsing and error checking
+// Helper function to handle response parsing and error checking.
 func (c *SerpClientAsync) GetResponse(
 	jobID string,
 	parse bool,

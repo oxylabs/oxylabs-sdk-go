@@ -46,7 +46,7 @@ func (opt *BingUrlOpts) checkParameterValidity() error {
 	return nil
 }
 
-// BingSearchOpts contains all the query paramaters available for bing_search.
+// BingSearchOpts contains all the query parameters available for bing_search.
 type BingSearchOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
@@ -110,7 +110,7 @@ func (c *SerpClient) ScrapeBingSearch(
 	return res, nil
 }
 
-// BingUrlOpts contains all the query paramaters available for bing.
+// BingUrlOpts contains all the query parameters available for bing.
 type BingUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
 	GeoLocation *string

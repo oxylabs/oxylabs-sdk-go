@@ -7,7 +7,7 @@ import (
 	"net/url"
 )
 
-// Init for Proxy runtime model.
+// Init initializes and returns an http client configured with oxylabs proxy settings.
 func Init(
 	username string,
 	password string,
