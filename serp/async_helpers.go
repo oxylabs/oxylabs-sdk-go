@@ -97,7 +97,8 @@ func (c *SerpClientAsync) GetResponse(
 }
 
 // PollJobStatus polls the job status and handles the response/error channels.
-func (c *SerpClientAsync) PollJobStatus(jobID string,
+func (c *SerpClientAsync) PollJobStatus(
+	jobID string,
 	parse bool,
 	responseChan chan *Response,
 	errChan chan error,
