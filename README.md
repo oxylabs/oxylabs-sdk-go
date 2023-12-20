@@ -263,7 +263,6 @@ func main() {
 	)
 
 	// Add relevant Headers.
-	proxy.AddGeoLocationHeader(request, "Germany")
 	proxy.AddUserAgentHeader(request, oxylabs.UA_DESKTOP)
 	proxy.AddRenderHeader(request, "html")
 	proxy.AddParseHeader(request, "google_search")
