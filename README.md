@@ -1,59 +1,59 @@
 # Oxylabs SDK Go
 
-Welcome to the official SERP API SDK for [Oxylabs](https://oxylabs.io). 
+This is a Go SDK for the [Oxylabs](https://oxylabs.io) [Scraper APIs](https://developers.oxylabs.io/scraper-apis/getting-started).
 
-The Oxylabs SERP SDK simplifies interaction with the Oxylabs SERP API, providing a seamless integration for developers to retrieve search engine results pages (SERP) data with ease.
+This will help simplify integrating with Oxylabs's APIs, which can help you with retrieving search engine results (SERP), eCommerce data, real estate data, and more.
+	
+Some technical features include but are not limited to:
 
-- [Features](#features)
-- [Getting Started](#getting-started)
-  - [Requirements](#requirements)
-  - [Setting Up](#setting-up)
-  - [Quick Start](#quick-start)
-- [General Information](#general-information)
-    - [Integration Methods](#integration-methods)
-    - [Sources](#sources)
-	- [Query Parameters](#query-parameters)
-    - [Configurable Options](#configurable-options)
-    - [Context Options for Google Sources](#context-options-for-google-sources)
-- [Integration Methods](#integration-methods-1)
-	- [Realtime Integration](#realtime-integration)
-	- [Push-Pull (Polling) Integration](#push-pull)
-	- [Proxy Endpoint](#proxy-endpoint)
+### Simplified Interface
 
-## Features
+Abstracts away complexities, offering a straightforward user interface for interacting with the Oxylabs SERP API.
 
-- **Simplified Interface:** Abstracts away complexities, offering a straightforward user interface for interacting with the Oxylabs SERP API.
+### Automated Request Management
 
-- **Automated Request Management**: Streamlines the handling of API requests and responses for enhanced efficiency and reliability.
+Streamlines the handling of API requests and responses for enhanced efficiency and reliability.
 
-- **Error Handling:** Provides meaningful error messages and handles common API errors, simplifying troubleshooting.
+### Error Handling
 
-- **Result Parsing:** Streamlines the process of extracting relevant data from SERP results, allowing developers to focus on application logic.
+Provides meaningful error messages and handles common API errors, simplifying troubleshooting.
+
+### Result Parsing
+
+Streamlines the process of extracting relevant data from SERP results, allowing developers to focus on application logic.
 
 ## Getting Started
+
 You will need an Oxylabs API username and password which you can get by signing up at https://oxylabs.io. You can check things out with a free trial at https://oxylabs.io/products/scraper-api/serp for a week. 
-
-
-### Requirements
-```bash
-go 1.21.0 or above
-```
 
 ### Setting Up
 
-Start a local Go project if you don't have one:
+This SDK requires a minimum version of `go 1.21`. 
 
-```bash
-go mod init
+You can check your go version by running the following command in your preferred terminal:
+
+```sh
+go version
+``` 
+
+If you need to install or update go you can do so by following the steps mentioned [here](https://go.dev/doc/install).
+
+#### Initialize Project
+
+```sh
+$ mkdir ~/oxylabs-sdk
+$ cd ~/oxylabs-sdk
+$ go mod init oxylabs-sdk 
 ```
 
-Install the package:
+#### Install SDK package
 
-```bash
-go get github.com/mslmio/oxylabs-sdk-go
+```sh
+$ go get github.com/mslmio/oxylabs-sdk-go
 ```
 
 ### Quick Start
+
 Basic usage of the SDK.
 
 ```go
@@ -62,26 +62,26 @@ package main
 import (
 	"fmt"
 
-	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
+	"github.com/mslmio/oxylabs-sdk-go/serp"
 )
 
 func main() {
-    // Set your Oxylabs API Credentials.
+	// Set your Oxylabs API Credentials.
 	const username = "username"
 	const password = "password"
 
-    // Initialize the SERP realtime client with your credentials.
+	// Initialize the SERP realtime client with your credentials.
 	c := serp.Init(username, password)
 
-    // Use `google_search` as a source to scrape Google with adidas as a query.
+	// Use `google_search` as a source to scrape Google with adidas as a query.
 	res, err := c.ScrapeGoogleSearch(
 		"adidas",
 	)
 	if err != nil {
 		panic(err)
-	} 
+	}
 
-    fmt.Printf("Results: %+v\n", res)
+	fmt.Printf("Results: %+v\n", res)
 }
 ```
 
@@ -120,9 +120,9 @@ Our SDK makes it easy for you, you just need to call the relevant function name 
 just need to invoke:
 
 ```go
-    res, err :=c.ScrapeYandexSearch(
-        "football",
-    )
+res, err := c.ScrapeYandexSearch(
+	"football",
+)
 ```
 
 ### Query Parameters
@@ -131,34 +131,40 @@ Each source has different accepted query parameters. For a detailed list of acce
 This SDK provides you with the option to query with default parameters by not sending anything as the second argument as seen in the above example. Lets say we want to send in some query parameters it is as simple as:
 
 ```go
-	res, err := c.ScrapeYandexSearch(
-		"football",
-		&serp.YandexSearchOpts{
-        	StartPage: 1,
-			Pages:     3,
-			Limit:     4,
-			Domain:    "com",
-			Locale:    "en",
-        },
-	)
+res, err := c.ScrapeYandexSearch(
+	"football",
+	&serp.YandexSearchOpts{
+		StartPage: 1,
+		Pages:     3,
+		Limit:     4,
+		Domain:    "com",
+		Locale:    "en",
+	},
+)
 ```
 
 ### Configurable Options
-For consistency and ease of use, this SDK provides a list of pre-defined commonly used parameter values as constants in our library.
+For consistency and ease of use, this SDK provides a list of pre-defined commonly used parameter values as constants in our library. You can use them by importing the oxylabs package.
+
+```go
+import (
+	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
+)
+```
 
 Currently these are available for the `Render` and`UserAgent` parameters. For the full list you can check `oxylabs/types.go`. You can send in these values as strings too.
 
 These can be used like this: 
 
 ```go
-    res, err := c.ScrapeGoogleSearch(
-        "adidas",
-         &serp.GoogleSearchOpts{
-            UserAgent: oxylabs.UA_DESKTOP_CHROME, //desktop_chrome
-            Render:    oxylabs.HTML,              // html
-            Domain:    oxylabs.DOMAIN_COM,        // com
-        }
-    )
+res, err := c.ScrapeGoogleSearch(
+	"adidas",
+	&serp.GoogleSearchOpts{
+		UserAgent: oxylabs.UA_DESKTOP_CHROME, //desktop_chrome
+		Render:    oxylabs.HTML,              // html
+		Domain:    oxylabs.DOMAIN_COM,        // com
+	},
+)
 ```
 
 ### Context Options for Google sources
@@ -168,22 +174,23 @@ The SDK easily allows you to send in context options relevant to google sources.
 Here is an example of how you could send context options for Google Search:
 
 ```go
-    res, err := c.ScrapeGoogleSearch(
-        "adidas",
-        &serp.GoogleSearchOpts{
-            Parse: true,
-            Context: []func(serp.ContextOption){
-                serp.ResultsLanguage("en"),
-                serp.Filter(1),
-                serp.Tbm("isch"),
-                serp.LimitPerPage([]serp.PageLimit{{Page: 1, Limit: 1}, { Page: 2, Limit: 6}})
-            }
-        }
-    )
+res, err := c.ScrapeGoogleSearch(
+	"adidas",
+	&serp.GoogleSearchOpts{
+		Parse: true,
+		Context: []func(serp.ContextOption){
+			serp.ResultsLanguage("en"),
+			serp.Filter(1),
+			serp.Tbm("isch"),
+			serp.LimitPerPage([]serp.PageLimit{{Page: 1, Limit: 1}, {Page: 2, Limit: 6}}),
+		},
+	},
+)
 ```
 ## Integration Methods
 
 ### Realtime Integration
+
 Realtime is a synchronous integration method. This means that upon sending your job submission request, **you will have to keep the connection open** until we successfully finish your job or return an error.
 
 
@@ -191,6 +198,7 @@ The **TTL** of Realtime connections is **150 seconds**. There may be rare cases 
 
  
 ### Push Pull(Polling) Integration <a id="push-pull"></a>
+
 Push-Pull is an asynchronous integration method. This SDK implements this integration with a polling technique to poll the endpoint for results after a set interval of time.
 
 Using it as straightforward as using the realtime integration. The only difference is that it will return a channel with the Response. Below is an example of this integration method:
@@ -210,7 +218,7 @@ func main() {
 	const username = "username"
 	const password = "password"
 
-    // Initialize the SERP push-pull client with your credentials.
+	// Initialize the SERP push-pull client with your credentials.
 	c := serp.InitAsync(username, password)
 
 	ch, err := c.ScrapeGoogleAds(
@@ -223,13 +231,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	
-    res := <-ch
-    fmt.Printf("Results: %+v\n", res)
+
+	res := <-ch
+	fmt.Printf("Results: %+v\n", res)
 }
 ```
 
 ### Proxy Endpoint
+
 This method is also synchronous (like Realtime), but instead of using our service via a RESTful interface, you **can use our endpoint like a proxy**. Use Proxy Endpoint if you've used proxies before and would just like to get unblocked content from us.
 
 Since the parameters in this method are sent as as headers there are only a few parameters which this integration method accepts. You can find those parameters at 
@@ -256,7 +265,7 @@ func main() {
 	// Init returns an http client pre configured with the proxy settings.
 	c, _ := proxy.Init(username, password)
 
-	request , _ := http.NewRequest(
+	request, _ := http.NewRequest(
 		"GET",
 		"https://www.example.com",
 		nil,
@@ -264,14 +273,18 @@ func main() {
 
 	// Add relevant Headers.
 	proxy.AddUserAgentHeader(request, oxylabs.UA_DESKTOP)
-	proxy.AddRenderHeader(request, "html")
+	proxy.AddRenderHeader(request, oxylabs.HTML)
 	proxy.AddParseHeader(request, "google_search")
 
-
-	request.SetBasicAuth(username, Password)
+	request.SetBasicAuth(username, password)
 	response, _ := c.Do(request)
 
-	resp, _ :=  io.ReadAll(response.Body)
+	resp, _ := io.ReadAll(response.Body)
 	fmt.Println(string(resp))
 }
 ```
+
+## About Oxylabs
+Established in 2015, Oxylabs are a market-leading web intelligence collection platform, driven by the highest business, ethics, and compliance standards, enabling companies worldwide to unlock data-driven insights.
+
+[![image](https://oxylabs.io/images/og-image.png)](https://oxylabs.io/)
