@@ -71,7 +71,7 @@ func (opt *GoogleAdsOpts) checkParameterValidity(ctx ContextOption) error {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
 	}
 
-	if opt.Limit <= 0 || opt.Pages <= 0 || opt.StartPage <= 0 {
+	if opt.Pages <= 0 || opt.StartPage <= 0 {
 		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
 	}
 
@@ -126,7 +126,7 @@ func (opt *GoogleTravelHotelsOpts) checkParameterValidity(ctx ContextOption) err
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
 	}
 
-	if opt.Limit <= 0 || opt.Pages <= 0 || opt.StartPage <= 0 {
+	if opt.StartPage <= 0 {
 		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
 	}
 
@@ -186,6 +186,7 @@ type GoogleSearchOpts struct {
 	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
+	CallbackURL string
 	Parse       bool
 	Context     []func(ContextOption)
 }
@@ -232,10 +233,12 @@ func (c *SerpClient) ScrapeGoogleSearch(
 		"source":          oxylabs.GoogleSearch,
 		"domain":          opt.Domain,
 		"query":           query,
+		"locale":          opt.Locale,
 		"geo_location":    &opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"parse":           opt.Parse,
 		"render":          opt.Render,
+		"callback_url":    opt.CallbackURL,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -355,11 +358,11 @@ type GoogleAdsOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
 	Pages       int
-	Limit       int
 	Locale      string
 	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
+	CallbackURL string
 	Parse       bool
 	Context     []func(ContextOption)
 }
@@ -384,7 +387,6 @@ func (c *SerpClient) ScrapeGoogleAds(
 	// Set defaults.
 	SetDefaultDomain(&opt.Domain)
 	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
 	SetDefaultPages(&opt.Pages)
 	SetDefaultUserAgent(&opt.UserAgent)
 
@@ -398,10 +400,14 @@ func (c *SerpClient) ScrapeGoogleAds(
 		"source":          oxylabs.GoogleAds,
 		"domain":          opt.Domain,
 		"query":           query,
+		"start_page":      opt.StartPage,
+		"pages":           opt.Pages,
+		"locale":          opt.Locale,
 		"geo_location":    &opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"parse":           opt.Parse,
 		"render":          opt.Render,
+		"callback_url":    opt.CallbackURL,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -468,6 +474,7 @@ func (c *SerpClient) ScrapeGoogleSuggestions(
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleSuggestions,
 		"query":           query,
+		"locale":          opt.Locale,
 		"geo_location":    &opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
@@ -489,17 +496,16 @@ func (c *SerpClient) ScrapeGoogleSuggestions(
 
 // GoogleHotelsOpts contains all the query parameters available for google_hotels.
 type GoogleHotelsOpts struct {
-	Domain          oxylabs.Domain
-	StartPage       int
-	Pages           int
-	Limit           int
-	Locale          string
-	ResultsLanguage string
-	GeoLocation     string
-	UserAgent       oxylabs.UserAgent
-	Render          oxylabs.Render
-	CallbackURL     string
-	Context         []func(ContextOption)
+	Domain      oxylabs.Domain
+	StartPage   int
+	Pages       int
+	Limit       int
+	Locale      string
+	GeoLocation string
+	UserAgent   oxylabs.UserAgent
+	Render      oxylabs.Render
+	CallbackURL string
+	Context     []func(ContextOption)
 }
 
 // ScrapeGoogleHotels scrapes google via the google_hotels source.
@@ -534,19 +540,22 @@ func (c *SerpClient) ScrapeGoogleHotels(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":           oxylabs.GoogleHotels,
-		"domain":           opt.Domain,
-		"query":            query,
-		"start_page":       opt.StartPage,
-		"pages":            opt.Pages,
-		"limit":            opt.Limit,
-		"locale":           opt.Locale,
-		"results_language": opt.ResultsLanguage,
-		"geo_location":     &opt.GeoLocation,
-		"user_agent_type":  opt.UserAgent,
-		"render":           opt.Render,
-		"callback_url":     opt.CallbackURL,
+		"source":          oxylabs.GoogleHotels,
+		"domain":          opt.Domain,
+		"query":           query,
+		"start_page":      opt.StartPage,
+		"pages":           opt.Pages,
+		"limit":           opt.Limit,
+		"locale":          opt.Locale,
+		"geo_location":    &opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackURL,
 		"context": []map[string]interface{}{
+			{
+				"key":   "results_language",
+				"value": context["results_language"],
+			},
 			{
 				"key":   "nfpr",
 				"value": context["nfpr"],
@@ -579,8 +588,6 @@ func (c *SerpClient) ScrapeGoogleHotels(
 type GoogleTravelHotelsOpts struct {
 	Domain      oxylabs.Domain
 	StartPage   int
-	Pages       int
-	Limit       int
 	Locale      string
 	GeoLocation *string
 	UserAgent   oxylabs.UserAgent
@@ -609,8 +616,6 @@ func (c *SerpClient) ScrapeGoogleTravelHotels(
 	// Set defaults.
 	SetDefaultDomain(&opt.Domain)
 	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity(context)
@@ -624,8 +629,6 @@ func (c *SerpClient) ScrapeGoogleTravelHotels(
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
-		"pages":           opt.Pages,
-		"limit":           opt.Limit,
 		"locale":          opt.Locale,
 		"geo_location":    &opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
