@@ -37,7 +37,7 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "bing_search",
+		"source":          oxylabs.BingSearch,
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
@@ -103,7 +103,7 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "bing",
+		"source":          oxylabs.BingUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"geo_location":    &opt.GeoLocation,

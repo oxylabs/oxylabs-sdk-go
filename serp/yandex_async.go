@@ -37,7 +37,7 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex_search",
+		"source":          oxylabs.YandexSearch,
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
@@ -102,7 +102,7 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "yandex",
+		"source":          oxylabs.YandexUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,

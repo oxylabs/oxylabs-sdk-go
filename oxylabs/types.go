@@ -56,6 +56,28 @@ func IsRenderValid(render Render) bool {
 	}
 }
 
+type Source string
+
+const (
+	GoogleSearch        Source = "google_search"
+	GoogleUrl           Source = "google"
+	GoogleAds           Source = "google_ads"
+	GoogleSuggestions   Source = "google_suggest"
+	GoogleHotels        Source = "google_hotels"
+	GoogleTravelHotels  Source = "google_travel_hotels"
+	GoogleTrendsExplore Source = "google_trends_explore"
+	GoogleImages        Source = "google_images"
+
+	BingSearch Source = "bing_search"
+	BingUrl    Source = "bing"
+
+	YandexSearch Source = "yandex_search"
+	YandexUrl    Source = "yandex"
+
+	BaiduSearch Source = "baidu_search"
+	BaiduUrl    Source = "baidu"
+)
+
 type Domain string
 
 var (

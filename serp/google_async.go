@@ -48,7 +48,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearch(
 
 	// Prepare payload with common parameters.
 	payload := map[string]interface{}{
-		"source":          "google_search",
+		"source":          oxylabs.GoogleSearch,
 		"domain":          opt.Domain,
 		"query":           query,
 		"geo_location":    &opt.GeoLocation,
@@ -150,7 +150,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "google",
+		"source":          oxylabs.GoogleUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
@@ -215,7 +215,7 @@ func (c *SerpClientAsync) ScrapeGoogleAds(
 	}
 
 	payload := map[string]interface{}{
-		"source":          "google_search",
+		"source":          oxylabs.GoogleAds,
 		"domain":          opt.Domain,
 		"query":           query,
 		"geo_location":    &opt.GeoLocation,
@@ -289,7 +289,7 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestions(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "google_suggestions",
+		"source":          oxylabs.GoogleSuggestions,
 		"query":           query,
 		"geo_location":    &opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
@@ -354,7 +354,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotels(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":           "google_hotels",
+		"source":           oxylabs.GoogleHotels,
 		"domain":           opt.Domain,
 		"query":            query,
 		"start_page":       opt.StartPage,
@@ -438,7 +438,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "google_travel_hotels",
+		"source":          oxylabs.GoogleTravelHotels,
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
@@ -526,7 +526,7 @@ func (c *SerpClientAsync) ScrapeGoogleImages(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "google_images",
+		"source":          oxylabs.GoogleImages,
 		"domain":          opt.Domain,
 		"query":           url,
 		"start_page":      opt.StartPage,
@@ -601,7 +601,7 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExplore(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":       "google_trends_explore",
+		"source":       oxylabs.GoogleTrendsExplore,
 		"query":        query,
 		"geo_location": &opt.GeoLocation,
 		"context": []map[string]interface{}{

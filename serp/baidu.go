@@ -75,7 +75,7 @@ func (c *SerpClient) ScrapeBaiduSearch(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "baidu_search",
+		"source":          oxylabs.BaiduSearch,
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
@@ -132,7 +132,7 @@ func (c *SerpClient) ScrapeBaiduUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "baidu",
+		"source":          oxylabs.BaiduUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
