@@ -113,6 +113,7 @@ func (c *SerpClient) ScrapeYandexSearch(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
@@ -167,6 +168,7 @@ func (c *SerpClient) ScrapeYandexUrl(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err

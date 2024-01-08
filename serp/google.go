@@ -280,6 +280,7 @@ func (c *SerpClient) ScrapeGoogleSearch(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, opt.Parse, "POST")
 	if err != nil {
 		return nil, err
@@ -338,6 +339,7 @@ func (c *SerpClient) ScrapeGoogleUrl(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, opt.Parse, "POST")
 	if err != nil {
 		return nil, err
@@ -360,7 +362,7 @@ type GoogleAdsOpts struct {
 	Context     []func(ContextOption)
 }
 
-// SrcapeGoogleAds scrapes google via Oxylabs SERP API with google_ads as source.
+// ScrapeGoogleAds scrapes google via Oxylabs SERP API with google_ads as source.
 func (c *SerpClient) ScrapeGoogleAds(
 	query string,
 	opts ...*GoogleAdsOpts,
@@ -422,6 +424,7 @@ func (c *SerpClient) ScrapeGoogleAds(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, opt.Parse, "POST")
 	if err != nil {
 		return nil, err
@@ -473,6 +476,7 @@ func (c *SerpClient) ScrapeGoogleSuggestions(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
@@ -560,6 +564,7 @@ func (c *SerpClient) ScrapeGoogleHotels(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
@@ -644,6 +649,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotels(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
@@ -727,6 +733,7 @@ func (c *SerpClient) ScrapeGoogleImages(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
@@ -800,6 +807,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExplore(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err

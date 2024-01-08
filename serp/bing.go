@@ -102,6 +102,7 @@ func (c *SerpClient) ScrapeBingSearch(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
@@ -158,6 +159,7 @@ func (c *SerpClient) ScrapeBingUrl(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
+	// Request.
 	res, err := c.Req(jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err

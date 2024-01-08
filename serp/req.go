@@ -13,7 +13,7 @@ func (c *SerpClient) Req(
 	parse bool,
 	method string,
 ) (*Response, error) {
-	// Prepare requst.
+	// Prepare request.
 	request, _ := http.NewRequest(
 		method,
 		c.BaseUrl,
@@ -34,7 +34,7 @@ func (c *SerpClient) Req(
 		return nil, err
 	}
 
-	// Send back error message.
+	// If status code not 200, return error.
 	if response.StatusCode != 200 {
 		return nil, fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
 	}

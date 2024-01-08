@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 )
 
-// Custom function to unmarshall into the Response struct because of
-// different return types depending on the parse option.
+// Custom function to unmarshal into the Response struct.
+// Because of different return types depending on the parse option.
 func (r *Response) UnmarshalJSON(data []byte) error {
 	// Unmarshal json data into RawResponse map.
 	var rawResponse map[string]json.RawMessage

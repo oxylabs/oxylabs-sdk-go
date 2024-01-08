@@ -135,7 +135,7 @@ func (c *SerpClientAsync) PollJobStatus(
 		// Unmarshal into job.
 		job := &Job{}
 		if err = json.Unmarshal(responseBody, &job); err != nil {
-			err = fmt.Errorf("error unmarshalling Job response body: %v", err)
+			err = fmt.Errorf("error unmarshalling job response body: %v", err)
 			errChan <- err
 			close(responseChan)
 			return
@@ -146,7 +146,7 @@ func (c *SerpClientAsync) PollJobStatus(
 			c.GetResponse(job.ID, parse, responseChan, errChan)
 			return
 		} else if job.Status == "faulted" {
-			err = fmt.Errorf("There was an error processing your query")
+			err = fmt.Errorf("there was an error processing your query")
 			errChan <- err
 			close(responseChan)
 			return
