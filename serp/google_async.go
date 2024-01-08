@@ -30,7 +30,9 @@ func (c *SerpClientAsync) ScrapeGoogleSearch(
 
 	// Check if limit_per_page context parameter is used together with limit, start_page or pages parameters.
 	if (opt.Limit != 0 || opt.StartPage != 0 || opt.Pages != 0) && context["limit_per_page"] != nil {
-		return nil, fmt.Errorf("limit, start_page and pages parameters cannot be used together with limit_per_page context parameter")
+		return nil, fmt.Errorf(
+			"limit, start_page and pages parameters cannot be used together with limit_per_page context parameter",
+		)
 	}
 
 	// Set defaults.
