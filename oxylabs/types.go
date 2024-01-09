@@ -2,7 +2,7 @@ package oxylabs
 
 type UserAgent string
 
-var (
+const (
 	UA_DESKTOP         UserAgent = "desktop"
 	UA_DESKTOP_CHROME  UserAgent = "desktop_chrome"
 	UA_DESKTOP_EDGE    UserAgent = "desktop_edge"
@@ -40,7 +40,7 @@ func IsUserAgentValid(ua UserAgent) bool {
 
 type Render string
 
-var (
+const (
 	HTML Render = "html"
 	PNG  Render = "png"
 )
@@ -80,7 +80,7 @@ const (
 
 type Domain string
 
-var (
+const (
 	DOMAIN_RU       Domain = "ru"
 	DOMAIN_UA       Domain = "ua"
 	DOMAIN_TR       Domain = "tr"
@@ -295,7 +295,7 @@ var (
 
 type Locale string
 
-var (
+const (
 	LOCALE_EN Locale = "en"
 	LOCALE_RU Locale = "ru"
 	LOCALE_BY Locale = "by"

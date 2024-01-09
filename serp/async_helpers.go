@@ -11,7 +11,7 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// Helper function to make post request and retrieve Job ID.
+// Helper function to make a POST request and retrieve the Job ID.
 func (c *SerpClientAsync) GetJobID(
 	jsonPayload []byte,
 ) (string, error) {
@@ -36,13 +36,13 @@ func (c *SerpClientAsync) GetJobID(
 	// Unmarshal into job.
 	job := &Job{}
 	if err = json.Unmarshal(responseBody, &job); err != nil {
-		return "", fmt.Errorf("error unmarshalling Job response body: %v", err)
+		return "", fmt.Errorf("error unmarshalling job response body: %v", err)
 	}
 
 	return job.ID, nil
 }
 
-// Helper function to handle response parsing and error checking.
+// Helper function for handling response parsing and error checking.
 func (c *SerpClientAsync) GetResponse(
 	jobID string,
 	parse bool,
@@ -73,7 +73,7 @@ func (c *SerpClientAsync) GetResponse(
 	}
 	response.Body.Close()
 
-	// Send back error message.
+	// Check status code.
 	if response.StatusCode != 200 {
 		err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
 		errChan <- err
@@ -96,18 +96,18 @@ func (c *SerpClientAsync) GetResponse(
 	responseChan <- resp
 }
 
-// PollJobStatus polls the job status and handles the response/error channels.
+// PollJobStatus polls the job status and manages the response/error channels.
 func (c *SerpClientAsync) PollJobStatus(
 	jobID string,
 	parse bool,
 	responseChan chan *Response,
 	errChan chan error,
 ) {
-	// Setting start time to check for timeout.
+	// Setting the start time to check for a timeout.
 	startNow := time.Now()
 
 	for {
-		// Perform request to query job status.
+		// Perform a request to query job status.
 		request, _ := http.NewRequest(
 			"GET",
 			fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", jobID),

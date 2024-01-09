@@ -29,13 +29,13 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 	SetDefaultPages(&opt.Pages)
 	SetDefaultUserAgent(&opt.UserAgent)
 
-	// Check validity of parameters.
+	// Check the validity of the parameters.
 	err := opt.checkParameterValidity()
 	if err != nil {
 		return nil, err
 	}
 
-	// Prepare payload.
+	// Prepare the payload.
 	payload := map[string]interface{}{
 		"source":          oxylabs.YandexSearch,
 		"domain":          opt.Domain,
@@ -53,7 +53,7 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Get job ID.
+	// Get the job ID.
 	jobID, err := c.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 	responseChan := make(chan *Response)
 	errChan := make(chan error)
 
-	// Check validity of url.
+	// Check the validity of the URL.
 	err := oxylabs.ValidateURL(url, "yandex")
 	if err != nil {
 		return nil, err
@@ -94,13 +94,13 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 	// Set defaults.
 	SetDefaultUserAgent(&opt.UserAgent)
 
-	// Check validity of parameters.
+	// Check the validity of parameters.
 	err = opt.checkParameterValidity()
 	if err != nil {
 		return nil, err
 	}
 
-	// Prepare payload.
+	// Prepare the payload.
 	payload := map[string]interface{}{
 		"source":          oxylabs.YandexUrl,
 		"url":             url,
@@ -113,7 +113,7 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Get job ID.
+	// Get the job ID.
 	jobID, err := c.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
