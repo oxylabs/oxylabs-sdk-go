@@ -1,6 +1,7 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -10,6 +11,20 @@ import (
 // ScrapeYandexSearch scrapes yandex with async polling runtime via Oxylabs SERP API
 // and yandex_search as source.
 func (c *SerpClientAsync) ScrapeYandexSearch(
+	query string,
+	opts ...*YandexSearchOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeYandexSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeYandexSearchCtx scrapes yandex with async polling runtime via Oxylabs SERP API
+// and yandex_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeYandexSearchCtx(
+	ctx context.Context,
 	query string,
 	opts ...*YandexSearchOpts,
 ) (chan *Response, error) {
@@ -60,7 +75,7 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -73,6 +88,20 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 // ScrapeYandexUrl scrapes yandex with async polling runtime via Oxylabs SERP API
 // and yandex as source.
 func (c *SerpClientAsync) ScrapeYandexUrl(
+	url string,
+	opts ...*YandexUrlOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeYandexUrlCtx(ctx, url, opts...)
+}
+
+// ScrapeYandexUrlCtx scrapes yandex with async polling runtime via Oxylabs SERP API
+// and yandex as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeYandexUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*YandexUrlOpts,
 ) (chan *Response, error) {
@@ -120,7 +149,7 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {

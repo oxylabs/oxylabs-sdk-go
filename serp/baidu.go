@@ -1,6 +1,7 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -54,6 +55,19 @@ func (c *SerpClient) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
 ) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBaiduSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeBaiduSearchCtx scrapes baidu via Oxylabs SERP API with baidu_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeBaiduSearchCtx(
+	ctx context.Context,
+	query string,
+	opts ...*BaiduSearchOpts,
+) (*Response, error) {
 	// Prepare options.
 	opt := &BaiduSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -90,7 +104,7 @@ func (c *SerpClient) ScrapeBaiduSearch(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +120,19 @@ type BaiduUrlOpts struct {
 
 // ScrapeBaiduUrl scrapes baidu via Oxylabs SERP API with baidu as source.
 func (c *SerpClient) ScrapeBaiduUrl(
+	url string,
+	opts ...*BaiduUrlOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBaiduUrlCtx(ctx, url, opts...)
+}
+
+// ScrapeBaiduUrlCtx scrapes baidu via Oxylabs SERP API with baidu as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeBaiduUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*BaiduUrlOpts,
 ) (*Response, error) {
@@ -143,7 +170,7 @@ func (c *SerpClient) ScrapeBaiduUrl(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}

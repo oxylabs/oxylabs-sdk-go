@@ -2,6 +2,7 @@ package serp
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -98,14 +99,12 @@ func (c *SerpClientAsync) GetResponse(
 
 // PollJobStatus polls the job status and manages the response/error channels.
 func (c *SerpClientAsync) PollJobStatus(
+	ctx context.Context,
 	jobID string,
 	parse bool,
 	responseChan chan *Response,
 	errChan chan error,
 ) {
-	// Setting the start time to check for a timeout.
-	startNow := time.Now()
-
 	for {
 		// Perform a request to query job status.
 		request, _ := http.NewRequest(
@@ -152,14 +151,14 @@ func (c *SerpClientAsync) PollJobStatus(
 			return
 		}
 
-		// Check for timeout.
-		if time.Since(startNow) > oxylabs.DefaultTimeout {
-			err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
+		select {
+		case <-ctx.Done():
+			err = fmt.Errorf("timeout exceeded")
 			errChan <- err
 			close(responseChan)
 			return
+		default:
+			time.Sleep(oxylabs.DefaultWaitTime)
 		}
-
-		time.Sleep(oxylabs.DefaultWaitTime)
 	}
 }

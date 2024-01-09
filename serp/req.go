@@ -2,19 +2,23 @@ package serp
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 )
 
 // Request to the API.
 func (c *SerpClient) Req(
+	ctx context.Context,
 	jsonPayload []byte,
 	parse bool,
 	method string,
 ) (*Response, error) {
 	// Prepare request.
-	request, _ := http.NewRequest(
+	request, _ := http.NewRequestWithContext(
+		ctx,
 		method,
 		c.BaseUrl,
 		bytes.NewBuffer(jsonPayload),
@@ -24,7 +28,9 @@ func (c *SerpClient) Req(
 
 	// Get response.
 	response, err := c.HttpClient.Do(request)
-	if err != nil {
+	if e, ok := err.(net.Error); ok && e.Timeout() {
+		return nil, fmt.Errorf("timeout error: %v", err)
+	} else if err != nil {
 		return nil, err
 	}
 

@@ -1,6 +1,7 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -10,6 +11,20 @@ import (
 // ScrapeGoogleSearch scrapes google with async polling runtime via Oxylabs SERP API
 // and google_search as source.
 func (c *SerpClientAsync) ScrapeGoogleSearch(
+	query string,
+	opts ...*GoogleSearchOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleSearchCtx scrapes google with async polling runtime via Oxylabs SERP API
+// and google_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleSearchOpts,
 ) (chan *Response, error) {
@@ -112,7 +127,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearch(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, opt.Parse, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, opt.Parse, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -125,6 +140,20 @@ func (c *SerpClientAsync) ScrapeGoogleSearch(
 // ScrapeGoogleUrl scrapes google with async polling runtime via Oxylabs SERP API
 // and google as source.
 func (c *SerpClientAsync) ScrapeGoogleUrl(
+	url string,
+	opts ...*GoogleUrlOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleUrlCtx(ctx, url, opts...)
+}
+
+// ScrapeGoogleUrlCtx scrapes google with async polling runtime via Oxylabs SERP API
+// and google as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*GoogleUrlOpts,
 ) (chan *Response, error) {
@@ -174,7 +203,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrl(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, opt.Parse, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, opt.Parse, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -187,6 +216,20 @@ func (c *SerpClientAsync) ScrapeGoogleUrl(
 // ScrapeGoogleAds scrapes google with async polling runtime via Oxylabs SERP API
 // and google_ads as source.
 func (c *SerpClientAsync) ScrapeGoogleAds(
+	query string,
+	opts ...*GoogleAdsOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleAdsCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleAdsCtx scrapes google with async polling runtime via Oxylabs SERP API
+// and google_ads as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleAdsOpts,
 ) (chan *Response, error) {
@@ -260,7 +303,7 @@ func (c *SerpClientAsync) ScrapeGoogleAds(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, opt.Parse, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, opt.Parse, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -271,8 +314,22 @@ func (c *SerpClientAsync) ScrapeGoogleAds(
 }
 
 // ScrapeGoogleSuggestions scrapes google with async polling runtime via Oxylabs SERP API
-// and google_suggestions as source
+// and google_suggestions as source.
 func (c *SerpClientAsync) ScrapeGoogleSuggestions(
+	query string,
+	opts ...*GoogleSuggestionsOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleSuggestionsCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleSuggestionsCtx scrapes google with async polling runtime via Oxylabs SERP API
+// and google_suggestions as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleSuggestionsOpts,
 ) (chan *Response, error) {
@@ -316,7 +373,7 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestions(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -326,9 +383,23 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestions(
 	return responseChan, nil
 }
 
-// ScrapeGoogleTHotels scrapes google with async polling runtime via Oxylabs SERP API
+// ScrapeGoogleHotels scrapes google with async polling runtime via Oxylabs SERP API
 // and google_hotels as source.
 func (c *SerpClientAsync) ScrapeGoogleHotels(
+	query string,
+	opts ...*GoogleHotelsOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleHotelsCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleHotelsCtx scrapes google with async polling runtime via Oxylabs SERP API
+// and google_hotels as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleHotelsOpts,
 ) (chan *Response, error) {
@@ -404,7 +475,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotels(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -417,6 +488,20 @@ func (c *SerpClientAsync) ScrapeGoogleHotels(
 // ScrapeGoogleTravelHotels scrapes google with async polling runtime via Oxylabs SERP API
 // and google_travel_hotels as source.
 func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
+	query string,
+	opts ...*GoogleTravelHotelsOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleTravelHotelsCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleTravelHotelsCtx scrapes google with async polling runtime via Oxylabs SERP API
+// and google_travel_hotels as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
 ) (chan *Response, error) {
@@ -483,7 +568,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -496,6 +581,20 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
 // ScrapeGoogleImages scrapes google with async polling runtime via Oxylabs SERP API
 // and google_images as source.
 func (c *SerpClientAsync) ScrapeGoogleImages(
+	url string,
+	opts ...*GoogleImagesOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleImagesCtx(ctx, url, opts...)
+}
+
+// ScrapeGoogleImagesCtx scrapes google with async polling runtime via Oxylabs SERP API
+// and google_images as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
+	ctx context.Context,
 	url string,
 	opts ...*GoogleImagesOpts,
 ) (chan *Response, error) {
@@ -566,7 +665,7 @@ func (c *SerpClientAsync) ScrapeGoogleImages(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -579,6 +678,20 @@ func (c *SerpClientAsync) ScrapeGoogleImages(
 // ScrapeGoogleTrendsExplore scrapes google with async polling runtime via Oxylabs SERP API
 // and google_trends_explore as source.
 func (c *SerpClientAsync) ScrapeGoogleTrendsExplore(
+	query string,
+	opts ...*GoogleTrendsExploreOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleTrendsExploreCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleTrendsExploreCtx scrapes google with async polling runtime via Oxylabs SERP API
+// and google_trends_explore as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
 ) (chan *Response, error) {
@@ -644,7 +757,7 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExplore(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {

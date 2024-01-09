@@ -1,6 +1,7 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -196,6 +197,19 @@ func (c *SerpClient) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
 ) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleSearchCtx scrapes google via Oxylabs SERP API with google_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeGoogleSearchCtx(
+	ctx context.Context,
+	query string,
+	opts ...*GoogleSearchOpts,
+) (*Response, error) {
 	// Prepare options.
 	opt := &GoogleSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -286,7 +300,7 @@ func (c *SerpClient) ScrapeGoogleSearch(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, opt.Parse, "POST")
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -305,6 +319,19 @@ type GoogleUrlOpts struct {
 
 // ScrapeGoogleUrl scrapes google via Oxylabs SERP API with google as source.
 func (c *SerpClient) ScrapeGoogleUrl(
+	url string,
+	opts ...*GoogleUrlOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleUrlCtx(ctx, url, opts...)
+}
+
+// ScrapeGoogleUrlCtx scrapes google via Oxylabs SERP API with google as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeGoogleUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*GoogleUrlOpts,
 ) (*Response, error) {
@@ -345,7 +372,7 @@ func (c *SerpClient) ScrapeGoogleUrl(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, opt.Parse, "POST")
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -369,6 +396,19 @@ type GoogleAdsOpts struct {
 
 // ScrapeGoogleAds scrapes google via Oxylabs SERP API with google_ads as source.
 func (c *SerpClient) ScrapeGoogleAds(
+	query string,
+	opts ...*GoogleAdsOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleAdsCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleAdsCtx scrapes google via Oxylabs SERP API with google_ads as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeGoogleAdsCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleAdsOpts,
 ) (*Response, error) {
@@ -433,7 +473,7 @@ func (c *SerpClient) ScrapeGoogleAds(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, opt.Parse, "POST")
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -441,7 +481,7 @@ func (c *SerpClient) ScrapeGoogleAds(
 	return res, nil
 }
 
-// GoogleShoppingOpts contains all the query parameters available for google_shopping.
+// GoogleSuggestionsOpts contains all the query parameters available for google_shopping.
 type GoogleSuggestionsOpts struct {
 	Locale      string
 	GeoLocation *string
@@ -450,8 +490,21 @@ type GoogleSuggestionsOpts struct {
 	CallbackUrl string
 }
 
-// ScrapeGoogleSuggestions scrapes google via  Oxylabs SERP API with google_suggestions as source.
+// ScrapeGoogleSuggestions scrapes google via Oxylabs SERP API with google_suggestions as source.
 func (c *SerpClient) ScrapeGoogleSuggestions(
+	query string,
+	opts ...*GoogleSuggestionsOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleSuggestionsCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleSuggestionsCtx scrapes google via  Oxylabs SERP API with google_suggestions as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleSuggestionsOpts,
 ) (*Response, error) {
@@ -486,7 +539,7 @@ func (c *SerpClient) ScrapeGoogleSuggestions(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -508,8 +561,21 @@ type GoogleHotelsOpts struct {
 	Context     []func(ContextOption)
 }
 
-// ScrapeGoogleHotels scrapes google via the google_hotels source.
+// ScrapeGoogleHotels scrapes google via Oxylabs SERP API with google_hotels as source.
 func (c *SerpClient) ScrapeGoogleHotels(
+	query string,
+	opts ...*GoogleHotelsOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleHotelsCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleHotelsCtx scrapes google via the google_hotels source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeGoogleHotelsCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleHotelsOpts,
 ) (*Response, error) {
@@ -576,7 +642,7 @@ func (c *SerpClient) ScrapeGoogleHotels(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -598,6 +664,19 @@ type GoogleTravelHotelsOpts struct {
 
 // ScrapeGoogleTravelHotels scrapes google via Oxylabs SERP API with google_travel_hotels as source.
 func (c *SerpClient) ScrapeGoogleTravelHotels(
+	query string,
+	opts ...*GoogleTravelHotelsOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleTravelHotelsCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleTravelHotelsCtx scrapes google via Oxylabs SERP API with google_travel_hotels as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
 ) (*Response, error) {
@@ -655,7 +734,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotels(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -678,6 +757,19 @@ type GoogleImagesOpts struct {
 
 // ScrapeGoogleImages scrapes google via Oxylabs SERP API with google_images as source.
 func (c *SerpClient) ScrapeGoogleImages(
+	url string,
+	opts ...*GoogleImagesOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleImagesCtx(ctx, url, opts...)
+}
+
+// ScrapeGoogleImagesCtx scrapes google via Oxylabs SERP API with google_images as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeGoogleImagesCtx(
+	ctx context.Context,
 	url string,
 	opts ...*GoogleImagesOpts,
 ) (*Response, error) {
@@ -739,7 +831,7 @@ func (c *SerpClient) ScrapeGoogleImages(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -757,6 +849,19 @@ type GoogleTrendsExploreOpts struct {
 
 // ScrapeGoogleTrendsExplore scrapes google via Oxylabs SERP API with google_trends_explore as source.
 func (c *SerpClient) ScrapeGoogleTrendsExplore(
+	query string,
+	opts ...*GoogleTrendsExploreOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleTrendsExploreCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleTrendsExploreCtx scrapes google via Oxylabs SERP API with google_trends_explore as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
+	ctx context.Context,
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
 ) (*Response, error) {
@@ -813,7 +918,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExplore(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -10,6 +11,20 @@ import (
 // ScrapeBingSearch scrapes bing with async polling runtime via Oxylabs SERP API
 // and bing_search as source.
 func (c *SerpClientAsync) ScrapeBingSearch(
+	query string,
+	opts ...*BingSearchOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBingSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeBingSearchCtx scrapes bing with async polling runtime via Oxylabs SERP API
+// and bing_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeBingSearchCtx(
+	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
 ) (chan *Response, error) {
@@ -61,7 +76,7 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -74,6 +89,20 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 // ScrapeBingUrl scrapes bing with async polling runtime via Oxylabs SERP API
 // and bing as source.
 func (c *SerpClientAsync) ScrapeBingUrl(
+	url string,
+	opts ...*BingUrlOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBingUrlCtx(ctx, url, opts...)
+}
+
+// ScrapeBingUrlCtx scrapes bing with async polling runtime via Oxylabs SERP API
+// and bing as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeBingUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
 ) (chan *Response, error) {
@@ -122,7 +151,7 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {

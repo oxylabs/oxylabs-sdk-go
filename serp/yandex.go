@@ -1,6 +1,7 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -76,6 +77,19 @@ func (c *SerpClient) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
 ) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeYandexSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeYandexSearchCtx scrapes yandex via Oxylabs SERP API with yandex_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeYandexSearchCtx(
+	ctx context.Context,
+	query string,
+	opts ...*YandexSearchOpts,
+) (*Response, error) {
 	// Prepare options.
 	opt := &YandexSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -114,7 +128,7 @@ func (c *SerpClient) ScrapeYandexSearch(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -129,8 +143,21 @@ type YandexUrlOpts struct {
 	CallbackUrl string
 }
 
-// ScapeYandexUrl scrapes a yandex url via Oxylabs SERP API with yandex as source.
+// ScrapeYandexUrl scrapes a yandex url via Oxylabs SERP API with yandex as source.
 func (c *SerpClient) ScrapeYandexUrl(
+	url string,
+	opts ...*YandexUrlOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeYandexUrlCtx(ctx, url, opts...)
+}
+
+// ScapeYandexUrlCtx scrapes a yandex url via Oxylabs SERP API with yandex as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeYandexUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*YandexUrlOpts,
 ) (*Response, error) {
@@ -169,7 +196,7 @@ func (c *SerpClient) ScrapeYandexUrl(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}

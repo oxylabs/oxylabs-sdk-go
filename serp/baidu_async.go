@@ -1,15 +1,30 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// ScrapeBingSearch scrapes bing with async polling runtime via Oxylabs SERP API
-// and bing_search as source.
+// ScrapeBaiduSearch scrapes baidu with async polling runtime via Oxylabs SERP API
+// and baidu_search as source.
 func (c *SerpClientAsync) ScrapeBaiduSearch(
+	query string,
+	opts ...*BaiduSearchOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBaiduSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeBaiduSearchCtx scrapes baidu with async polling runtime via Oxylabs SERP API
+// and baidu_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
+	ctx context.Context,
 	query string,
 	opts ...*BaiduSearchOpts,
 ) (chan *Response, error) {
@@ -58,7 +73,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearch(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -68,9 +83,23 @@ func (c *SerpClientAsync) ScrapeBaiduSearch(
 	return responseChan, nil
 }
 
-// ScrapeBingUrl scrapes bing with async polling runtime via Oxylabs SERP API
-// and bing as source.
+// ScrapeBaiduUrl scrapes baidu with async polling runtime via Oxylabs SERP API
+// and baidu as source.
 func (c *SerpClientAsync) ScrapeBaiduUrl(
+	query string,
+	opts ...*BaiduUrlOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBaiduUrlCtx(ctx, query, opts...)
+}
+
+// ScrapeBaiduUrlCtx scrapes baidu with async polling runtime via Oxylabs SERP API
+// and baidu as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*BaiduUrlOpts,
 ) (chan *Response, error) {
@@ -117,7 +146,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrl(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {

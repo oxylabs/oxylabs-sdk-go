@@ -1,6 +1,7 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -64,6 +65,19 @@ func (c *SerpClient) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
 ) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBingSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeBingSearchCtx scrapes bing via Oxylabs SERP API with bing_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeBingSearchCtx(
+	ctx context.Context,
+	query string,
+	opts ...*BingSearchOpts,
+) (*Response, error) {
 	// Prepare options.
 	opt := &BingSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -103,7 +117,7 @@ func (c *SerpClient) ScrapeBingSearch(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -121,6 +135,19 @@ type BingUrlOpts struct {
 
 // ScrapeBingUrl scrapes bing via Oxylabs SERP API with bing as source.
 func (c *SerpClient) ScrapeBingUrl(
+	url string,
+	opts ...*BingUrlOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBingUrlCtx(ctx, url, opts...)
+}
+
+// ScrapeBingUrlCtx scrapes bing via Oxylabs SERP API with bing as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeBingUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
 ) (*Response, error) {
@@ -160,7 +187,7 @@ func (c *SerpClient) ScrapeBingUrl(
 	}
 
 	// Request.
-	res, err := c.Req(jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, false, "POST")
 	if err != nil {
 		return nil, err
 	}
