@@ -14,6 +14,10 @@ func (opt *WayfairSearchOpts) checkParametersValidity() error {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
 
+	if opt.Limit <= 0 || opt.Pages <= 0 || opt.StartPage <= 0 {
+		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
+	}
+
 	if opt.Limit != 24 && opt.Limit != 48 && opt.Limit != 96 {
 		return fmt.Errorf("invalid limit parameter: %v", opt.Limit)
 	}
