@@ -3,35 +3,35 @@ package oxylabs
 type UserAgent string
 
 const (
+	UA_MOBILE          UserAgent = "mobile"
+	UA_TABLET          UserAgent = "tablet"
 	UA_DESKTOP         UserAgent = "desktop"
-	UA_DESKTOP_CHROME  UserAgent = "desktop_chrome"
+	UA_MOBILE_IOS      UserAgent = "mobile_ios"
+	UA_TABLET_IOS      UserAgent = "tablet_ios"
 	UA_DESKTOP_EDGE    UserAgent = "desktop_edge"
-	UA_DESKTOP_FIREFOX UserAgent = "desktop_firefox"
 	UA_DESKTOP_OPERA   UserAgent = "desktop_opera"
 	UA_DESKTOP_SAFARI  UserAgent = "desktop_safari"
-	UA_MOBILE          UserAgent = "mobile"
 	UA_MOBILE_ANDROID  UserAgent = "mobile_android"
-	UA_MOBILE_IOS      UserAgent = "mobile_ios"
-	UA_TABLET          UserAgent = "tablet"
+	UA_DESKTOP_CHROME  UserAgent = "desktop_chrome"
 	UA_TABLET_ANDROID  UserAgent = "tablet_android"
-	UA_TABLET_IOS      UserAgent = "tablet_ios"
+	UA_DESKTOP_FIREFOX UserAgent = "desktop_firefox"
 )
 
 func IsUserAgentValid(ua UserAgent) bool {
 	switch ua {
 	case
+		UA_MOBILE,
+		UA_TABLET,
 		UA_DESKTOP,
-		UA_DESKTOP_CHROME,
+		UA_MOBILE_IOS,
+		UA_TABLET_IOS,
 		UA_DESKTOP_EDGE,
-		UA_DESKTOP_FIREFOX,
 		UA_DESKTOP_OPERA,
 		UA_DESKTOP_SAFARI,
-		UA_MOBILE,
 		UA_MOBILE_ANDROID,
-		UA_MOBILE_IOS,
-		UA_TABLET,
+		UA_DESKTOP_CHROME,
 		UA_TABLET_ANDROID,
-		UA_TABLET_IOS:
+		UA_DESKTOP_FIREFOX:
 		return true
 	default:
 		return false
@@ -41,15 +41,15 @@ func IsUserAgentValid(ua UserAgent) bool {
 type Render string
 
 const (
-	HTML Render = "html"
 	PNG  Render = "png"
+	HTML Render = "html"
 )
 
 func IsRenderValid(render Render) bool {
 	switch render {
 	case
-		HTML,
-		PNG:
+		PNG,
+		HTML:
 		return true
 	default:
 		return false
@@ -59,23 +59,26 @@ func IsRenderValid(render Render) bool {
 type Source string
 
 const (
-	GoogleSearch        Source = "google_search"
 	GoogleUrl           Source = "google"
 	GoogleAds           Source = "google_ads"
-	GoogleSuggestions   Source = "google_suggest"
 	GoogleHotels        Source = "google_hotels"
+	GoogleSearch        Source = "google_search"
+	GoogleImages        Source = "google_images"
+	GoogleSuggestions   Source = "google_suggest"
 	GoogleTravelHotels  Source = "google_travel_hotels"
 	GoogleTrendsExplore Source = "google_trends_explore"
-	GoogleImages        Source = "google_images"
 
-	BingSearch Source = "bing_search"
 	BingUrl    Source = "bing"
+	BingSearch Source = "bing_search"
 
-	YandexSearch Source = "yandex_search"
 	YandexUrl    Source = "yandex"
+	YandexSearch Source = "yandex_search"
 
-	BaiduSearch Source = "baidu_search"
 	BaiduUrl    Source = "baidu"
+	BaiduSearch Source = "baidu_search"
+
+	Wayfair       Source = "wayfair"
+	WayfairSearch Source = "wayfair_search"
 )
 
 type Domain string
