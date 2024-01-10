@@ -64,6 +64,14 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		"callback_url":    opt.CallbackUrl,
 		"render":          opt.Render,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -76,7 +84,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, opt.Parse, customParserFlag, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -139,6 +147,14 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -151,7 +167,7 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, opt.Parse, customParserFlag, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {

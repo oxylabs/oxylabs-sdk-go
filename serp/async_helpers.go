@@ -47,6 +47,7 @@ func (c *SerpClientAsync) GetJobID(
 func (c *SerpClientAsync) GetResponse(
 	jobID string,
 	parse bool,
+	parseInstructions bool,
 	responseChan chan *Response,
 	errChan chan error,
 ) {
@@ -98,10 +99,17 @@ func (c *SerpClientAsync) GetResponse(
 }
 
 // PollJobStatus polls the job status and manages the response/error channels.
+// Ctx is the context of the request.
+// JsonPayload is the payload for the request.
+// Parse indicates whether to parse the response.
+// ParseInstructions indicates whether to parse the response
+// with custom parsing instructions.
+// ResponseChan and errChan are the channels for the response and error respectively.
 func (c *SerpClientAsync) PollJobStatus(
 	ctx context.Context,
 	jobID string,
 	parse bool,
+	parseInstructions bool,
 	responseChan chan *Response,
 	errChan chan error,
 ) {
@@ -142,7 +150,7 @@ func (c *SerpClientAsync) PollJobStatus(
 
 		// Check job status.
 		if job.Status == "done" {
-			c.GetResponse(job.ID, parse, responseChan, errChan)
+			c.GetResponse(job.ID, parse, parseInstructions, responseChan, errChan)
 			return
 		} else if job.Status == "faulted" {
 			err = fmt.Errorf("there was an error processing your query")

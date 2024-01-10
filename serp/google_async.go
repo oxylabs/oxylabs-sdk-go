@@ -115,6 +115,13 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 		payload["limit"] = opt.Limit
 	}
 
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -127,7 +134,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, opt.Parse, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, opt.Parse, customParserFlag, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -191,6 +198,14 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 		"geo_location":    &opt.GeoLocation,
 		"parse":           opt.Parse,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -203,7 +218,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, opt.Parse, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, opt.Parse, customParserFlag, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -291,6 +306,14 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 			},
 		},
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -303,7 +326,7 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, opt.Parse, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, opt.Parse, customParserFlag, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -361,6 +384,15 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -373,7 +405,7 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -463,6 +495,15 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 			},
 		},
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -475,7 +516,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -556,6 +597,15 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 			},
 		},
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -568,7 +618,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -653,6 +703,15 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 			},
 		},
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -665,7 +724,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {
@@ -745,6 +804,15 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackURL,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -757,7 +825,7 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.PollJobStatus(ctx, jobID, true, customParserFlag, responseChan, errChan)
 
 	err = <-errChan
 	if err != nil {

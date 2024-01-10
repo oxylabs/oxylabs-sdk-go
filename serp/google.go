@@ -907,10 +907,11 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 
 // GoogleTrendsExploreOpts contains all the query parameters available for google_trends_explore.
 type GoogleTrendsExploreOpts struct {
-	GeoLocation *string
-	Context     []func(ContextOption)
-	UserAgent   oxylabs.UserAgent
-	CallbackURL string
+	GeoLocation       *string
+	Context           []func(ContextOption)
+	UserAgent         oxylabs.UserAgent
+	CallbackURL       string
+	ParseInstructions *map[string]interface{}
 }
 
 // ScrapeGoogleTrendsExplore scrapes google via Oxylabs SERP API with google_trends_explore as source.
@@ -978,13 +979,21 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackURL,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, true, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, true, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
