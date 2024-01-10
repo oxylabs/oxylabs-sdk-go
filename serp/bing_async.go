@@ -59,10 +59,11 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 		"render":          opt.Render,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
@@ -143,9 +144,10 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		"source":          oxylabs.BingUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.

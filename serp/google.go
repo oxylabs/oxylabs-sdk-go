@@ -73,7 +73,7 @@ func (opt *GoogleAdsOpts) checkParameterValidity(ctx ContextOption) error {
 	}
 
 	if opt.Pages <= 0 || opt.StartPage <= 0 {
-		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
+		return fmt.Errorf("pages and start_page parameters must be greater than 0")
 	}
 
 	if ctx["tbm"] != nil && !oxylabs.InList(ctx["tbm"].(string), AcceptedTbmParameters) {
@@ -128,7 +128,7 @@ func (opt *GoogleTravelHotelsOpts) checkParameterValidity(ctx ContextOption) err
 	}
 
 	if opt.StartPage <= 0 {
-		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
+		return fmt.Errorf("start_page must be greater than 0")
 	}
 
 	if ctx["hotel_occupancy"] != nil && ctx["hotel_occupancy"].(int) < 0 {
@@ -171,7 +171,7 @@ func (opt *GoogleImagesOpts) checkParameterValidity(ctx ContextOption) error {
 	}
 
 	if opt.Pages <= 0 || opt.StartPage <= 0 {
-		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
+		return fmt.Errorf("pages and start_page parameters must be greater than 0")
 	}
 
 	return nil
@@ -184,7 +184,7 @@ type GoogleSearchOpts struct {
 	Pages             int
 	Limit             int
 	Locale            oxylabs.Locale
-	GeoLocation       *string
+	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	CallbackURL       string
@@ -249,7 +249,7 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 		"domain":          opt.Domain,
 		"query":           query,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"parse":           opt.Parse,
 		"render":          opt.Render,
@@ -318,7 +318,7 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 
 // GoogleUrlOpts contains all the query parameters available for google.
 type GoogleUrlOpts struct {
-	GeoLocation       *string
+	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	Parse             bool
@@ -372,7 +372,7 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"parse":           opt.Parse,
 	}
 
@@ -403,7 +403,7 @@ type GoogleAdsOpts struct {
 	StartPage         int
 	Pages             int
 	Locale            string
-	GeoLocation       *string
+	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	CallbackURL       string
@@ -461,7 +461,7 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"parse":           opt.Parse,
 		"render":          opt.Render,
@@ -510,7 +510,7 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 // GoogleSuggestionsOpts contains all the query parameters available for google_shopping.
 type GoogleSuggestionsOpts struct {
 	Locale            string
-	GeoLocation       *string
+	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	ParseInstructions *map[string]interface{}
@@ -555,7 +555,7 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 		"source":          oxylabs.GoogleSuggestions,
 		"query":           query,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
@@ -634,6 +634,7 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	SetDefaultLimit(&opt.Limit)
 	SetDefaultPages(&opt.Pages)
 	SetDefaultUserAgent(&opt.UserAgent)
+	setDefaultHotelOccupancy(context)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity(context)
@@ -650,7 +651,7 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackURL,
@@ -701,7 +702,7 @@ type GoogleTravelHotelsOpts struct {
 	Domain            oxylabs.Domain
 	StartPage         int
 	Locale            string
-	GeoLocation       *string
+	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	CallbackURL       string
@@ -756,7 +757,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackURL,
@@ -804,7 +805,7 @@ type GoogleImagesOpts struct {
 	StartPage         int
 	Pages             int
 	Locale            string
-	GeoLocation       *string
+	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	CallbackURL       string
@@ -867,7 +868,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackURL,
@@ -907,7 +908,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 
 // GoogleTrendsExploreOpts contains all the query parameters available for google_trends_explore.
 type GoogleTrendsExploreOpts struct {
-	GeoLocation       *string
+	GeoLocation       string
 	Context           []func(ContextOption)
 	UserAgent         oxylabs.UserAgent
 	CallbackURL       string
@@ -957,7 +958,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	payload := map[string]interface{}{
 		"source":       oxylabs.GoogleTrendsExplore,
 		"query":        query,
-		"geo_location": &opt.GeoLocation,
+		"geo_location": opt.GeoLocation,
 		"context": []map[string]interface{}{
 			{
 				"key":   "search_type",

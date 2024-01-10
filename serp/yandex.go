@@ -44,6 +44,10 @@ func (opt *YandexSearchOpts) checkParameterValidity() error {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
 
+	if opt.Limit <= 0 || opt.Pages <= 0 || opt.StartPage <= 0 {
+		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
+	}
+
 	return nil
 }
 
@@ -67,7 +71,7 @@ type YandexSearchOpts struct {
 	Pages             int
 	Limit             int
 	Locale            oxylabs.Locale
-	GeoLocation       *string
+	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
@@ -119,7 +123,7 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}

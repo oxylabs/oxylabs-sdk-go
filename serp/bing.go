@@ -59,7 +59,7 @@ type BingSearchOpts struct {
 	Pages             int
 	Limit             int
 	Locale            oxylabs.Locale
-	GeoLocation       *string
+	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
 	Render            oxylabs.Render
@@ -113,7 +113,7 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 		"render":          opt.Render,
@@ -144,7 +144,7 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 // BingUrlOpts contains all the query parameters available for bing.
 type BingUrlOpts struct {
 	UserAgent         oxylabs.UserAgent
-	GeoLocation       *string
+	GeoLocation       string
 	Render            oxylabs.Render
 	CallbackUrl       string
 	Parse             bool
@@ -195,7 +195,7 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 		"source":          oxylabs.BingUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 		"parse":           opt.Parse,

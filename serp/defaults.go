@@ -38,3 +38,9 @@ func SetDefaultUserAgent(userAgent *oxylabs.UserAgent) {
 		*userAgent = oxylabs.UA_DESKTOP
 	}
 }
+
+func setDefaultHotelOccupancy(ctx ContextOption) {
+	if ctx["hotel_occupancy"] == nil {
+		ctx["hotel_occupancy"] = 2
+	}
+}
