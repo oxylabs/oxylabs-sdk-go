@@ -62,14 +62,15 @@ func (opt *YandexUrlOpts) checkParameterValidity() error {
 
 // YandexSearchOpts contains all the query parameters available for yandex_search.
 type YandexSearchOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Limit       int
-	Locale      oxylabs.Locale
-	GeoLocation *string
-	UserAgent   oxylabs.UserAgent
-	CallbackUrl string
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Limit             int
+	Locale            oxylabs.Locale
+	GeoLocation       *string
+	UserAgent         oxylabs.UserAgent
+	CallbackUrl       string
+	ParseInstructions *map[string]interface{}
 }
 
 // ScrapeYandexSearch scrapes yandex via Oxylabs SERP API with yandex_search as source.
@@ -122,13 +123,22 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -138,9 +148,10 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 
 // YandexUrlOpts contains all the query parameters available for yandex.
 type YandexUrlOpts struct {
-	UserAgent   oxylabs.UserAgent
-	Render      oxylabs.Render
-	CallbackUrl string
+	UserAgent         oxylabs.UserAgent
+	Render            oxylabs.Render
+	CallbackUrl       string
+	ParseInstructions *map[string]interface{}
 }
 
 // ScrapeYandexUrl scrapes a yandex url via Oxylabs SERP API with yandex as source.
@@ -190,13 +201,22 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

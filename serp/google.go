@@ -179,17 +179,18 @@ func (opt *GoogleImagesOpts) checkParameterValidity(ctx ContextOption) error {
 
 // GoogleSearchOpts contains all the query parameters available for google_search.
 type GoogleSearchOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Limit       int
-	Locale      oxylabs.Locale
-	GeoLocation *string
-	UserAgent   oxylabs.UserAgent
-	Render      oxylabs.Render
-	CallbackURL string
-	Parse       bool
-	Context     []func(ContextOption)
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Limit             int
+	Locale            oxylabs.Locale
+	GeoLocation       *string
+	UserAgent         oxylabs.UserAgent
+	Render            oxylabs.Render
+	CallbackURL       string
+	Parse             bool
+	ParseInstructions *map[string]interface{}
+	Context           []func(ContextOption)
 }
 
 // ScrapeGoogleSearch scrapes google via Oxylabs SERP API with google_search as source.
@@ -294,13 +295,20 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 		payload["limit"] = opt.Limit
 	}
 
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, opt.Parse, "POST")
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -310,11 +318,12 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 
 // GoogleUrlOpts contains all the query parameters available for google.
 type GoogleUrlOpts struct {
-	GeoLocation *string
-	UserAgent   oxylabs.UserAgent
-	Render      oxylabs.Render
-	Parse       bool
-	CallbackUrl string
+	GeoLocation       *string
+	UserAgent         oxylabs.UserAgent
+	Render            oxylabs.Render
+	Parse             bool
+	ParseInstructions *map[string]interface{}
+	CallbackUrl       string
 }
 
 // ScrapeGoogleUrl scrapes google via Oxylabs SERP API with google as source.
@@ -366,13 +375,21 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 		"geo_location":    &opt.GeoLocation,
 		"parse":           opt.Parse,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, opt.Parse, "POST")
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -382,16 +399,17 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 
 // GoogleAdsOpts contains all the query parameters available for google_ads.
 type GoogleAdsOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Locale      string
-	GeoLocation *string
-	UserAgent   oxylabs.UserAgent
-	Render      oxylabs.Render
-	CallbackURL string
-	Parse       bool
-	Context     []func(ContextOption)
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Locale            string
+	GeoLocation       *string
+	UserAgent         oxylabs.UserAgent
+	Render            oxylabs.Render
+	CallbackURL       string
+	Parse             bool
+	ParseInstructions *map[string]interface{}
+	Context           []func(ContextOption)
 }
 
 // ScrapeGoogleAds scrapes google via Oxylabs SERP API with google_ads as source.
@@ -467,13 +485,21 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 			},
 		},
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, opt.Parse, "POST")
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -483,11 +509,12 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 
 // GoogleSuggestionsOpts contains all the query parameters available for google_shopping.
 type GoogleSuggestionsOpts struct {
-	Locale      string
-	GeoLocation *string
-	UserAgent   oxylabs.UserAgent
-	Render      oxylabs.Render
-	CallbackUrl string
+	Locale            string
+	GeoLocation       *string
+	UserAgent         oxylabs.UserAgent
+	Render            oxylabs.Render
+	ParseInstructions *map[string]interface{}
+	CallbackUrl       string
 }
 
 // ScrapeGoogleSuggestions scrapes google via Oxylabs SERP API with google_suggestions as source.
@@ -533,13 +560,22 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -549,16 +585,17 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 
 // GoogleHotelsOpts contains all the query parameters available for google_hotels.
 type GoogleHotelsOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Limit       int
-	Locale      string
-	GeoLocation string
-	UserAgent   oxylabs.UserAgent
-	Render      oxylabs.Render
-	CallbackURL string
-	Context     []func(ContextOption)
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Limit             int
+	Locale            string
+	GeoLocation       string
+	UserAgent         oxylabs.UserAgent
+	Render            oxylabs.Render
+	CallbackURL       string
+	ParseInstructions *map[string]interface{}
+	Context           []func(ContextOption)
 }
 
 // ScrapeGoogleHotels scrapes google via Oxylabs SERP API with google_hotels as source.
@@ -636,13 +673,22 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 			},
 		},
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -652,14 +698,15 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 
 // GoogleTravelHotelsOpts contains all the query parameters available for google_travel_hotels.
 type GoogleTravelHotelsOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Locale      string
-	GeoLocation *string
-	UserAgent   oxylabs.UserAgent
-	Render      oxylabs.Render
-	CallbackURL string
-	Context     []func(ContextOption)
+	Domain            oxylabs.Domain
+	StartPage         int
+	Locale            string
+	GeoLocation       *string
+	UserAgent         oxylabs.UserAgent
+	Render            oxylabs.Render
+	CallbackURL       string
+	ParseInstructions *map[string]interface{}
+	Context           []func(ContextOption)
 }
 
 // ScrapeGoogleTravelHotels scrapes google via Oxylabs SERP API with google_travel_hotels as source.
@@ -728,13 +775,22 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 			},
 		},
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -744,15 +800,16 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 
 // GoogleImagesOpts contains all the query parameters available for google_images.
 type GoogleImagesOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Locale      string
-	GeoLocation *string
-	UserAgent   oxylabs.UserAgent
-	Render      oxylabs.Render
-	CallbackURL string
-	Context     []func(ContextOption)
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Locale            string
+	GeoLocation       *string
+	UserAgent         oxylabs.UserAgent
+	Render            oxylabs.Render
+	CallbackURL       string
+	ParseInstructions *map[string]interface{}
+	Context           []func(ContextOption)
 }
 
 // ScrapeGoogleImages scrapes google via Oxylabs SERP API with google_images as source.
@@ -825,13 +882,22 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 			},
 		},
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -918,7 +984,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, true, false, "POST")
 	if err != nil {
 		return nil, err
 	}

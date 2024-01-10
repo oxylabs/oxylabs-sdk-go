@@ -42,12 +42,13 @@ func (opt *BaiduUrlOpts) checkParameterValidity() error {
 
 // BaiduSearchOpts contains all the query parameters available for baidu_search.
 type BaiduSearchOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Limit       int
-	UserAgent   oxylabs.UserAgent
-	CallbackUrl string
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Limit             int
+	UserAgent         oxylabs.UserAgent
+	CallbackUrl       string
+	ParseInstructions *map[string]interface{}
 }
 
 // ScrapeBaiduSearch scrapes baidu via Oxylabs SERP API with baidu_search as source.
@@ -98,13 +99,22 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -114,8 +124,9 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 
 // BaiduUrlOpts contains all the query parameters available for baidu.
 type BaiduUrlOpts struct {
-	UserAgent   oxylabs.UserAgent
-	CallbackUrl string
+	UserAgent         oxylabs.UserAgent
+	CallbackUrl       string
+	ParseInstructions *map[string]interface{}
 }
 
 // ScrapeBaiduUrl scrapes baidu via Oxylabs SERP API with baidu as source.
@@ -164,13 +175,22 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

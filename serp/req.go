@@ -10,10 +10,17 @@ import (
 )
 
 // Request to the API.
+// Ctx is the context of the request.
+// JsonPayload is the payload for the request.
+// Parse indicates whether to parse the response.
+// ParseInstructions indicates whether to parse the response
+// with custom parsing instructions.
+// Method is the HTTP method of the request.
 func (c *SerpClient) Req(
 	ctx context.Context,
 	jsonPayload []byte,
 	parse bool,
+	parseInstructions bool,
 	method string,
 ) (*Response, error) {
 	// Prepare request.
@@ -48,6 +55,7 @@ func (c *SerpClient) Req(
 	// Unmarshal the JSON object.
 	resp := &Response{}
 	resp.Parse = parse
+	resp.ParseInstructions = parseInstructions
 	if err := resp.UnmarshalJSON(responseBody); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON object: %v", err)
 	}

@@ -49,15 +49,17 @@ func (opt *BingUrlOpts) checkParameterValidity() error {
 
 // BingSearchOpts contains all the query parameters available for bing_search.
 type BingSearchOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Limit       int
-	Locale      oxylabs.Locale
-	GeoLocation *string
-	UserAgent   oxylabs.UserAgent
-	CallbackUrl string
-	Render      oxylabs.Render
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Limit             int
+	Locale            oxylabs.Locale
+	GeoLocation       *string
+	UserAgent         oxylabs.UserAgent
+	CallbackUrl       string
+	Render            oxylabs.Render
+	Parse             bool
+	ParseInstructions *map[string]interface{}
 }
 
 // ScrapeBingSearch scrapes bing via Oxylabs SERP API with bing_search as source.
@@ -99,7 +101,7 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "bing_search",
+		"source":          oxylabs.BingSearch,
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
@@ -110,14 +112,23 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 		"render":          opt.Render,
+		"parse":           opt.Parse,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -127,10 +138,12 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 
 // BingUrlOpts contains all the query parameters available for bing.
 type BingUrlOpts struct {
-	UserAgent   oxylabs.UserAgent
-	GeoLocation *string
-	Render      oxylabs.Render
-	CallbackUrl string
+	UserAgent         oxylabs.UserAgent
+	GeoLocation       *string
+	Render            oxylabs.Render
+	CallbackUrl       string
+	Parse             bool
+	ParseInstructions *map[string]interface{}
 }
 
 // ScrapeBingUrl scrapes bing via Oxylabs SERP API with bing as source.
@@ -174,20 +187,29 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "bing",
+		"source":          oxylabs.BingUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"geo_location":    &opt.GeoLocation,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
