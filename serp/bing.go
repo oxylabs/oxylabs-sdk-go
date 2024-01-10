@@ -31,6 +31,11 @@ func (opt *BingSearchOpts) checkParameterValidity() error {
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
 	}
+
+	if opt.Limit <= 0 || opt.Pages <= 0 || opt.StartPage <= 0 {
+		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
+	}
+
 	return nil
 }
 
