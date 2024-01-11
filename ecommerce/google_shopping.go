@@ -21,7 +21,7 @@ type GoogleShoppingUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
 	Render      oxylabs.Render
 	CallbackUrl string
-	GeoLocation *string
+	GeoLocation string
 	Parse       bool
 }
 
@@ -84,7 +84,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingUrlCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"parse":           opt.Parse,
 	}
 
@@ -109,8 +109,8 @@ type GoogleShoppingSearchOpts struct {
 	StartPage       int
 	Pages           int
 	Locale          oxylabs.Locale
-	ResultsLanguage *string
-	GeoLocation     *string
+	ResultsLanguage string
+	GeoLocation     string
 	UserAgent       oxylabs.UserAgent
 	Render          oxylabs.Render
 	CallbackURL     string
@@ -198,7 +198,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingSearchCtx(
 		"pages":            opt.Pages,
 		"locale":           opt.Locale,
 		"results_language": opt.ResultsLanguage,
-		"geo_location":     &opt.GeoLocation,
+		"geo_location":     opt.GeoLocation,
 		"user_agent_type":  opt.UserAgent,
 		"render":           opt.Render,
 		"callback_url":     opt.CallbackURL,
@@ -242,8 +242,8 @@ func (c *EcommerceClient) ScrapeGoogleShoppingSearchCtx(
 type GoogleShoppingProductOpts struct {
 	Domain          oxylabs.Domain
 	Locale          oxylabs.Locale
-	ResultsLanguage *string
-	GeoLocation     *string
+	ResultsLanguage string
+	GeoLocation     string
 	UserAgent       oxylabs.UserAgent
 	Render          oxylabs.Render
 	CallbackURL     string
@@ -306,7 +306,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingProductCtx(
 		"query":            query,
 		"locale":           opt.Locale,
 		"results_language": opt.ResultsLanguage,
-		"geo_location":     &opt.GeoLocation,
+		"geo_location":     opt.GeoLocation,
 		"user_agent_type":  opt.UserAgent,
 		"render":           opt.Render,
 		"callback_url":     opt.CallbackURL,
@@ -334,8 +334,8 @@ type GoogleShoppingPricingOpts struct {
 	StartPage       int
 	Pages           int
 	Locale          oxylabs.Locale
-	ResultsLanguage *string
-	GeoLocation     *string
+	ResultsLanguage string
+	GeoLocation     string
 	UserAgent       oxylabs.UserAgent
 	Render          oxylabs.Render
 	CallbackURL     string
@@ -406,7 +406,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingPricingCtx(
 		"pages":            opt.Pages,
 		"locale":           opt.Locale,
 		"results_language": opt.ResultsLanguage,
-		"geo_location":     &opt.GeoLocation,
+		"geo_location":     opt.GeoLocation,
 		"user_agent_type":  opt.UserAgent,
 		"render":           opt.Render,
 		"callback_url":     opt.CallbackURL,

@@ -6,7 +6,7 @@ import (
 
 // SetDefaultSortBy sets the sort by parameter in the ctx if it is not set.
 func SetDefaultSortBy(ctx ContextOption) {
-	if ctx["sort_by"] == "" {
+	if ctx["sort_by"] == nil {
 		ctx["sort_by"] = "r"
 	}
 }
