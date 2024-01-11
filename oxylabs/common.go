@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	DefaultTimeout  = 50 * time.Second
-	DefaultWaitTime = 2 * time.Second
+	DefaultTimeout      = 50 * time.Second
+	DefaultPollInterval = 2 * time.Second
 )
 
 func ValidateURL(

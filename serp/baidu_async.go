@@ -87,7 +87,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 		jobID,
 		customParserFlag,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)
@@ -177,7 +177,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 		jobID,
 		customParserFlag,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)

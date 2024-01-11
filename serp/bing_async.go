@@ -90,7 +90,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		jobID,
 		opt.Parse,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)
@@ -182,7 +182,7 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		jobID,
 		opt.Parse,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)

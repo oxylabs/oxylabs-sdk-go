@@ -76,7 +76,7 @@ type YandexSearchOpts struct {
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
-	WaitTime          time.Duration
+	PollInterval      time.Duration
 }
 
 // ScrapeYandexSearch scrapes yandex via Oxylabs SERP API with yandex_search as source.
@@ -158,7 +158,7 @@ type YandexUrlOpts struct {
 	Render            oxylabs.Render
 	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
-	WaitTime          time.Duration
+	PollInterval      time.Duration
 }
 
 // ScrapeYandexUrl scrapes a yandex url via Oxylabs SERP API with yandex as source.

@@ -89,7 +89,7 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 		jobID,
 		customParserFlag,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)
@@ -180,7 +180,7 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 		jobID,
 		customParserFlag,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)

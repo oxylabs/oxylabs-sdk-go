@@ -50,7 +50,7 @@ type BaiduSearchOpts struct {
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
-	WaitTime          time.Duration
+	PollInterval      time.Duration
 }
 
 // ScrapeBaiduSearch scrapes baidu via Oxylabs SERP API with baidu_search as source.
@@ -129,7 +129,7 @@ type BaiduUrlOpts struct {
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
-	WaitTime          time.Duration
+	PollInterval      time.Duration
 }
 
 // ScrapeBaiduUrl scrapes baidu via Oxylabs SERP API with baidu as source.

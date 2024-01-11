@@ -139,7 +139,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 		jobID,
 		opt.Parse,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)
@@ -231,7 +231,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 		jobID,
 		opt.Parse,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)
@@ -346,7 +346,7 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 		jobID,
 		opt.Parse,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)
@@ -433,7 +433,7 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 		jobID,
 		customParserFlag,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)
@@ -552,7 +552,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 		jobID,
 		customParserFlag,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)
@@ -662,7 +662,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 		jobID,
 		customParserFlag,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)
@@ -776,7 +776,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 		jobID,
 		customParserFlag,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)
@@ -885,7 +885,7 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 		jobID,
 		customParserFlag,
 		customParserFlag,
-		opt.WaitTime,
+		opt.PollInterval,
 		responseChan,
 		errChan,
 	)

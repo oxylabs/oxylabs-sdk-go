@@ -103,14 +103,14 @@ func (c *SerpClientAsync) GetResponse(
 // JsonPayload is the payload for the request.
 // Parse indicates whether to parse the response.
 // ParseInstructions indicates whether to parse the response with custom parsing instructions.
-// WaitTime is the time to wait between each subsequent polling request.
+// PollInterval is the time to wait between each subsequent polling request.
 // ResponseChan and errChan are the channels for the response and error respectively.
 func (c *SerpClientAsync) PollJobStatus(
 	ctx context.Context,
 	jobID string,
 	parse bool,
 	parseInstructions bool,
-	waitTime time.Duration,
+	pollInterval time.Duration,
 	responseChan chan *Response,
 	errChan chan error,
 ) {
@@ -168,9 +168,9 @@ func (c *SerpClientAsync) PollJobStatus(
 		}
 
 		// Set wait time between requests.
-		sleepTime := oxylabs.DefaultWaitTime
-		if waitTime != 0 {
-			sleepTime = waitTime
+		sleepTime := oxylabs.DefaultPollInterval
+		if pollInterval != 0 {
+			sleepTime = pollInterval
 		}
 
 		select {

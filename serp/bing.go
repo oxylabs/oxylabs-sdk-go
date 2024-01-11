@@ -66,7 +66,7 @@ type BingSearchOpts struct {
 	Render            oxylabs.Render
 	Parse             bool
 	ParseInstructions *map[string]interface{}
-	WaitTime          time.Duration
+	PollInterval      time.Duration
 }
 
 // ScrapeBingSearch scrapes bing via Oxylabs SERP API with bing_search as source.
@@ -151,7 +151,7 @@ type BingUrlOpts struct {
 	CallbackUrl       string
 	Parse             bool
 	ParseInstructions *map[string]interface{}
-	WaitTime          time.Duration
+	PollInterval      time.Duration
 }
 
 // ScrapeBingUrl scrapes bing via Oxylabs SERP API with bing as source.
