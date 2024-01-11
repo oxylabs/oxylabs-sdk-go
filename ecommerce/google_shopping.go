@@ -49,7 +49,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingUrl(
 	return c.ScrapeGoogleShoppingUrlCtx(ctx, url, opts...)
 }
 
-// ScrapeGoogleShoppingUrlCtx scrapes google shopping via Oxylabs E-Commerce API with google as source.
+// ScrapeGoogleShoppingUrlCtx scrapes google shopping via Oxylabs E-Commerce API with google_shopping as source.
 // The provided context allows customization of the HTTP request, including setting timeouts.
 func (c *EcommerceClient) ScrapeGoogleShoppingUrlCtx(
 	ctx context.Context,
