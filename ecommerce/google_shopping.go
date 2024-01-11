@@ -323,3 +323,102 @@ func (c *EcommerceClient) ScrapeGoogleShoppingProductCtx(
 
 	return res, nil
 }
+
+// GoogleShoppingPricingOpts contains all the query parameters available for google shopping pricing.
+type GoogleShoppingPricingOpts struct {
+	Domain          oxylabs.Domain
+	StartPage       int
+	Pages           int
+	Locale          oxylabs.Locale
+	ResultsLanguage *string
+	GeoLocation     *string
+	UserAgent       oxylabs.UserAgent
+	Render          oxylabs.Render
+	CallbackURL     string
+	Parse           bool
+}
+
+// checkParameterValidity checks validity of ScrapeGoogleShoppingPricing parameters.
+func (opt *GoogleShoppingPricingOpts) checkParameterValidity() error {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
+		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	if opt.Pages <= 0 || opt.StartPage <= 0 {
+		return fmt.Errorf("pages and start_page parameters must be greater than 0")
+	}
+
+	return nil
+}
+
+// ScrapeGoogleShoppingPricing scrapes google shopping via Oxylabs E-Commerce API
+// with google_shopping_pricing as source.
+func (c *EcommerceClient) ScrapeGoogleShoppingPricing(
+	query string,
+	opts ...*GoogleShoppingPricingOpts,
+) (*Resp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleShoppingPricingCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleShoppingPricingCtx scrapes google shopping via Oxylabs E-Commerce API
+// with google_shopping_pricing as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *EcommerceClient) ScrapeGoogleShoppingPricingCtx(
+	ctx context.Context,
+	query string,
+	opts ...*GoogleShoppingPricingOpts,
+) (*Resp, error) {
+	// Prepare options.
+	opt := &GoogleShoppingPricingOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Set defaults.
+	SetDefaultPages(&opt.Pages)
+	SetDefaultDomain(&opt.Domain)
+	SetDefaultStartPage(&opt.StartPage)
+	SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity()
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload with common parameters.
+	payload := map[string]interface{}{
+		"source":           oxylabs.GoogleShoppingPricing,
+		"domain":           opt.Domain,
+		"query":            query,
+		"start_page":       opt.StartPage,
+		"pages":            opt.Pages,
+		"locale":           opt.Locale,
+		"results_language": opt.ResultsLanguage,
+		"geo_location":     &opt.GeoLocation,
+		"user_agent_type":  opt.UserAgent,
+		"render":           opt.Render,
+		"callback_url":     opt.CallbackURL,
+		"parse":            opt.Parse,
+	}
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	// Request.
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, "POST")
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}

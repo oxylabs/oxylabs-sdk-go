@@ -80,6 +80,7 @@ const (
 	GoogleShoppingUrl     Source = "google_shopping"
 	GoogleShoppingSearch  Source = "google_shopping_search"
 	GoogleShoppingProduct Source = "google_shopping_product"
+	GoogleShoppingPricing Source = "google_shopping_pricing"
 
 	Wayfair       Source = "wayfair"
 	WayfairSearch Source = "wayfair_search"
