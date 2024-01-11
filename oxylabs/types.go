@@ -77,6 +77,9 @@ const (
 	BaiduUrl    Source = "baidu"
 	BaiduSearch Source = "baidu_search"
 
+	GoogleShoppingUrl    Source = "google_shopping"
+	GoogleShoppingSearch Source = "google_shopping_search"
+
 	Wayfair       Source = "wayfair"
 	WayfairSearch Source = "wayfair_search"
 )

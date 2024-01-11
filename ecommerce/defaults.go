@@ -4,6 +4,20 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
+// SetDefaultSortBy sets the sort by parameter in the ctx if it is not set.
+func SetDefaultSortBy(ctx ContextOption) {
+	if ctx["sort_by"] == "" {
+		ctx["sort_by"] = "r"
+	}
+}
+
+// SetDefaultDomain sets the domain parameter if it is not set.
+func SetDefaultDomain(domain *oxylabs.Domain) {
+	if *domain == "" {
+		*domain = oxylabs.DOMAIN_COM
+	}
+}
+
 // SetDefaultStartPage sets the start_page parameter if it is not set.
 func SetDefaultStartPage(startPage *int) {
 	if *startPage == 0 {
