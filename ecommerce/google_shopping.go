@@ -101,7 +101,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingUrlCtx(
 	return res, nil
 }
 
-// GoogleShoppingSearchOpts contains all the query parameters available for google_shopping_search.
+// GoogleShoppingSearchOpts contains all the query parameters available for google shopping search.
 type GoogleShoppingSearchOpts struct {
 	Domain          oxylabs.Domain
 	StartPage       int
@@ -219,6 +219,95 @@ func (c *EcommerceClient) ScrapeGoogleShoppingSearchCtx(
 				"value": context["max_price"],
 			},
 		},
+	}
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	// Request.
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, "POST")
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// GoogleShoppingProductOpts contains all the query parameters available for google shopping product.
+type GoogleShoppingProductOpts struct {
+	Domain          oxylabs.Domain
+	Locale          oxylabs.Locale
+	ResultsLanguage *string
+	GeoLocation     *string
+	UserAgent       oxylabs.UserAgent
+	Render          oxylabs.Render
+	CallbackURL     string
+	Parse           bool
+}
+
+// checkParameterValidity checks validity of ScrapeGoogleShoppingProduct parameters.
+func (opt *GoogleShoppingProductOpts) checkParameterValidity() error {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
+		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	return nil
+}
+
+// ScrapeGoogleShoppingProduct scrapes google shopping via Oxylabs E-Commerce API
+// with google_shopping_product as source.
+func (c *EcommerceClient) ScrapeGoogleShoppingProduct(
+	query string,
+	opts ...*GoogleShoppingProductOpts,
+) (*Resp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeGoogleShoppingProductCtx(ctx, query, opts...)
+}
+
+// ScrapeGoogleShoppingProductCtx scrapes google shopping via Oxylabs E-Commerce API
+// with google_shopping_product as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *EcommerceClient) ScrapeGoogleShoppingProductCtx(
+	ctx context.Context,
+	query string,
+	opts ...*GoogleShoppingProductOpts,
+) (*Resp, error) {
+	// Prepare options.
+	opt := &GoogleShoppingProductOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Set defaults.
+	SetDefaultDomain(&opt.Domain)
+	SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity()
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload with common parameters.
+	payload := map[string]interface{}{
+		"source":           oxylabs.GoogleShoppingProduct,
+		"domain":           opt.Domain,
+		"query":            query,
+		"locale":           opt.Locale,
+		"results_language": opt.ResultsLanguage,
+		"geo_location":     &opt.GeoLocation,
+		"user_agent_type":  opt.UserAgent,
+		"render":           opt.Render,
+		"callback_url":     opt.CallbackURL,
+		"parse":            opt.Parse,
 	}
 
 	jsonPayload, err := json.Marshal(payload)
