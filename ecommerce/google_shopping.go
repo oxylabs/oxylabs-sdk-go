@@ -87,6 +87,8 @@ func (c *EcommerceClient) ScrapeGoogleShoppingUrlCtx(
 		"geo_location":    &opt.GeoLocation,
 		"parse":           opt.Parse,
 	}
+
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -221,6 +223,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingSearchCtx(
 		},
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -310,6 +313,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingProductCtx(
 		"parse":            opt.Parse,
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -409,6 +413,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingPricingCtx(
 		"parse":            opt.Parse,
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
