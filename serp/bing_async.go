@@ -1,6 +1,7 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -10,6 +11,20 @@ import (
 // ScrapeBingSearch scrapes bing with async polling runtime via Oxylabs SERP API
 // and bing_search as source.
 func (c *SerpClientAsync) ScrapeBingSearch(
+	query string,
+	opts ...*BingSearchOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBingSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeBingSearchCtx scrapes bing with async polling runtime via Oxylabs SERP API
+// and bing_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeBingSearchCtx(
+	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
 ) (chan *Response, error) {
@@ -37,18 +52,27 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "bing_search",
+		"source":          oxylabs.BingSearch,
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 		"render":          opt.Render,
+		"parse":           opt.Parse,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -61,7 +85,15 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.PollInterval,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -74,6 +106,20 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 // ScrapeBingUrl scrapes bing with async polling runtime via Oxylabs SERP API
 // and bing as source.
 func (c *SerpClientAsync) ScrapeBingUrl(
+	url string,
+	opts ...*BingUrlOpts,
+) (chan *Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBingUrlCtx(ctx, url, opts...)
+}
+
+// ScrapeBingUrlCtx scrapes bing with async polling runtime via Oxylabs SERP API
+// and bing as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClientAsync) ScrapeBingUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
 ) (chan *Response, error) {
@@ -103,13 +149,22 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "bing",
+		"source":          oxylabs.BingUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -122,7 +177,15 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(jobID, false, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.PollInterval,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {

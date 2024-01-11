@@ -1,8 +1,10 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
@@ -41,16 +43,31 @@ func (opt *BaiduUrlOpts) checkParameterValidity() error {
 
 // BaiduSearchOpts contains all the query parameters available for baidu_search.
 type BaiduSearchOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Limit       int
-	UserAgent   oxylabs.UserAgent
-	CallbackUrl string
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Limit             int
+	UserAgent         oxylabs.UserAgent
+	CallbackUrl       string
+	ParseInstructions *map[string]interface{}
+	PollInterval      time.Duration
 }
 
 // ScrapeBaiduSearch scrapes baidu via Oxylabs SERP API with baidu_search as source.
 func (c *SerpClient) ScrapeBaiduSearch(
+	query string,
+	opts ...*BaiduSearchOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBaiduSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeBaiduSearchCtx scrapes baidu via Oxylabs SERP API with baidu_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeBaiduSearchCtx(
+	ctx context.Context,
 	query string,
 	opts ...*BaiduSearchOpts,
 ) (*Response, error) {
@@ -75,7 +92,7 @@ func (c *SerpClient) ScrapeBaiduSearch(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "baidu_search",
+		"source":          oxylabs.BaiduSearch,
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
@@ -84,12 +101,22 @@ func (c *SerpClient) ScrapeBaiduSearch(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, false, "POST")
+	// Request.
+	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -99,12 +126,27 @@ func (c *SerpClient) ScrapeBaiduSearch(
 
 // BaiduUrlOpts contains all the query parameters available for baidu.
 type BaiduUrlOpts struct {
-	UserAgent   oxylabs.UserAgent
-	CallbackUrl string
+	UserAgent         oxylabs.UserAgent
+	CallbackUrl       string
+	ParseInstructions *map[string]interface{}
+	PollInterval      time.Duration
 }
 
 // ScrapeBaiduUrl scrapes baidu via Oxylabs SERP API with baidu as source.
 func (c *SerpClient) ScrapeBaiduUrl(
+	url string,
+	opts ...*BaiduUrlOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBaiduUrlCtx(ctx, url, opts...)
+}
+
+// ScrapeBaiduUrlCtx scrapes baidu via Oxylabs SERP API with baidu as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeBaiduUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*BaiduUrlOpts,
 ) (*Response, error) {
@@ -131,17 +173,27 @@ func (c *SerpClient) ScrapeBaiduUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "baidu",
+		"source":          oxylabs.BaiduUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, false, "POST")
+	// Request.
+	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

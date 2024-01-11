@@ -7,12 +7,12 @@ import (
 	"net/url"
 )
 
-// Init initializes and returns an http client configured with oxylabs proxy settings.
+// Init initializes and returns an HTTP client configured with Oxylabs proxy settings.
 func Init(
 	username string,
 	password string,
 ) (*http.Client, error) {
-	// Prepare proxy url.
+	// Prepare proxy URL.
 	proxyUrl, err := url.Parse(
 		fmt.Sprintf(
 			"http://%s:%s@realtime.oxylabs.io:60000",
@@ -21,7 +21,7 @@ func Init(
 		),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing proxy url: %v", err)
+		return nil, fmt.Errorf("error parsing proxy URL: %v", err)
 	}
 
 	// Prepare custom transport.

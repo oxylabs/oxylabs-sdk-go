@@ -1,8 +1,10 @@
 package serp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
@@ -30,6 +32,11 @@ func (opt *BingSearchOpts) checkParameterValidity() error {
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
 	}
+
+	if opt.Limit <= 0 || opt.Pages <= 0 || opt.StartPage <= 0 {
+		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
+	}
+
 	return nil
 }
 
@@ -48,19 +55,35 @@ func (opt *BingUrlOpts) checkParameterValidity() error {
 
 // BingSearchOpts contains all the query parameters available for bing_search.
 type BingSearchOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Limit       int
-	Locale      oxylabs.Locale
-	GeoLocation *string
-	UserAgent   oxylabs.UserAgent
-	CallbackUrl string
-	Render      oxylabs.Render
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Limit             int
+	Locale            oxylabs.Locale
+	GeoLocation       string
+	UserAgent         oxylabs.UserAgent
+	CallbackUrl       string
+	Render            oxylabs.Render
+	Parse             bool
+	ParseInstructions *map[string]interface{}
+	PollInterval      time.Duration
 }
 
 // ScrapeBingSearch scrapes bing via Oxylabs SERP API with bing_search as source.
 func (c *SerpClient) ScrapeBingSearch(
+	query string,
+	opts ...*BingSearchOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBingSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeBingSearchCtx scrapes bing via Oxylabs SERP API with bing_search as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeBingSearchCtx(
+	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
 ) (*Response, error) {
@@ -85,24 +108,34 @@ func (c *SerpClient) ScrapeBingSearch(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "bing_search",
+		"source":          oxylabs.BingSearch,
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 		"render":          opt.Render,
+		"parse":           opt.Parse,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, false, "POST")
+	// Request.
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -112,14 +145,30 @@ func (c *SerpClient) ScrapeBingSearch(
 
 // BingUrlOpts contains all the query parameters available for bing.
 type BingUrlOpts struct {
-	UserAgent   oxylabs.UserAgent
-	GeoLocation *string
-	Render      oxylabs.Render
-	CallbackUrl string
+	UserAgent         oxylabs.UserAgent
+	GeoLocation       string
+	Render            oxylabs.Render
+	CallbackUrl       string
+	Parse             bool
+	ParseInstructions *map[string]interface{}
+	PollInterval      time.Duration
 }
 
 // ScrapeBingUrl scrapes bing via Oxylabs SERP API with bing as source.
 func (c *SerpClient) ScrapeBingUrl(
+	url string,
+	opts ...*BingUrlOpts,
+) (*Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeBingUrlCtx(ctx, url, opts...)
+}
+
+// ScrapeBingUrlCtx scrapes bing via Oxylabs SERP API with bing as source.
+// The provided context allows customization of the HTTP request, including setting timeouts.
+func (c *SerpClient) ScrapeBingUrlCtx(
+	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
 ) (*Response, error) {
@@ -146,19 +195,29 @@ func (c *SerpClient) ScrapeBingUrl(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "bing",
+		"source":          oxylabs.BingUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	res, err := c.Req(jsonPayload, false, "POST")
+	// Request.
+	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

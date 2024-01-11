@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 )
 
-// Custom function to unmarshall into the Response struct because of
-// different return types depending on the parse option.
+// Custom function to unmarshal into the Response struct.
+// Because of different return types depending on the parse option.
 func (r *Response) UnmarshalJSON(data []byte) error {
 	// Unmarshal json data into RawResponse map.
 	var rawResponse map[string]json.RawMessage
@@ -23,7 +23,7 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 
 		// Unmarshal each result into the Results slice.
 		for _, resultRawMessage := range resultsRawMessages {
-			if r.Parse {
+			if r.Parse && !r.ParseInstructions {
 				var result struct {
 					ContentParsed Content `json:"content"`
 					CreatedAt     string  `json:"created_at"`
@@ -45,7 +45,29 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 					JobID:         result.JobID,
 					StatusCode:    result.StatusCode,
 				})
-			} else {
+			} else if r.Parse && r.ParseInstructions {
+				var result struct {
+					CustomContentParsed map[string]interface{} `json:"content"`
+					CreatedAt           string                 `json:"created_at"`
+					UpdatedAt           string                 `json:"updated_at"`
+					Page                int                    `json:"page"`
+					URL                 string                 `json:"url"`
+					JobID               string                 `json:"job_id"`
+					StatusCode          int                    `json:"status_code"`
+				}
+				if err := json.Unmarshal(resultRawMessage, &result); err != nil {
+					return err
+				}
+				r.Results = append(r.Results, Result{
+					CustomContentParsed: result.CustomContentParsed,
+					CreatedAt:           result.CreatedAt,
+					UpdatedAt:           result.UpdatedAt,
+					Page:                result.Page,
+					URL:                 result.URL,
+					JobID:               result.JobID,
+					StatusCode:          result.StatusCode,
+				})
+			} else if !r.Parse {
 				var result struct {
 					Content    string `json:"content"`
 					CreatedAt  string `json:"created_at"`
@@ -84,11 +106,12 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 }
 
 type Response struct {
-	Parse      bool     `json:"parse"`
-	Results    []Result `json:"results"`
-	Job        Job      `json:"job"`
-	StatusCode int      `json:"status_code"`
-	Status     string   `json:"status"`
+	Parse             bool     `json:"parse"`
+	ParseInstructions bool     `json:"parse_instructions"`
+	Results           []Result `json:"results"`
+	Job               Job      `json:"job"`
+	StatusCode        int      `json:"status_code"`
+	Status            string   `json:"status"`
 }
 
 type ResponseProxy struct {
@@ -143,15 +166,16 @@ type Link struct {
 }
 
 type Result struct {
-	ContentParsed Content
-	Content       string
-	CreatedAt     string `json:"created_at"`
-	UpdatedAt     string `json:"updated_at"`
-	Page          int    `json:"page"`
-	URL           string `json:"url"`
-	JobID         string `json:"job_id"`
-	StatusCode    int    `json:"status_code"`
-	ParserType    string `json:"parser_type"`
+	CustomContentParsed map[string]interface{}
+	ContentParsed       Content
+	Content             string
+	CreatedAt           string `json:"created_at"`
+	UpdatedAt           string `json:"updated_at"`
+	Page                int    `json:"page"`
+	URL                 string `json:"url"`
+	JobID               string `json:"job_id"`
+	StatusCode          int    `json:"status_code"`
+	ParserType          string `json:"parser_type"`
 }
 
 type Content struct {

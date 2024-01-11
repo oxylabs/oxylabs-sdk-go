@@ -32,9 +32,15 @@ func SetDefaultLimit(limit *int) {
 	}
 }
 
-// SetDefaultUserAgent sets the user_agent parameter if it is not set.
+// SetDefaultUserAgent sets the user_agent_type parameter if it is not set.
 func SetDefaultUserAgent(userAgent *oxylabs.UserAgent) {
 	if *userAgent == "" {
 		*userAgent = oxylabs.UA_DESKTOP
+	}
+}
+
+func setDefaultHotelOccupancy(ctx ContextOption) {
+	if ctx["hotel_occupancy"] == nil {
+		ctx["hotel_occupancy"] = 2
 	}
 }

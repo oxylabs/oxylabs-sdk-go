@@ -2,6 +2,7 @@ package serp
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,7 +12,7 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// Helper function to make post request and retrieve Job ID.
+// Helper function to make a POST request and retrieve the Job ID.
 func (c *SerpClientAsync) GetJobID(
 	jsonPayload []byte,
 ) (string, error) {
@@ -36,16 +37,17 @@ func (c *SerpClientAsync) GetJobID(
 	// Unmarshal into job.
 	job := &Job{}
 	if err = json.Unmarshal(responseBody, &job); err != nil {
-		return "", fmt.Errorf("error unmarshalling Job response body: %v", err)
+		return "", fmt.Errorf("error unmarshalling job response body: %v", err)
 	}
 
 	return job.ID, nil
 }
 
-// Helper function to handle response parsing and error checking.
+// Helper function for handling response parsing and error checking.
 func (c *SerpClientAsync) GetResponse(
 	jobID string,
 	parse bool,
+	parseInstructions bool,
 	responseChan chan *Response,
 	errChan chan error,
 ) {
@@ -73,7 +75,7 @@ func (c *SerpClientAsync) GetResponse(
 	}
 	response.Body.Close()
 
-	// Send back error message.
+	// Check status code.
 	if response.StatusCode != 200 {
 		err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
 		errChan <- err
@@ -96,18 +98,24 @@ func (c *SerpClientAsync) GetResponse(
 	responseChan <- resp
 }
 
-// PollJobStatus polls the job status and handles the response/error channels.
+// PollJobStatus polls the job status and manages the response/error channels.
+// Ctx is the context of the request.
+// JsonPayload is the payload for the request.
+// Parse indicates whether to parse the response.
+// ParseInstructions indicates whether to parse the response with custom parsing instructions.
+// PollInterval is the time to wait between each subsequent polling request.
+// ResponseChan and errChan are the channels for the response and error respectively.
 func (c *SerpClientAsync) PollJobStatus(
+	ctx context.Context,
 	jobID string,
 	parse bool,
+	parseInstructions bool,
+	pollInterval time.Duration,
 	responseChan chan *Response,
 	errChan chan error,
 ) {
-	// Setting start time to check for timeout.
-	startNow := time.Now()
-
 	for {
-		// Perform request to query job status.
+		// Perform a request to query job status.
 		request, _ := http.NewRequest(
 			"GET",
 			fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", jobID),
@@ -135,7 +143,7 @@ func (c *SerpClientAsync) PollJobStatus(
 		// Unmarshal into job.
 		job := &Job{}
 		if err = json.Unmarshal(responseBody, &job); err != nil {
-			err = fmt.Errorf("error unmarshalling Job response body: %v", err)
+			err = fmt.Errorf("error unmarshalling job response body: %v", err)
 			errChan <- err
 			close(responseChan)
 			return
@@ -143,23 +151,36 @@ func (c *SerpClientAsync) PollJobStatus(
 
 		// Check job status.
 		if job.Status == "done" {
-			c.GetResponse(job.ID, parse, responseChan, errChan)
+			c.GetResponse(job.ID, parse, parseInstructions, responseChan, errChan)
 			return
 		} else if job.Status == "faulted" {
-			err = fmt.Errorf("There was an error processing your query")
+			err = fmt.Errorf("there was an error processing your query")
 			errChan <- err
 			close(responseChan)
 			return
 		}
 
-		// Check for timeout.
-		if time.Since(startNow) > oxylabs.DefaultTimeout {
-			err = fmt.Errorf("timeout exceeded: %v", oxylabs.DefaultTimeout)
+		// Add default timeout if ctx has no deadline.
+		if _, ok := ctx.Deadline(); !ok {
+			context, cancel := context.WithTimeout(ctx, oxylabs.DefaultTimeout)
+			defer cancel()
+			ctx = context
+		}
+
+		// Set wait time between requests.
+		sleepTime := oxylabs.DefaultPollInterval
+		if pollInterval != 0 {
+			sleepTime = pollInterval
+		}
+
+		select {
+		case <-ctx.Done():
+			err = fmt.Errorf("timeout exceeded")
 			errChan <- err
 			close(responseChan)
 			return
+		default:
+			time.Sleep(sleepTime)
 		}
-
-		time.Sleep(oxylabs.DefaultWaitTime)
 	}
 }
