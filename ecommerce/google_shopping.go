@@ -8,6 +8,14 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
+// Accepted Parameters for context options in google shopping.
+var AcceptedSortByParameters = []string{
+	"r",
+	"p",
+	"rv",
+	"pd",
+}
+
 // GoogleShoppingUrlOpts contains all the query parameters available for google shopping.
 type GoogleShoppingUrlOpts struct {
 	UserAgent   oxylabs.UserAgent
@@ -106,14 +114,6 @@ type GoogleShoppingSearchOpts struct {
 	CallbackURL     string
 	Parse           bool
 	Context         []func(ContextOption)
-}
-
-// Accepted Parameters for context options in google shopping.
-var AcceptedSortByParameters = []string{
-	"r",
-	"p",
-	"rv",
-	"pd",
 }
 
 // checkParameterValidity checks validity of ScrapeGoogleShoppingSearch parameters.
