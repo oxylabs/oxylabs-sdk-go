@@ -82,7 +82,15 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -164,7 +172,15 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {

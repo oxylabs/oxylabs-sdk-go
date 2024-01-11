@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
@@ -190,6 +191,7 @@ type GoogleSearchOpts struct {
 	CallbackURL       string
 	Parse             bool
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 	Context           []func(ContextOption)
 }
 
@@ -324,6 +326,7 @@ type GoogleUrlOpts struct {
 	Parse             bool
 	ParseInstructions *map[string]interface{}
 	CallbackUrl       string
+	WaitTime          time.Duration
 }
 
 // ScrapeGoogleUrl scrapes google via Oxylabs SERP API with google as source.
@@ -409,6 +412,7 @@ type GoogleAdsOpts struct {
 	CallbackURL       string
 	Parse             bool
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 	Context           []func(ContextOption)
 }
 
@@ -514,6 +518,7 @@ type GoogleSuggestionsOpts struct {
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 	CallbackUrl       string
 }
 
@@ -595,6 +600,7 @@ type GoogleHotelsOpts struct {
 	Render            oxylabs.Render
 	CallbackURL       string
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 	Context           []func(ContextOption)
 }
 
@@ -707,6 +713,7 @@ type GoogleTravelHotelsOpts struct {
 	Render            oxylabs.Render
 	CallbackURL       string
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 	Context           []func(ContextOption)
 }
 
@@ -810,6 +817,7 @@ type GoogleImagesOpts struct {
 	Render            oxylabs.Render
 	CallbackURL       string
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 	Context           []func(ContextOption)
 }
 
@@ -913,6 +921,7 @@ type GoogleTrendsExploreOpts struct {
 	UserAgent         oxylabs.UserAgent
 	CallbackURL       string
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 }
 
 // ScrapeGoogleTrendsExplore scrapes google via Oxylabs SERP API with google_trends_explore as source.

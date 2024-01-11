@@ -85,7 +85,15 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, opt.Parse, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -169,7 +177,15 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, opt.Parse, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {

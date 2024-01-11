@@ -84,7 +84,15 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -167,7 +175,15 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {

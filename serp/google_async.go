@@ -134,7 +134,15 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, opt.Parse, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -218,7 +226,15 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, opt.Parse, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -326,7 +342,14 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, opt.Parse, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -405,7 +428,15 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -516,7 +547,15 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -618,7 +657,15 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -724,7 +771,15 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, customParserFlag, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -825,7 +880,15 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, true, customParserFlag, responseChan, errChan)
+	go c.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.WaitTime,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {

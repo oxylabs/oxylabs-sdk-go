@@ -102,14 +102,15 @@ func (c *SerpClientAsync) GetResponse(
 // Ctx is the context of the request.
 // JsonPayload is the payload for the request.
 // Parse indicates whether to parse the response.
-// ParseInstructions indicates whether to parse the response
-// with custom parsing instructions.
+// ParseInstructions indicates whether to parse the response with custom parsing instructions.
+// WaitTime is the time to wait between each subsequent polling request.
 // ResponseChan and errChan are the channels for the response and error respectively.
 func (c *SerpClientAsync) PollJobStatus(
 	ctx context.Context,
 	jobID string,
 	parse bool,
 	parseInstructions bool,
+	waitTime time.Duration,
 	responseChan chan *Response,
 	errChan chan error,
 ) {
@@ -159,6 +160,19 @@ func (c *SerpClientAsync) PollJobStatus(
 			return
 		}
 
+		// Add default timeout if ctx has no deadline.
+		if _, ok := ctx.Deadline(); !ok {
+			context, cancel := context.WithTimeout(ctx, oxylabs.DefaultTimeout)
+			defer cancel()
+			ctx = context
+		}
+
+		// Set wait time between requests.
+		sleepTime := oxylabs.DefaultWaitTime
+		if waitTime != 0 {
+			sleepTime = waitTime
+		}
+
 		select {
 		case <-ctx.Done():
 			err = fmt.Errorf("timeout exceeded")
@@ -166,7 +180,7 @@ func (c *SerpClientAsync) PollJobStatus(
 			close(responseChan)
 			return
 		default:
-			time.Sleep(oxylabs.DefaultWaitTime)
+			time.Sleep(sleepTime)
 		}
 	}
 }

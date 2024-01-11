@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
@@ -75,6 +76,7 @@ type YandexSearchOpts struct {
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 }
 
 // ScrapeYandexSearch scrapes yandex via Oxylabs SERP API with yandex_search as source.
@@ -156,6 +158,7 @@ type YandexUrlOpts struct {
 	Render            oxylabs.Render
 	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 }
 
 // ScrapeYandexUrl scrapes a yandex url via Oxylabs SERP API with yandex as source.

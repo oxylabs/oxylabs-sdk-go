@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
@@ -65,6 +66,7 @@ type BingSearchOpts struct {
 	Render            oxylabs.Render
 	Parse             bool
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 }
 
 // ScrapeBingSearch scrapes bing via Oxylabs SERP API with bing_search as source.
@@ -149,6 +151,7 @@ type BingUrlOpts struct {
 	CallbackUrl       string
 	Parse             bool
 	ParseInstructions *map[string]interface{}
+	WaitTime          time.Duration
 }
 
 // ScrapeBingUrl scrapes bing via Oxylabs SERP API with bing as source.
