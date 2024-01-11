@@ -38,7 +38,7 @@ func (opt *GoogleShoppingUrlOpts) checkParameterValidity() error {
 	return nil
 }
 
-// ScrapeGoogleShoppingUrl scrapes google shopping via Oxylabs E-Commerce API with google as source.
+// ScrapeGoogleShoppingUrl scrapes google shopping via Oxylabs E-Commerce API with google_shopping as source.
 func (c *EcommerceClient) ScrapeGoogleShoppingUrl(
 	url string,
 	opts ...*GoogleShoppingUrlOpts,
