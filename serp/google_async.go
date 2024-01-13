@@ -14,7 +14,7 @@ import (
 func (c *SerpClientAsync) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
-) (chan *Response, error) {
+) (chan *internal.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,8 +28,8 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSearchOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -129,13 +129,13 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.InternalClient.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.InternalClient.PollJobStatus(
 		ctx,
 		jobID,
 		opt.Parse,
@@ -158,7 +158,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 func (c *SerpClientAsync) ScrapeGoogleUrl(
 	url string,
 	opts ...*GoogleUrlOpts,
-) (chan *Response, error) {
+) (chan *internal.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -172,8 +172,8 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleUrlOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Check validity of url.
@@ -221,13 +221,13 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.InternalClient.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.InternalClient.PollJobStatus(
 		ctx,
 		jobID,
 		opt.Parse,
@@ -250,7 +250,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 func (c *SerpClientAsync) ScrapeGoogleAds(
 	query string,
 	opts ...*GoogleAdsOpts,
-) (chan *Response, error) {
+) (chan *internal.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -264,8 +264,8 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleAdsOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -337,13 +337,13 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.InternalClient.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx,
+	go c.InternalClient.PollJobStatus(ctx,
 		jobID,
 		opt.Parse,
 		customParserFlag,
@@ -365,7 +365,7 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 func (c *SerpClientAsync) ScrapeGoogleSuggestions(
 	query string,
 	opts ...*GoogleSuggestionsOpts,
-) (chan *Response, error) {
+) (chan *internal.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -379,8 +379,8 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSuggestionsOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -423,13 +423,13 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.InternalClient.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.InternalClient.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
@@ -452,7 +452,7 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 func (c *SerpClientAsync) ScrapeGoogleHotels(
 	query string,
 	opts ...*GoogleHotelsOpts,
-) (chan *Response, error) {
+) (chan *internal.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -466,8 +466,8 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleHotelsOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -542,13 +542,13 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.InternalClient.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.InternalClient.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
@@ -571,7 +571,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
-) (chan *Response, error) {
+) (chan *internal.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -585,8 +585,8 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -652,13 +652,13 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.InternalClient.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.InternalClient.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
@@ -681,7 +681,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 func (c *SerpClientAsync) ScrapeGoogleImages(
 	url string,
 	opts ...*GoogleImagesOpts,
-) (chan *Response, error) {
+) (chan *internal.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -695,8 +695,8 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleImagesOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Check validity of url.
@@ -766,13 +766,13 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.InternalClient.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.InternalClient.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
@@ -795,7 +795,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 func (c *SerpClientAsync) ScrapeGoogleTrendsExplore(
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
-) (chan *Response, error) {
+) (chan *internal.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -809,8 +809,8 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -875,13 +875,13 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.InternalClient.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.InternalClient.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,

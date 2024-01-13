@@ -1,4 +1,4 @@
-package serp
+package internal
 
 import (
 	"bytes"
@@ -8,25 +8,23 @@ import (
 	"io"
 	"net/http"
 	"time"
-
-	"github.com/mslmio/oxylabs-sdk-go/internal"
 )
 
 // Helper function to make a POST request and retrieve the Job ID.
-func (c *SerpClientAsync) GetJobID(
+func (c *Client) GetJobID(
 	jsonPayload []byte,
 ) (string, error) {
 	request, _ := http.NewRequest(
 		"POST",
-		c.InternalClient.BaseURL,
+		c.BaseURL,
 		bytes.NewBuffer(jsonPayload),
 	)
 	request.Header.Add("Content-type", "application/json")
 	request.SetBasicAuth(
-		c.InternalClient.ApiCredentials.Username,
-		c.InternalClient.ApiCredentials.Password,
+		c.ApiCredentials.Username,
+		c.ApiCredentials.Password,
 	)
-	response, err := c.InternalClient.HttpClient.Do(request)
+	response, err := c.HttpClient.Do(request)
 	if err != nil {
 		return "", fmt.Errorf("error performing request: %v", err)
 	}
@@ -47,7 +45,7 @@ func (c *SerpClientAsync) GetJobID(
 }
 
 // Helper function for handling response parsing and error checking.
-func (c *SerpClientAsync) GetResponse(
+func (c *Client) GetResponse(
 	jobID string,
 	parse bool,
 	parseInstructions bool,
@@ -61,10 +59,10 @@ func (c *SerpClientAsync) GetResponse(
 	)
 	request.Header.Add("Content-type", "application/json")
 	request.SetBasicAuth(
-		c.InternalClient.ApiCredentials.Username,
-		c.InternalClient.ApiCredentials.Password,
+		c.ApiCredentials.Username,
+		c.ApiCredentials.Password,
 	)
-	response, err := c.InternalClient.HttpClient.Do(request)
+	response, err := c.HttpClient.Do(request)
 	if err != nil {
 		errChan <- err
 		close(responseChan)
@@ -104,14 +102,14 @@ func (c *SerpClientAsync) GetResponse(
 	responseChan <- resp
 }
 
-// PollJobStatus polls the job status and manages the response/error channels.
+// InternalClient.PollJobStatus polls the job status and manages the response/error channels.
 // Ctx is the context of the request.
 // JsonPayload is the payload for the request.
 // Parse indicates whether to parse the response.
 // ParseInstructions indicates whether to parse the response with custom parsing instructions.
 // PollInterval is the time to wait between each subsequent polling request.
 // ResponseChan and errChan are the channels for the response and error respectively.
-func (c *SerpClientAsync) PollJobStatus(
+func (c *Client) PollJobStatus(
 	ctx context.Context,
 	jobID string,
 	parse bool,
@@ -129,10 +127,10 @@ func (c *SerpClientAsync) PollJobStatus(
 		)
 		request.Header.Add("Content-type", "application/json")
 		request.SetBasicAuth(
-			c.InternalClient.ApiCredentials.Username,
-			c.InternalClient.ApiCredentials.Password,
+			c.ApiCredentials.Username,
+			c.ApiCredentials.Password,
 		)
-		response, err := c.InternalClient.HttpClient.Do(request)
+		response, err := c.HttpClient.Do(request)
 		if err != nil {
 			errChan <- err
 			close(responseChan)
@@ -171,13 +169,13 @@ func (c *SerpClientAsync) PollJobStatus(
 
 		// Add default timeout if ctx has no deadline.
 		if _, ok := ctx.Deadline(); !ok {
-			context, cancel := context.WithTimeout(ctx, internal.DefaultTimeout)
+			context, cancel := context.WithTimeout(ctx, DefaultTimeout)
 			defer cancel()
 			ctx = context
 		}
 
 		// Set wait time between requests.
-		sleepTime := internal.DefaultPollInterval
+		sleepTime := DefaultPollInterval
 		if pollInterval != 0 {
 			sleepTime = pollInterval
 		}

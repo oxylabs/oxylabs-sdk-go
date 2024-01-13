@@ -14,7 +14,7 @@ import (
 func (c *SerpClientAsync) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *Response, error) {
+) (chan *internal.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,8 +28,8 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -80,13 +80,13 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.InternalClient.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.InternalClient.PollJobStatus(
 		ctx,
 		jobID,
 		opt.Parse,
@@ -109,7 +109,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 func (c *SerpClientAsync) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *Response, error) {
+) (chan *internal.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -123,8 +123,8 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Check validity of url.
@@ -172,13 +172,13 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.InternalClient.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.InternalClient.PollJobStatus(
 		ctx,
 		jobID,
 		opt.Parse,
