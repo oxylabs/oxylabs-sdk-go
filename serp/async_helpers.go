@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 )
 
 // Helper function to make a POST request and retrieve the Job ID.
@@ -18,12 +18,15 @@ func (c *SerpClientAsync) GetJobID(
 ) (string, error) {
 	request, _ := http.NewRequest(
 		"POST",
-		c.BaseUrl,
+		c.InternalClient.BaseURL,
 		bytes.NewBuffer(jsonPayload),
 	)
 	request.Header.Add("Content-type", "application/json")
-	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
-	response, err := c.HttpClient.Do(request)
+	request.SetBasicAuth(
+		c.InternalClient.ApiCredentials.Username,
+		c.InternalClient.ApiCredentials.Password,
+	)
+	response, err := c.InternalClient.HttpClient.Do(request)
 	if err != nil {
 		return "", fmt.Errorf("error performing request: %v", err)
 	}
@@ -57,8 +60,11 @@ func (c *SerpClientAsync) GetResponse(
 		nil,
 	)
 	request.Header.Add("Content-type", "application/json")
-	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
-	response, err := c.HttpClient.Do(request)
+	request.SetBasicAuth(
+		c.InternalClient.ApiCredentials.Username,
+		c.InternalClient.ApiCredentials.Password,
+	)
+	response, err := c.InternalClient.HttpClient.Do(request)
 	if err != nil {
 		errChan <- err
 		close(responseChan)
@@ -122,8 +128,11 @@ func (c *SerpClientAsync) PollJobStatus(
 			nil,
 		)
 		request.Header.Add("Content-type", "application/json")
-		request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
-		response, err := c.HttpClient.Do(request)
+		request.SetBasicAuth(
+			c.InternalClient.ApiCredentials.Username,
+			c.InternalClient.ApiCredentials.Password,
+		)
+		response, err := c.InternalClient.HttpClient.Do(request)
 		if err != nil {
 			errChan <- err
 			close(responseChan)
@@ -162,13 +171,13 @@ func (c *SerpClientAsync) PollJobStatus(
 
 		// Add default timeout if ctx has no deadline.
 		if _, ok := ctx.Deadline(); !ok {
-			context, cancel := context.WithTimeout(ctx, oxylabs.DefaultTimeout)
+			context, cancel := context.WithTimeout(ctx, internal.DefaultTimeout)
 			defer cancel()
 			ctx = context
 		}
 
 		// Set wait time between requests.
-		sleepTime := oxylabs.DefaultPollInterval
+		sleepTime := internal.DefaultPollInterval
 		if pollInterval != 0 {
 			sleepTime = pollInterval
 		}
