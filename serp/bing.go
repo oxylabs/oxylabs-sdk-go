@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -21,7 +22,7 @@ var BingSearchAcceptedDomainParameters = []oxylabs.Domain{
 
 // checkParameterValidity checks validity of ScrapeBingSearch parameters.
 func (opt *BingSearchOpts) checkParameterValidity() error {
-	if opt.Domain != "" && !oxylabs.InList(opt.Domain, BingSearchAcceptedDomainParameters) {
+	if opt.Domain != "" && !internal.InList(opt.Domain, BingSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
 	}
 
@@ -74,7 +75,7 @@ func (c *SerpClient) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
 ) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBingSearchCtx(ctx, query, opts...)
@@ -94,11 +95,11 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -159,7 +160,7 @@ func (c *SerpClient) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
 ) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBingUrlCtx(ctx, url, opts...)
@@ -173,7 +174,7 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	opts ...*BingUrlOpts,
 ) (*Response, error) {
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "bing")
+	err := internal.ValidateURL(url, "bing")
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()

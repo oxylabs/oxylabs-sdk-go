@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -14,7 +15,7 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
 ) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeYandexSearchCtx(ctx, query, opts...)
@@ -38,11 +39,11 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check the validity of the parameters.
 	err := opt.checkParameterValidity()
@@ -108,7 +109,7 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
 ) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeYandexUrlCtx(ctx, url, opts...)
@@ -126,7 +127,7 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	errChan := make(chan error)
 
 	// Check the validity of the URL.
-	err := oxylabs.ValidateURL(url, "yandex")
+	err := internal.ValidateURL(url, "yandex")
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +139,7 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check the validity of parameters.
 	err = opt.checkParameterValidity()

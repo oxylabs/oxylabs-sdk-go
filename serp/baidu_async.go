@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -14,7 +15,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
 ) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBaiduSearchCtx(ctx, query, opts...)
@@ -38,11 +39,11 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -106,7 +107,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrl(
 	query string,
 	opts ...*BaiduUrlOpts,
 ) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBaiduUrlCtx(ctx, query, opts...)
@@ -124,7 +125,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	errChan := make(chan error)
 
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "baidu")
+	err := internal.ValidateURL(url, "baidu")
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +137,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
