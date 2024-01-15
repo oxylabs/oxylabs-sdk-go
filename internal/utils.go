@@ -6,17 +6,18 @@ import (
 	"strings"
 )
 
-// Checks if the parameter is in the list of accepted parameters.
+// InList checks if a value is present in the given slice.
 func InList[T comparable](val T, list []T) bool {
 	for _, item := range list {
 		if item == val {
 			return true
 		}
 	}
+
 	return false
 }
 
-// Checks if the provided URL is valid.
+// ValidateUrl validates non-empty URL's scheme, host, and matches expected domain or host.
 func ValidateUrl(
 	inputUrl string,
 	host string,
