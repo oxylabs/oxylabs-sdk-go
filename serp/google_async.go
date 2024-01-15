@@ -176,7 +176,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
-	// Check validity of url.
+	// Check validity of URL.
 	err := internal.ValidateUrl(url, "google")
 	if err != nil {
 		return nil, err
@@ -699,7 +699,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
-	// Check validity of url.
+	// Check validity of URL.
 	err := internal.ValidateUrl(url, "google")
 	if err != nil {
 		return nil, err

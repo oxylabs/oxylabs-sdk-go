@@ -126,7 +126,7 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
-	// Check the validity of the Url.
+	// Check the validity of the URL.
 	err := internal.ValidateUrl(url, "yandex")
 	if err != nil {
 		return nil, err

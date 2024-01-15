@@ -348,7 +348,7 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 	url string,
 	opts ...*GoogleUrlOpts,
 ) (*internal.Response, error) {
-	// Check validity of url.
+	// Check validity of URL.
 	err := internal.ValidateUrl(url, "google")
 	if err != nil {
 		return nil, err
@@ -840,7 +840,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	url string,
 	opts ...*GoogleImagesOpts,
 ) (*internal.Response, error) {
-	// Check validity of url.
+	// Check validity of URL.
 	err := internal.ValidateUrl(url, "google")
 	if err != nil {
 		return nil, err

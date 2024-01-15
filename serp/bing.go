@@ -173,7 +173,7 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	url string,
 	opts ...*BingUrlOpts,
 ) (*internal.Response, error) {
-	// Check validity of url.
+	// Check validity of URL.
 	err := internal.ValidateUrl(url, "bing")
 	if err != nil {
 		return nil, err

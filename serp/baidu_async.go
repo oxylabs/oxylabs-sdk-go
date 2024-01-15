@@ -124,7 +124,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
-	// Check validity of url.
+	// Check validity of URL.
 	err := internal.ValidateUrl(url, "baidu")
 	if err != nil {
 		return nil, err
