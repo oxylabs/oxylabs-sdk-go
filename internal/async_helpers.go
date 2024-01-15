@@ -49,7 +49,7 @@ func (c *Client) GetResponse(
 	jobID string,
 	parse bool,
 	parseInstructions bool,
-	responseChan chan *Response,
+	respChan chan *Resp,
 	errChan chan error,
 ) {
 	request, _ := http.NewRequest(
@@ -65,7 +65,7 @@ func (c *Client) GetResponse(
 	response, err := c.HttpClient.Do(request)
 	if err != nil {
 		errChan <- err
-		close(responseChan)
+		close(respChan)
 		return
 	}
 
@@ -74,7 +74,7 @@ func (c *Client) GetResponse(
 	if err != nil {
 		err = fmt.Errorf("error reading response body: %v", err)
 		errChan <- err
-		close(responseChan)
+		close(respChan)
 		return
 	}
 	response.Body.Close()
@@ -83,23 +83,23 @@ func (c *Client) GetResponse(
 	if response.StatusCode != 200 {
 		err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
 		errChan <- err
-		close(responseChan)
+		close(respChan)
 		return
 	}
 
 	// Unmarshal the JSON object.
-	resp := &Response{}
+	resp := &Resp{}
 	resp.Parse = parse
 	if err := resp.UnmarshalJSON(responseBody); err != nil {
 		err = fmt.Errorf("failed to parse JSON object: %v", err)
 		errChan <- err
-		close(responseChan)
+		close(respChan)
 		return
 	}
 	resp.StatusCode = response.StatusCode
 	resp.Status = response.Status
 	close(errChan)
-	responseChan <- resp
+	respChan <- resp
 }
 
 // PollJobStatus polls the job status and manages the response/error channels.
@@ -108,14 +108,14 @@ func (c *Client) GetResponse(
 // Parse indicates whether to parse the response.
 // ParseInstructions indicates whether to parse the response with custom parsing instructions.
 // PollInterval is the time to wait between each subsequent polling request.
-// ResponseChan and errChan are the channels for the response and error respectively.
+// respChan and errChan are the channels for the response and error respectively.
 func (c *Client) PollJobStatus(
 	ctx context.Context,
 	jobID string,
 	parse bool,
 	parseInstructions bool,
 	pollInterval time.Duration,
-	responseChan chan *Response,
+	respChan chan *Resp,
 	errChan chan error,
 ) {
 	for {
@@ -133,7 +133,7 @@ func (c *Client) PollJobStatus(
 		response, err := c.HttpClient.Do(request)
 		if err != nil {
 			errChan <- err
-			close(responseChan)
+			close(respChan)
 			return
 		}
 
@@ -143,7 +143,7 @@ func (c *Client) PollJobStatus(
 		if err != nil {
 			err = fmt.Errorf("error reading response body: %v", err)
 			errChan <- err
-			close(responseChan)
+			close(respChan)
 			return
 		}
 
@@ -152,18 +152,18 @@ func (c *Client) PollJobStatus(
 		if err = json.Unmarshal(responseBody, &job); err != nil {
 			err = fmt.Errorf("error unmarshalling job response body: %v", err)
 			errChan <- err
-			close(responseChan)
+			close(respChan)
 			return
 		}
 
 		// Check job status.
 		if job.Status == "done" {
-			c.GetResponse(job.ID, parse, parseInstructions, responseChan, errChan)
+			c.GetResponse(job.ID, parse, parseInstructions, respChan, errChan)
 			return
 		} else if job.Status == "faulted" {
 			err = fmt.Errorf("there was an error processing your query")
 			errChan <- err
-			close(responseChan)
+			close(respChan)
 			return
 		}
 
@@ -184,7 +184,7 @@ func (c *Client) PollJobStatus(
 		case <-ctx.Done():
 			err = fmt.Errorf("timeout exceeded")
 			errChan <- err
-			close(responseChan)
+			close(respChan)
 			return
 		default:
 			time.Sleep(sleepTime)

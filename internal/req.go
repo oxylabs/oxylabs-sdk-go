@@ -22,7 +22,7 @@ func (c *Client) Req(
 	parse bool,
 	parseInstructions bool,
 	method string,
-) (*Response, error) {
+) (*Resp, error) {
 	// Prepare request.
 	request, err := http.NewRequestWithContext(
 		ctx,
@@ -57,7 +57,7 @@ func (c *Client) Req(
 	}
 
 	// Unmarshal the JSON object.
-	resp := &Response{}
+	resp := &Resp{}
 	resp.Parse = parse
 	resp.ParseInstructions = parseInstructions
 	if err := resp.UnmarshalJSON(responseBody); err != nil {
