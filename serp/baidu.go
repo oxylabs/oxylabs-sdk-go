@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -16,7 +18,7 @@ var BaiduSearchAcceptedDomainParameters = []oxylabs.Domain{
 
 // checkParameterValidity checks validity of ScrapeBaiduSearch parameters.
 func (opt *BaiduSearchOpts) checkParameterValidity() error {
-	if !oxylabs.InList(opt.Domain, BaiduSearchAcceptedDomainParameters) {
+	if !internal.InList(opt.Domain, BaiduSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
 	}
 
@@ -42,20 +44,22 @@ func (opt *BaiduUrlOpts) checkParameterValidity() error {
 
 // BaiduSearchOpts contains all the query parameters available for baidu_search.
 type BaiduSearchOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Limit       int
-	UserAgent   oxylabs.UserAgent
-	CallbackUrl string
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Limit             int
+	UserAgent         oxylabs.UserAgent
+	CallbackUrl       string
+	ParseInstructions *map[string]interface{}
+	PollInterval      time.Duration
 }
 
 // ScrapeBaiduSearch scrapes baidu via Oxylabs SERP API with baidu_search as source.
 func (c *SerpClient) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*internal.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBaiduSearchCtx(ctx, query, opts...)
@@ -67,7 +71,7 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BaiduSearchOpts,
-) (*Response, error) {
+) (*internal.Response, error) {
 	// Prepare options.
 	opt := &BaiduSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -75,11 +79,11 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -98,13 +102,22 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -114,16 +127,18 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 
 // BaiduUrlOpts contains all the query parameters available for baidu.
 type BaiduUrlOpts struct {
-	UserAgent   oxylabs.UserAgent
-	CallbackUrl string
+	UserAgent         oxylabs.UserAgent
+	CallbackUrl       string
+	ParseInstructions *map[string]interface{}
+	PollInterval      time.Duration
 }
 
 // ScrapeBaiduUrl scrapes baidu via Oxylabs SERP API with baidu as source.
 func (c *SerpClient) ScrapeBaiduUrl(
 	url string,
 	opts ...*BaiduUrlOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*internal.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBaiduUrlCtx(ctx, url, opts...)
@@ -135,9 +150,9 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BaiduUrlOpts,
-) (*Response, error) {
+) (*internal.Response, error) {
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "baidu")
+	err := internal.ValidateUrl(url, "baidu")
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +164,7 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -164,13 +179,22 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

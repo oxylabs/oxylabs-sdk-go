@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -32,16 +34,20 @@ var YandexSearchAcceptedLocaleParameters = []oxylabs.Locale{
 
 // checkParameterValidity checks validity of ScrapeYandexSearch parameters.
 func (opt *YandexSearchOpts) checkParameterValidity() error {
-	if !oxylabs.InList(opt.Domain, YandexSearchAcceptedDomainParameters) {
+	if !internal.InList(opt.Domain, YandexSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
 	}
 
-	if opt.Locale != "" && !oxylabs.InList(opt.Locale, YandexSearchAcceptedLocaleParameters) {
+	if opt.Locale != "" && !internal.InList(opt.Locale, YandexSearchAcceptedLocaleParameters) {
 		return fmt.Errorf("invalid locale parameter: %s", opt.Locale)
 	}
 
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if opt.Limit <= 0 || opt.Pages <= 0 || opt.StartPage <= 0 {
+		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
 	}
 
 	return nil
@@ -62,22 +68,24 @@ func (opt *YandexUrlOpts) checkParameterValidity() error {
 
 // YandexSearchOpts contains all the query parameters available for yandex_search.
 type YandexSearchOpts struct {
-	Domain      oxylabs.Domain
-	StartPage   int
-	Pages       int
-	Limit       int
-	Locale      oxylabs.Locale
-	GeoLocation *string
-	UserAgent   oxylabs.UserAgent
-	CallbackUrl string
+	Domain            oxylabs.Domain
+	StartPage         int
+	Pages             int
+	Limit             int
+	Locale            oxylabs.Locale
+	GeoLocation       string
+	UserAgent         oxylabs.UserAgent
+	CallbackUrl       string
+	ParseInstructions *map[string]interface{}
+	PollInterval      time.Duration
 }
 
 // ScrapeYandexSearch scrapes yandex via Oxylabs SERP API with yandex_search as source.
 func (c *SerpClient) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*internal.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeYandexSearchCtx(ctx, query, opts...)
@@ -89,7 +97,7 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*YandexSearchOpts,
-) (*Response, error) {
+) (*internal.Response, error) {
 	// Prepare options.
 	opt := &YandexSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -97,11 +105,11 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -118,17 +126,26 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -138,17 +155,19 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 
 // YandexUrlOpts contains all the query parameters available for yandex.
 type YandexUrlOpts struct {
-	UserAgent   oxylabs.UserAgent
-	Render      oxylabs.Render
-	CallbackUrl string
+	UserAgent         oxylabs.UserAgent
+	Render            oxylabs.Render
+	CallbackUrl       string
+	ParseInstructions *map[string]interface{}
+	PollInterval      time.Duration
 }
 
 // ScrapeYandexUrl scrapes a yandex url via Oxylabs SERP API with yandex as source.
 func (c *SerpClient) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*internal.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeYandexUrlCtx(ctx, url, opts...)
@@ -160,9 +179,9 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*YandexUrlOpts,
-) (*Response, error) {
+) (*internal.Response, error) {
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "yandex")
+	err := internal.ValidateUrl(url, "yandex")
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +193,7 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -190,13 +209,22 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, false, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

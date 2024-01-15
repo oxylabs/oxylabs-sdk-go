@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -13,8 +14,8 @@ import (
 func (c *SerpClientAsync) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
-) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *internal.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeYandexSearchCtx(ctx, query, opts...)
@@ -27,8 +28,8 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*YandexSearchOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -38,11 +39,11 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check the validity of the parameters.
 	err := opt.checkParameterValidity()
@@ -59,23 +60,40 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Get the job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.PollInterval,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -90,8 +108,8 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 func (c *SerpClientAsync) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
-) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *internal.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeYandexUrlCtx(ctx, url, opts...)
@@ -104,12 +122,12 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*YandexUrlOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
-	// Check the validity of the URL.
-	err := oxylabs.ValidateURL(url, "yandex")
+	// Check the validity of the Url.
+	err := internal.ValidateUrl(url, "yandex")
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +139,7 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check the validity of parameters.
 	err = opt.checkParameterValidity()
@@ -137,19 +155,36 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Get the job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.PollInterval,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {

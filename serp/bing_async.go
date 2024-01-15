@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -13,8 +14,8 @@ import (
 func (c *SerpClientAsync) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *internal.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBingSearchCtx(ctx, query, opts...)
@@ -27,8 +28,8 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -38,11 +39,11 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -59,24 +60,41 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
 		"locale":          opt.Locale,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 		"render":          opt.Render,
+		"parse":           opt.Parse,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.PollInterval,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -91,8 +109,8 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 func (c *SerpClientAsync) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *internal.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBingUrlCtx(ctx, url, opts...)
@@ -105,12 +123,12 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "bing")
+	err := internal.ValidateUrl(url, "bing")
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +140,7 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -135,23 +153,40 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		"source":          oxylabs.BingUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
-		"geo_location":    &opt.GeoLocation,
+		"geo_location":    opt.GeoLocation,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.PollInterval,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {

@@ -2,17 +2,17 @@ package serp
 
 import (
 	"net/http"
+
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 )
 
-type ApiCredentials struct {
-	Username string
-	Password string
-}
+const (
+	SYNC_BASE_URL  = "https://realtime.oxylabs.io/v1/queries"
+	ASYNC_BASE_URL = "https://data.oxylabs.io/v1/queries"
+)
 
 type SerpClient struct {
-	HttpClient     *http.Client
-	ApiCredentials *ApiCredentials
-	BaseUrl        string
+	C *internal.Client
 }
 
 // Init for Sync runtime model.
@@ -21,19 +21,19 @@ func Init(
 	password string,
 ) *SerpClient {
 	return &SerpClient{
-		ApiCredentials: &ApiCredentials{
-			Username: username,
-			Password: password,
+		C: &internal.Client{
+			BaseUrl: SYNC_BASE_URL,
+			ApiCredentials: &internal.ApiCredentials{
+				Username: username,
+				Password: password,
+			},
+			HttpClient: &http.Client{},
 		},
-		HttpClient: &http.Client{},
-		BaseUrl:    "https://realtime.oxylabs.io/v1/queries",
 	}
 }
 
 type SerpClientAsync struct {
-	HttpClient     *http.Client
-	ApiCredentials *ApiCredentials
-	BaseUrl        string
+	C *internal.Client
 }
 
 // Init for Async runtime model.
@@ -42,11 +42,13 @@ func InitAsync(
 	password string,
 ) *SerpClientAsync {
 	return &SerpClientAsync{
-		ApiCredentials: &ApiCredentials{
-			Username: username,
-			Password: password,
+		C: &internal.Client{
+			BaseUrl: ASYNC_BASE_URL,
+			ApiCredentials: &internal.ApiCredentials{
+				Username: username,
+				Password: password,
+			},
+			HttpClient: &http.Client{},
 		},
-		HttpClient: &http.Client{},
-		BaseUrl:    "https://data.oxylabs.io/v1/queries",
 	}
 }

@@ -1,4 +1,4 @@
-package serp
+package internal
 
 import (
 	"bytes"
@@ -8,12 +8,10 @@ import (
 	"io"
 	"net/http"
 	"time"
-
-	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
 // Helper function to make a POST request and retrieve the Job ID.
-func (c *SerpClientAsync) GetJobID(
+func (c *Client) GetJobID(
 	jsonPayload []byte,
 ) (string, error) {
 	request, _ := http.NewRequest(
@@ -22,7 +20,10 @@ func (c *SerpClientAsync) GetJobID(
 		bytes.NewBuffer(jsonPayload),
 	)
 	request.Header.Add("Content-type", "application/json")
-	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+	request.SetBasicAuth(
+		c.ApiCredentials.Username,
+		c.ApiCredentials.Password,
+	)
 	response, err := c.HttpClient.Do(request)
 	if err != nil {
 		return "", fmt.Errorf("error performing request: %v", err)
@@ -44,9 +45,10 @@ func (c *SerpClientAsync) GetJobID(
 }
 
 // Helper function for handling response parsing and error checking.
-func (c *SerpClientAsync) GetResponse(
+func (c *Client) GetResponse(
 	jobID string,
 	parse bool,
+	parseInstructions bool,
 	responseChan chan *Response,
 	errChan chan error,
 ) {
@@ -56,7 +58,10 @@ func (c *SerpClientAsync) GetResponse(
 		nil,
 	)
 	request.Header.Add("Content-type", "application/json")
-	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+	request.SetBasicAuth(
+		c.ApiCredentials.Username,
+		c.ApiCredentials.Password,
+	)
 	response, err := c.HttpClient.Do(request)
 	if err != nil {
 		errChan <- err
@@ -98,10 +103,18 @@ func (c *SerpClientAsync) GetResponse(
 }
 
 // PollJobStatus polls the job status and manages the response/error channels.
-func (c *SerpClientAsync) PollJobStatus(
+// Ctx is the context of the request.
+// JsonPayload is the payload for the request.
+// Parse indicates whether to parse the response.
+// ParseInstructions indicates whether to parse the response with custom parsing instructions.
+// PollInterval is the time to wait between each subsequent polling request.
+// ResponseChan and errChan are the channels for the response and error respectively.
+func (c *Client) PollJobStatus(
 	ctx context.Context,
 	jobID string,
 	parse bool,
+	parseInstructions bool,
+	pollInterval time.Duration,
 	responseChan chan *Response,
 	errChan chan error,
 ) {
@@ -113,7 +126,10 @@ func (c *SerpClientAsync) PollJobStatus(
 			nil,
 		)
 		request.Header.Add("Content-type", "application/json")
-		request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+		request.SetBasicAuth(
+			c.ApiCredentials.Username,
+			c.ApiCredentials.Password,
+		)
 		response, err := c.HttpClient.Do(request)
 		if err != nil {
 			errChan <- err
@@ -142,13 +158,26 @@ func (c *SerpClientAsync) PollJobStatus(
 
 		// Check job status.
 		if job.Status == "done" {
-			c.GetResponse(job.ID, parse, responseChan, errChan)
+			c.GetResponse(job.ID, parse, parseInstructions, responseChan, errChan)
 			return
 		} else if job.Status == "faulted" {
 			err = fmt.Errorf("there was an error processing your query")
 			errChan <- err
 			close(responseChan)
 			return
+		}
+
+		// Add default timeout if ctx has no deadline.
+		if _, ok := ctx.Deadline(); !ok {
+			context, cancel := context.WithTimeout(ctx, DefaultTimeout)
+			defer cancel()
+			ctx = context
+		}
+
+		// Set wait time between requests.
+		sleepTime := DefaultPollInterval
+		if pollInterval != 0 {
+			sleepTime = pollInterval
 		}
 
 		select {
@@ -158,7 +187,7 @@ func (c *SerpClientAsync) PollJobStatus(
 			close(responseChan)
 			return
 		default:
-			time.Sleep(oxylabs.DefaultWaitTime)
+			time.Sleep(sleepTime)
 		}
 	}
 }

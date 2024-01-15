@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -13,8 +14,8 @@ import (
 func (c *SerpClientAsync) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
-) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *internal.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBaiduSearchCtx(ctx, query, opts...)
@@ -27,8 +28,8 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BaiduSearchOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -38,11 +39,11 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -52,7 +53,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "baidu_search",
+		"source":          oxylabs.BaiduSearch,
 		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
@@ -61,19 +62,36 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.PollInterval,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
@@ -88,8 +106,8 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 func (c *SerpClientAsync) ScrapeBaiduUrl(
 	query string,
 	opts ...*BaiduUrlOpts,
-) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *internal.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBaiduUrlCtx(ctx, query, opts...)
@@ -102,12 +120,12 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BaiduUrlOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *internal.Response, error) {
+	responseChan := make(chan *internal.Response)
 	errChan := make(chan error)
 
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "baidu")
+	err := internal.ValidateUrl(url, "baidu")
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +137,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -129,24 +147,41 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          "baidu",
+		"source":          oxylabs.BaiduUrl,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse"] = true
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		customParserFlag,
+		customParserFlag,
+		opt.PollInterval,
+		responseChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
