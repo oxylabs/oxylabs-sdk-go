@@ -29,7 +29,7 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 					CreatedAt     string  `json:"created_at"`
 					UpdatedAt     string  `json:"updated_at"`
 					Page          int     `json:"page"`
-					URL           string  `json:"url"`
+					Url           string  `json:"url"`
 					JobID         string  `json:"job_id"`
 					StatusCode    int     `json:"status_code"`
 				}
@@ -41,7 +41,7 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 					CreatedAt:     result.CreatedAt,
 					UpdatedAt:     result.UpdatedAt,
 					Page:          result.Page,
-					URL:           result.URL,
+					Url:           result.Url,
 					JobID:         result.JobID,
 					StatusCode:    result.StatusCode,
 				})
@@ -51,7 +51,7 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 					CreatedAt           string                 `json:"created_at"`
 					UpdatedAt           string                 `json:"updated_at"`
 					Page                int                    `json:"page"`
-					URL                 string                 `json:"url"`
+					Url                 string                 `json:"url"`
 					JobID               string                 `json:"job_id"`
 					StatusCode          int                    `json:"status_code"`
 				}
@@ -63,7 +63,7 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 					CreatedAt:           result.CreatedAt,
 					UpdatedAt:           result.UpdatedAt,
 					Page:                result.Page,
-					URL:                 result.URL,
+					Url:                 result.Url,
 					JobID:               result.JobID,
 					StatusCode:          result.StatusCode,
 				})
@@ -73,7 +73,7 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 					CreatedAt  string `json:"created_at"`
 					UpdatedAt  string `json:"updated_at"`
 					Page       int    `json:"page"`
-					URL        string `json:"url"`
+					Url        string `json:"url"`
 					JobID      string `json:"job_id"`
 					StatusCode int    `json:"status_code"`
 				}
@@ -85,7 +85,7 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 					CreatedAt:  result.CreatedAt,
 					UpdatedAt:  result.UpdatedAt,
 					Page:       result.Page,
-					URL:        result.URL,
+					Url:        result.Url,
 					JobID:      result.JobID,
 					StatusCode: result.StatusCode,
 				})
@@ -115,7 +115,7 @@ type Response struct {
 }
 
 type Job struct {
-	CallbackURL         string        `json:"callback_url"`
+	CallbackUrl         string        `json:"callback_url"`
 	ClientID            int           `json:"client_id"`
 	Context             []Context     `json:"context"`
 	CreatedAt           string        `json:"created_at"`
@@ -130,13 +130,13 @@ type Job struct {
 	ParsingInstructions interface{}   `json:"parsing_instructions"`
 	BrowserInstructions interface{}   `json:"browser_instructions"`
 	Render              interface{}   `json:"render"`
-	URL                 interface{}   `json:"url"`
+	Url                 interface{}   `json:"url"`
 	Query               string        `json:"query"`
 	Source              string        `json:"source"`
 	StartPage           int           `json:"start_page"`
 	Status              string        `json:"status"`
 	StorageType         interface{}   `json:"storage_type"`
-	StorageURL          interface{}   `json:"storage_url"`
+	StorageUrl          interface{}   `json:"storage_url"`
 	Subdomain           string        `json:"subdomain"`
 	ContentEncoding     string        `json:"content_encoding"`
 	UpdatedAt           string        `json:"updated_at"`
@@ -165,14 +165,14 @@ type Result struct {
 	CreatedAt           string `json:"created_at"`
 	UpdatedAt           string `json:"updated_at"`
 	Page                int    `json:"page"`
-	URL                 string `json:"url"`
+	Url                 string `json:"url"`
 	JobID               string `json:"job_id"`
 	StatusCode          int    `json:"status_code"`
 	ParserType          string `json:"parser_type"`
 }
 
 type Content struct {
-	URL             string  `json:"url"`
+	Url             string  `json:"url"`
 	Page            int     `json:"page"`
 	Results         Results `json:"results"`
 	LastVisiblePage int     `json:"last_visible_page"`
@@ -211,23 +211,23 @@ type Pla struct {
 
 type PlaItem struct {
 	Pos       int    `json:"pos"`
-	URL       string `json:"url"`
+	Url       string `json:"url"`
 	Price     string `json:"price"`
 	Title     string `json:"title"`
 	Seller    string `json:"seller"`
-	URLImage  string `json:"url_image"`
+	UrlImage  string `json:"url_image"`
 	ImageData string `json:"image_data"`
 }
 
 type Paid struct {
 	Pos        int           `json:"pos"`
-	URL        string        `json:"url"`
+	Url        string        `json:"url"`
 	Desc       string        `json:"desc"`
 	Title      string        `json:"title"`
 	DataRw     string        `json:"data_rw"`
 	DataPcu    []string      `json:"data_pcu"`
 	Sitelinks  PaidSitelinks `json:"sitelinks"`
-	URLShown   string        `json:"url_shown"`
+	UrlShown   string        `json:"url_shown"`
 	PosOverall int           `json:"pos_overall"`
 }
 
@@ -237,13 +237,13 @@ type PaidSitelinks struct {
 }
 
 type Expanded struct {
-	URL   string `json:"url"`
+	Url   string `json:"url"`
 	Desc  string `json:"desc"`
 	Title string `json:"title"`
 }
 
 type Inline struct {
-	URL   string `json:"url"`
+	Url   string `json:"url"`
 	Desc  string `json:"desc"`
 	Title string `json:"title"`
 }
@@ -256,17 +256,17 @@ type Image struct {
 type ImageItem struct {
 	Alt string `json:"alt"`
 	Pos int    `json:"pos"`
-	URL string `json:"url"`
+	Url string `json:"url"`
 }
 
 type Organic struct {
 	Pos        int              `json:"pos"`
-	URL        string           `json:"url"`
+	Url        string           `json:"url"`
 	Desc       string           `json:"desc"`
 	Title      string           `json:"title"`
 	Images     []string         `json:"images"`
 	Sitelinks  OrganicSitelinks `json:"sitelinks,omitempty"`
-	URLShown   string           `json:"url_shown"`
+	UrlShown   string           `json:"url_shown"`
 	PosOverall int              `json:"pos_overall"`
 }
 
@@ -277,7 +277,7 @@ type OrganicSitelinks struct {
 
 type Twitter struct {
 	Pos        int           `json:"pos"`
-	URL        string        `json:"url"`
+	Url        string        `json:"url"`
 	Items      []TwitterItem `json:"items"`
 	Title      string        `json:"title"`
 	PosOverall int           `json:"pos_overall"`
@@ -285,7 +285,7 @@ type Twitter struct {
 
 type TwitterItem struct {
 	Pos       int    `json:"pos"`
-	URL       string `json:"url"`
+	Url       string `json:"url"`
 	Content   string `json:"content"`
 	TimeFrame string `json:"time_frame"`
 }
@@ -312,12 +312,12 @@ type LinkElement struct {
 }
 
 type Profile struct {
-	URL   string `json:"url"`
+	Url   string `json:"url"`
 	Title string `json:"title"`
 }
 
 type RelatedSearch struct {
-	URL          string `json:"url"`
+	Url          string `json:"url"`
 	Title        string `json:"title"`
 	SectionTitle string `json:"section_title"`
 }
@@ -344,7 +344,7 @@ type TopStory struct {
 
 type TopStoryItem struct {
 	Pos       int    `json:"pos"`
-	URL       string `json:"url"`
+	Url       string `json:"url"`
 	Title     string `json:"title"`
 	Source    string `json:"source"`
 	TimeFrame string `json:"time_frame"`
@@ -380,7 +380,7 @@ type RelatedQuestionsItem struct {
 }
 
 type Source struct {
-	URL      string `json:"url"`
+	Url      string `json:"url"`
 	Title    string `json:"title"`
 	UrlShown string `json:"url_shown"`
 }
@@ -411,7 +411,7 @@ type Recipes struct {
 
 type RecipesItem struct {
 	Pos      int    `json:"pos"`
-	URL      string `json:"url"`
+	Url      string `json:"url"`
 	Desc     string `json:"desc"`
 	Title    string `json:"title"`
 	Rating   int    `json:"rating"`
@@ -426,17 +426,17 @@ type Videos struct {
 
 type VideosItem struct {
 	Pos    int    `json:"pos"`
-	URL    string `json:"url"`
+	Url    string `json:"url"`
 	Title  string `json:"title"`
 	Author string `json:"author"`
 	Source string `json:"source"`
 }
 
 type FeaturedSnippet struct {
-	URl        string `json:"url"`
+	Url        string `json:"url"`
 	Desc       string `json:"desc"`
 	Title      string `json:"title"`
-	URLShown   string `json:"url_shown"`
+	UrlShown   string `json:"url_shown"`
 	PosOverall int    `json:"pos_overall"`
 }
 
@@ -447,7 +447,7 @@ type RelatedSearchesCategorized struct {
 }
 
 type RelatedSearchesCategorizedItem struct {
-	URL   string `json:"url"`
+	Url   string `json:"url"`
 	Title string `json:"title"`
 }
 
@@ -472,7 +472,7 @@ type Flights struct {
 	From    string `json:"from"`
 	DateTo  string `json:"date_to"`
 	Results []struct {
-		URL      string `json:"url"`
+		Url      string `json:"url"`
 		Type     string `json:"type"`
 		Price    string `json:"price"`
 		Airline  string `json:"airline"`
@@ -483,7 +483,7 @@ type Flights struct {
 }
 
 type VideoBox struct {
-	URL        string `json:"url"`
+	Url        string `json:"url"`
 	Title      string `json:"title"`
 	PosOverall int    `json:"pos_overall"`
 }
@@ -491,7 +491,7 @@ type VideoBox struct {
 type LocalServiceAds struct {
 	Items []struct {
 		Pos              int    `json:"pos"`
-		URL              string `json:"url"`
+		Url              string `json:"url"`
 		Title            string `json:"title"`
 		Rating           int    `json:"rating"`
 		ReviewsCount     int    `json:"reviews_count"`

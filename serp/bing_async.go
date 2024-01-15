@@ -128,7 +128,7 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	errChan := make(chan error)
 
 	// Check validity of url.
-	err := internal.ValidateURL(url, "bing")
+	err := internal.ValidateUrl(url, "bing")
 	if err != nil {
 		return nil, err
 	}

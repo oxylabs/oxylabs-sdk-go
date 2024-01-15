@@ -189,7 +189,7 @@ type GoogleSearchOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
-	CallbackURL       string
+	CallbackUrl       string
 	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
@@ -256,7 +256,7 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 		"user_agent_type": opt.UserAgent,
 		"parse":           opt.Parse,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -349,7 +349,7 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 	opts ...*GoogleUrlOpts,
 ) (*internal.Response, error) {
 	// Check validity of url.
-	err := internal.ValidateURL(url, "google")
+	err := internal.ValidateUrl(url, "google")
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +410,7 @@ type GoogleAdsOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
-	CallbackURL       string
+	CallbackUrl       string
 	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
@@ -470,7 +470,7 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 		"user_agent_type": opt.UserAgent,
 		"parse":           opt.Parse,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -599,7 +599,7 @@ type GoogleHotelsOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
-	CallbackURL       string
+	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 	Context           []func(oxylabs.ContextOption)
@@ -661,7 +661,7 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -712,7 +712,7 @@ type GoogleTravelHotelsOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
-	CallbackURL       string
+	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 	Context           []func(oxylabs.ContextOption)
@@ -768,7 +768,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "hotel_occupancy",
@@ -816,7 +816,7 @@ type GoogleImagesOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
-	CallbackURL       string
+	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 	Context           []func(oxylabs.ContextOption)
@@ -841,7 +841,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	opts ...*GoogleImagesOpts,
 ) (*internal.Response, error) {
 	// Check validity of url.
-	err := internal.ValidateURL(url, "google")
+	err := internal.ValidateUrl(url, "google")
 	if err != nil {
 		return nil, err
 	}
@@ -880,7 +880,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "nfpr",
@@ -920,7 +920,7 @@ type GoogleTrendsExploreOpts struct {
 	GeoLocation       string
 	Context           []func(oxylabs.ContextOption)
 	UserAgent         oxylabs.UserAgent
-	CallbackURL       string
+	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 }
@@ -988,7 +988,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 			},
 		},
 		"user_agent_type": opt.UserAgent,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 	}
 
 	// Add custom parsing instructions to the payload if provided.

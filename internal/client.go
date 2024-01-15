@@ -8,7 +8,7 @@ type ApiCredentials struct {
 }
 
 type Client struct {
-	BaseURL        string
+	BaseUrl        string
 	ApiCredentials *ApiCredentials
 	HttpClient     *http.Client
 }

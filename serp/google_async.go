@@ -74,7 +74,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 		"user_agent_type": opt.UserAgent,
 		"parse":           opt.Parse,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -177,7 +177,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	errChan := make(chan error)
 
 	// Check validity of url.
-	err := internal.ValidateURL(url, "google")
+	err := internal.ValidateUrl(url, "google")
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +303,7 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 		"user_agent_type": opt.UserAgent,
 		"parse":           opt.Parse,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -507,7 +507,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -621,7 +621,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "hotel_occupancy",
@@ -700,7 +700,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	errChan := make(chan error)
 
 	// Check validity of url.
-	err := internal.ValidateURL(url, "google")
+	err := internal.ValidateUrl(url, "google")
 	if err != nil {
 		return nil, err
 	}
@@ -739,7 +739,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "nfpr",
@@ -858,7 +858,7 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 			},
 		},
 		"user_agent_type": opt.UserAgent,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 	}
 
 	// Add custom parsing instructions to the payload if provided.

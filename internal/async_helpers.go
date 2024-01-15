@@ -16,7 +16,7 @@ func (c *Client) GetJobID(
 ) (string, error) {
 	request, _ := http.NewRequest(
 		"POST",
-		c.BaseURL,
+		c.BaseUrl,
 		bytes.NewBuffer(jsonPayload),
 	)
 	request.Header.Add("Content-type", "application/json")
@@ -102,7 +102,7 @@ func (c *Client) GetResponse(
 	responseChan <- resp
 }
 
-// InternalClient.PollJobStatus polls the job status and manages the response/error channels.
+// PollJobStatus polls the job status and manages the response/error channels.
 // Ctx is the context of the request.
 // JsonPayload is the payload for the request.
 // Parse indicates whether to parse the response.

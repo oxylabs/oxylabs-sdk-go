@@ -181,7 +181,7 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	opts ...*YandexUrlOpts,
 ) (*internal.Response, error) {
 	// Check validity of url.
-	err := internal.ValidateURL(url, "yandex")
+	err := internal.ValidateUrl(url, "yandex")
 	if err != nil {
 		return nil, err
 	}

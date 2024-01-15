@@ -1,5 +1,3 @@
-// internal package
-
 package internal
 
 import (
@@ -29,7 +27,7 @@ func (c *Client) Req(
 	request, err := http.NewRequestWithContext(
 		ctx,
 		method,
-		c.BaseURL,
+		c.BaseUrl,
 		bytes.NewBuffer(jsonPayload),
 	)
 	if err != nil {

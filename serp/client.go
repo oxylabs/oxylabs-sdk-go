@@ -17,7 +17,7 @@ func Init(
 ) *SerpClient {
 	return &SerpClient{
 		InternalClient: &internal.Client{
-			BaseURL: "https://realtime.oxylabs.io/v1/queries",
+			BaseUrl: "https://realtime.oxylabs.io/v1/queries",
 			ApiCredentials: &internal.ApiCredentials{
 				Username: username,
 				Password: password,
@@ -38,7 +38,7 @@ func InitAsync(
 ) *SerpClientAsync {
 	return &SerpClientAsync{
 		InternalClient: &internal.Client{
-			BaseURL: "https://data.oxylabs.io/v1/queries",
+			BaseUrl: "https://data.oxylabs.io/v1/queries",
 			ApiCredentials: &internal.ApiCredentials{
 				Username: username,
 				Password: password,

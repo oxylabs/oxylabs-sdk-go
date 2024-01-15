@@ -152,7 +152,7 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 	opts ...*BaiduUrlOpts,
 ) (*internal.Response, error) {
 	// Check validity of url.
-	err := internal.ValidateURL(url, "baidu")
+	err := internal.ValidateUrl(url, "baidu")
 	if err != nil {
 		return nil, err
 	}
