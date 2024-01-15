@@ -15,6 +15,9 @@ const (
 
 	DefaultLimit_SERP      int = 10
 	DefaultLimit_ECOMMERCE int = 48
+
+	SyncBaseUrl  string = "https://realtime.oxylabs.io/v1/queries"
+	AsyncBaseUrl string = "https://data.oxylabs.io/v1/queries"
 )
 
 var (
