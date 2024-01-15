@@ -14,7 +14,7 @@ import (
 func (c *SerpClientAsync) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
-) (chan *internal.Response, error) {
+) (chan *internal.Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,8 +28,8 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*YandexSearchOpts,
-) (chan *internal.Response, error) {
-	responseChan := make(chan *internal.Response)
+) (chan *internal.Resp, error) {
+	respChan := make(chan *internal.Resp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -91,7 +91,7 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		responseChan,
+		respChan,
 		errChan,
 	)
 
@@ -100,7 +100,7 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 		return nil, err
 	}
 
-	return responseChan, nil
+	return respChan, nil
 }
 
 // ScrapeYandexUrl scrapes yandex with async polling runtime via Oxylabs SERP API
@@ -108,7 +108,7 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 func (c *SerpClientAsync) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
-) (chan *internal.Response, error) {
+) (chan *internal.Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -122,8 +122,8 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*YandexUrlOpts,
-) (chan *internal.Response, error) {
-	responseChan := make(chan *internal.Response)
+) (chan *internal.Resp, error) {
+	respChan := make(chan *internal.Resp)
 	errChan := make(chan error)
 
 	// Check the validity of the URL.
@@ -182,7 +182,7 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		responseChan,
+		respChan,
 		errChan,
 	)
 
@@ -191,5 +191,5 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 		return nil, err
 	}
 
-	return responseChan, nil
+	return respChan, nil
 }

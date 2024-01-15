@@ -14,7 +14,7 @@ import (
 func (c *SerpClientAsync) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
-) (chan *internal.Response, error) {
+) (chan *internal.Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,8 +28,8 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BaiduSearchOpts,
-) (chan *internal.Response, error) {
-	responseChan := make(chan *internal.Response)
+) (chan *internal.Resp, error) {
+	respChan := make(chan *internal.Resp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -89,7 +89,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		responseChan,
+		respChan,
 		errChan,
 	)
 
@@ -98,7 +98,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 		return nil, err
 	}
 
-	return responseChan, nil
+	return respChan, nil
 }
 
 // ScrapeBaiduUrl scrapes baidu with async polling runtime via Oxylabs SERP API
@@ -106,7 +106,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 func (c *SerpClientAsync) ScrapeBaiduUrl(
 	query string,
 	opts ...*BaiduUrlOpts,
-) (chan *internal.Response, error) {
+) (chan *internal.Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -120,8 +120,8 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BaiduUrlOpts,
-) (chan *internal.Response, error) {
-	responseChan := make(chan *internal.Response)
+) (chan *internal.Resp, error) {
+	respChan := make(chan *internal.Resp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -179,7 +179,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		responseChan,
+		respChan,
 		errChan,
 	)
 
@@ -188,5 +188,5 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 		return nil, err
 	}
 
-	return responseChan, nil
+	return respChan, nil
 }

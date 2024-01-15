@@ -58,7 +58,7 @@ type BaiduSearchOpts struct {
 func (c *SerpClient) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
-) (*internal.Response, error) {
+) (*internal.Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -71,7 +71,7 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BaiduSearchOpts,
-) (*internal.Response, error) {
+) (*internal.Resp, error) {
 	// Prepare options.
 	opt := &BaiduSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -117,12 +117,12 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 	}
 
 	// Request.
-	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	resp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return resp, nil
 }
 
 // BaiduUrlOpts contains all the query parameters available for baidu.
@@ -137,7 +137,7 @@ type BaiduUrlOpts struct {
 func (c *SerpClient) ScrapeBaiduUrl(
 	url string,
 	opts ...*BaiduUrlOpts,
-) (*internal.Response, error) {
+) (*internal.Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -150,7 +150,7 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BaiduUrlOpts,
-) (*internal.Response, error) {
+) (*internal.Resp, error) {
 	// Check validity of URL.
 	err := internal.ValidateUrl(url, "baidu")
 	if err != nil {
@@ -194,10 +194,10 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 	}
 
 	// Request.
-	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	resp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return resp, nil
 }

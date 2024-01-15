@@ -14,7 +14,7 @@ import (
 func (c *SerpClientAsync) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *internal.Response, error) {
+) (chan *internal.Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,8 +28,8 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *internal.Response, error) {
-	responseChan := make(chan *internal.Response)
+) (chan *internal.Resp, error) {
+	respChan := make(chan *internal.Resp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -92,7 +92,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
-		responseChan,
+		respChan,
 		errChan,
 	)
 
@@ -101,7 +101,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		return nil, err
 	}
 
-	return responseChan, nil
+	return respChan, nil
 }
 
 // ScrapeBingUrl scrapes bing with async polling runtime via Oxylabs SERP API
@@ -109,7 +109,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 func (c *SerpClientAsync) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *internal.Response, error) {
+) (chan *internal.Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -123,8 +123,8 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *internal.Response, error) {
-	responseChan := make(chan *internal.Response)
+) (chan *internal.Resp, error) {
+	respChan := make(chan *internal.Resp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -184,7 +184,7 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
-		responseChan,
+		respChan,
 		errChan,
 	)
 
@@ -193,5 +193,5 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		return nil, err
 	}
 
-	return responseChan, nil
+	return respChan, nil
 }

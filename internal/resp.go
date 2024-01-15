@@ -6,7 +6,7 @@ import (
 
 // Custom function to unmarshal into the Response struct.
 // Because of different return types depending on the parse option.
-func (r *Response) UnmarshalJSON(data []byte) error {
+func (r *Resp) UnmarshalJSON(data []byte) error {
 	// Unmarshal json data into RawResponse map.
 	var rawResponse map[string]json.RawMessage
 	if err := json.Unmarshal(data, &rawResponse); err != nil {
@@ -105,7 +105,7 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type Response struct {
+type Resp struct {
 	Parse             bool     `json:"parse"`
 	ParseInstructions bool     `json:"parse_instructions"`
 	Results           []Result `json:"results"`
