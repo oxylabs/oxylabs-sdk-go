@@ -74,7 +74,7 @@ type BingSearchOpts struct {
 func (c *SerpClient) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -87,7 +87,7 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &BingSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -136,9 +136,14 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil
@@ -159,7 +164,7 @@ type BingUrlOpts struct {
 func (c *SerpClient) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -172,7 +177,7 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Check validity of URL.
 	err := internal.ValidateUrl(url, "bing")
 	if err != nil {
@@ -218,9 +223,14 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil

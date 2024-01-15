@@ -14,7 +14,7 @@ import (
 func (c *SerpClientAsync) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,8 +28,9 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSearchOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -141,14 +142,24 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -158,7 +169,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 func (c *SerpClientAsync) ScrapeGoogleUrl(
 	url string,
 	opts ...*GoogleUrlOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -172,8 +183,9 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleUrlOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -233,14 +245,24 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -250,7 +272,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 func (c *SerpClientAsync) ScrapeGoogleAds(
 	query string,
 	opts ...*GoogleAdsOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -264,8 +286,9 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleAdsOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -348,14 +371,24 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -365,7 +398,7 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 func (c *SerpClientAsync) ScrapeGoogleSuggestions(
 	query string,
 	opts ...*GoogleSuggestionsOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -379,8 +412,9 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSuggestionsOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -435,14 +469,24 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -452,7 +496,7 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 func (c *SerpClientAsync) ScrapeGoogleHotels(
 	query string,
 	opts ...*GoogleHotelsOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -466,8 +510,9 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleHotelsOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -554,14 +599,24 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -571,7 +626,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -585,8 +640,9 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -664,14 +720,24 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -681,7 +747,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 func (c *SerpClientAsync) ScrapeGoogleImages(
 	url string,
 	opts ...*GoogleImagesOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -695,8 +761,9 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleImagesOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -778,14 +845,24 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -795,7 +872,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 func (c *SerpClientAsync) ScrapeGoogleTrendsExplore(
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -809,8 +886,9 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -887,14 +965,24 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }

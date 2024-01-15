@@ -14,7 +14,7 @@ import (
 func (c *SerpClientAsync) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,8 +28,9 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BaiduSearchOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -89,14 +90,24 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -106,7 +117,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 func (c *SerpClientAsync) ScrapeBaiduUrl(
 	query string,
 	opts ...*BaiduUrlOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -120,8 +131,9 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BaiduUrlOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -179,14 +191,24 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }

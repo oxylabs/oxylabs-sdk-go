@@ -200,7 +200,7 @@ type GoogleSearchOpts struct {
 func (c *SerpClient) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -213,7 +213,7 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSearchOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -311,9 +311,14 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil
@@ -334,7 +339,7 @@ type GoogleUrlOpts struct {
 func (c *SerpClient) ScrapeGoogleUrl(
 	url string,
 	opts ...*GoogleUrlOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -347,7 +352,7 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleUrlOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Check validity of URL.
 	err := internal.ValidateUrl(url, "google")
 	if err != nil {
@@ -393,9 +398,14 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil
@@ -421,7 +431,7 @@ type GoogleAdsOpts struct {
 func (c *SerpClient) ScrapeGoogleAds(
 	query string,
 	opts ...*GoogleAdsOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -434,7 +444,7 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleAdsOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleAdsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -504,9 +514,14 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil
@@ -527,7 +542,7 @@ type GoogleSuggestionsOpts struct {
 func (c *SerpClient) ScrapeGoogleSuggestions(
 	query string,
 	opts ...*GoogleSuggestionsOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -540,7 +555,7 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSuggestionsOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleSuggestionsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -581,9 +596,14 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil
@@ -609,7 +629,7 @@ type GoogleHotelsOpts struct {
 func (c *SerpClient) ScrapeGoogleHotels(
 	query string,
 	opts ...*GoogleHotelsOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -622,7 +642,7 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleHotelsOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleHotelsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -696,9 +716,14 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil
@@ -722,7 +747,7 @@ type GoogleTravelHotelsOpts struct {
 func (c *SerpClient) ScrapeGoogleTravelHotels(
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -735,7 +760,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleTravelHotelsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -799,9 +824,14 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil
@@ -826,7 +856,7 @@ type GoogleImagesOpts struct {
 func (c *SerpClient) ScrapeGoogleImages(
 	url string,
 	opts ...*GoogleImagesOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -839,7 +869,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleImagesOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Check validity of URL.
 	err := internal.ValidateUrl(url, "google")
 	if err != nil {
@@ -907,9 +937,14 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil
@@ -929,7 +964,7 @@ type GoogleTrendsExploreOpts struct {
 func (c *SerpClient) ScrapeGoogleTrendsExplore(
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -942,7 +977,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleTrendsExploreOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -1004,9 +1039,14 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, true, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, true, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil

@@ -14,7 +14,7 @@ import (
 func (c *SerpClientAsync) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,8 +28,9 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -92,14 +93,24 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -109,7 +120,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 func (c *SerpClientAsync) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *internal.Resp, error) {
+) (chan *SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -123,8 +134,9 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *internal.Resp, error) {
-	respChan := make(chan *internal.Resp)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	respChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -184,14 +196,24 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
-		respChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal response and forward it to the
+	// external response channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &SerpResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
