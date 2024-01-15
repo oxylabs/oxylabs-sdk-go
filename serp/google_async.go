@@ -129,13 +129,13 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		opt.Parse,
@@ -221,13 +221,13 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		opt.Parse,
@@ -337,13 +337,13 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(ctx,
+	go c.C.PollJobStatus(ctx,
 		jobID,
 		opt.Parse,
 		customParserFlag,
@@ -423,13 +423,13 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
@@ -542,13 +542,13 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
@@ -652,13 +652,13 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
@@ -766,13 +766,13 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
@@ -875,13 +875,13 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,

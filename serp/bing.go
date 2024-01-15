@@ -136,7 +136,7 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +218,7 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

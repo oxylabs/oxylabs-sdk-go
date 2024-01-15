@@ -77,13 +77,13 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
@@ -167,13 +167,13 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,

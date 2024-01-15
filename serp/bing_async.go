@@ -80,13 +80,13 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		opt.Parse,
@@ -172,13 +172,13 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.InternalClient.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.InternalClient.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		opt.Parse,

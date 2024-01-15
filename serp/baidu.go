@@ -117,7 +117,7 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

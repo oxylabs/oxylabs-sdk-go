@@ -145,7 +145,7 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +224,7 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

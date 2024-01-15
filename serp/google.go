@@ -311,7 +311,7 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +393,7 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -504,7 +504,7 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -581,7 +581,7 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -696,7 +696,7 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -799,7 +799,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -907,7 +907,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -1004,7 +1004,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Request.
-	res, err := c.InternalClient.Req(ctx, jsonPayload, true, customParserFlag, "POST")
+	res, err := c.C.Req(ctx, jsonPayload, true, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

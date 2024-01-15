@@ -6,8 +6,13 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 )
 
+const (
+	SYNC_BASE_URL  = "https://realtime.oxylabs.io/v1/queries"
+	ASYNC_BASE_URL = "https://data.oxylabs.io/v1/queries"
+)
+
 type SerpClient struct {
-	InternalClient *internal.Client
+	C *internal.Client
 }
 
 // Init for Sync runtime model.
@@ -16,8 +21,8 @@ func Init(
 	password string,
 ) *SerpClient {
 	return &SerpClient{
-		InternalClient: &internal.Client{
-			BaseUrl: "https://realtime.oxylabs.io/v1/queries",
+		C: &internal.Client{
+			BaseUrl: SYNC_BASE_URL,
 			ApiCredentials: &internal.ApiCredentials{
 				Username: username,
 				Password: password,
@@ -28,7 +33,7 @@ func Init(
 }
 
 type SerpClientAsync struct {
-	InternalClient *internal.Client
+	C *internal.Client
 }
 
 // Init for Async runtime model.
@@ -37,8 +42,8 @@ func InitAsync(
 	password string,
 ) *SerpClientAsync {
 	return &SerpClientAsync{
-		InternalClient: &internal.Client{
-			BaseUrl: "https://data.oxylabs.io/v1/queries",
+		C: &internal.Client{
+			BaseUrl: ASYNC_BASE_URL,
 			ApiCredentials: &internal.ApiCredentials{
 				Username: username,
 				Password: password,
