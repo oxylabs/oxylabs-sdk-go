@@ -92,7 +92,7 @@ func (c *SerpClient) ScrapeYandexSearch(
 }
 
 // ScrapeYandexSearchCtx scrapes yandex via Oxylabs SERP API with yandex_search as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeYandexSearchCtx(
 	ctx context.Context,
 	query string,
@@ -144,13 +144,13 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}
@@ -179,7 +179,7 @@ func (c *SerpClient) ScrapeYandexUrl(
 }
 
 // ScapeYandexUrlCtx scrapes a yandex url via Oxylabs SERP API with yandex as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeYandexUrlCtx(
 	ctx context.Context,
 	url string,
@@ -228,13 +228,13 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}

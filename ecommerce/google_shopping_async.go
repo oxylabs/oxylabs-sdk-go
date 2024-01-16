@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -13,8 +14,8 @@ import (
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrl(
 	url string,
 	opts ...*GoogleShoppingUrlOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *EcommerceResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleShoppingUrlCtx(ctx, url, opts...)
@@ -22,17 +23,18 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrl(
 
 // ScrapeGoogleShoppingUrlCtx scrapes google shopping with async polling runtime
 // via Oxylabs E-Commerce API and google_shopping as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleShoppingUrlOpts,
-) (chan *Resp, error) {
-	respChan := make(chan *Resp)
+) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
+	respChan := make(chan *EcommerceResp)
+	internalRespChan := make(chan *internal.Resp)
 
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "shopping.google")
+	err := internal.ValidateUrl(url, "shopping.google")
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +46,7 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -63,6 +65,13 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 		"parse":           opt.Parse,
 	}
 
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -70,18 +79,35 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, respChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.PollInterval,
+		internalRespChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &EcommerceResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -91,8 +117,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearch(
 	query string,
 	opts ...*GoogleShoppingSearchOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *EcommerceResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleShoppingSearchCtx(ctx, query, opts...)
@@ -100,14 +126,15 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearch(
 
 // ScrapeGoogleShoppingSearchCtx scrapes google shopping with async polling runtime
 // via Oxylabs E-Commerce API and google_shopping_search as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleShoppingSearchOpts,
-) (chan *Resp, error) {
-	respChan := make(chan *Resp)
+) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
+	respChan := make(chan *EcommerceResp)
+	internalRespChan := make(chan *internal.Resp)
 
 	// Prepare options.
 	opt := &GoogleShoppingSearchOpts{}
@@ -116,17 +143,17 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 	}
 
 	// Initialize the context map and apply each provided context modifier function.
-	context := make(ContextOption)
+	context := make(oxylabs.ContextOption)
 	for _, modifier := range opt.Context {
 		modifier(context)
 	}
 
 	// Set defaults.
-	SetDefaultSortBy(context)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultSortBy(context)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity(context)
@@ -168,6 +195,13 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 		},
 	}
 
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -175,18 +209,35 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, respChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.PollInterval,
+		internalRespChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &EcommerceResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -196,8 +247,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingProduct(
 	query string,
 	opts ...*GoogleShoppingProductOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *EcommerceResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleShoppingProductCtx(ctx, query, opts...)
@@ -205,14 +256,15 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProduct(
 
 // ScrapeGoogleShoppingProductCtx scrapes google shopping with async polling runtime
 // via Oxylabs E-Commerce API and google_shopping_product as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleShoppingProductOpts,
-) (chan *Resp, error) {
-	respChan := make(chan *Resp)
+) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
+	respChan := make(chan *EcommerceResp)
+	internalRespChan := make(chan *internal.Resp)
 
 	// Prepare options.
 	opt := &GoogleShoppingProductOpts{}
@@ -221,8 +273,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -244,6 +296,13 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 		"parse":            opt.Parse,
 	}
 
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -251,18 +310,35 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, respChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.PollInterval,
+		internalRespChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &EcommerceResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }
@@ -272,8 +348,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricing(
 	query string,
 	opts ...*GoogleShoppingPricingOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *EcommerceResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleShoppingPricingCtx(ctx, query, opts...)
@@ -281,14 +357,15 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricing(
 
 // ScrapeGoogleShoppingPricingCtx scrapes google shopping via Oxylabs E-Commerce API
 // with google_shopping_pricing as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleShoppingPricingOpts,
-) (chan *Resp, error) {
-	respChan := make(chan *Resp)
+) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
+	respChan := make(chan *EcommerceResp)
+	internalRespChan := make(chan *internal.Resp)
 
 	// Prepare options.
 	opt := &GoogleShoppingPricingOpts{}
@@ -297,10 +374,10 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 	}
 
 	// Set defaults.
-	SetDefaultPages(&opt.Pages)
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -324,6 +401,13 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 		"parse":            opt.Parse,
 	}
 
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
 	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -331,18 +415,35 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, respChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.PollInterval,
+		internalRespChan,
+		errChan,
+	)
 
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &EcommerceResp{
+			Resp: *internalResp,
+		}
+	}()
 
 	return respChan, nil
 }

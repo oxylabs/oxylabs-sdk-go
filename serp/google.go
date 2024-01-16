@@ -208,7 +208,7 @@ func (c *SerpClient) ScrapeGoogleSearch(
 }
 
 // ScrapeGoogleSearchCtx scrapes google via Oxylabs SERP API with google_search as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleSearchCtx(
 	ctx context.Context,
 	query string,
@@ -310,13 +310,13 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}
@@ -347,7 +347,7 @@ func (c *SerpClient) ScrapeGoogleUrl(
 }
 
 // ScrapeGoogleUrlCtx scrapes google via Oxylabs SERP API with google as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleUrlCtx(
 	ctx context.Context,
 	url string,
@@ -397,13 +397,13 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}
@@ -439,7 +439,7 @@ func (c *SerpClient) ScrapeGoogleAds(
 }
 
 // ScrapeGoogleAdsCtx scrapes google via Oxylabs SERP API with google_ads as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleAdsCtx(
 	ctx context.Context,
 	query string,
@@ -513,13 +513,13 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}
@@ -550,7 +550,7 @@ func (c *SerpClient) ScrapeGoogleSuggestions(
 }
 
 // ScrapeGoogleSuggestionsCtx scrapes google via  Oxylabs SERP API with google_suggestions as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	ctx context.Context,
 	query string,
@@ -595,13 +595,13 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}
@@ -637,7 +637,7 @@ func (c *SerpClient) ScrapeGoogleHotels(
 }
 
 // ScrapeGoogleHotelsCtx scrapes google via the google_hotels source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	ctx context.Context,
 	query string,
@@ -715,13 +715,13 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}
@@ -755,7 +755,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotels(
 }
 
 // ScrapeGoogleTravelHotelsCtx scrapes google via Oxylabs SERP API with google_travel_hotels as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	ctx context.Context,
 	query string,
@@ -823,13 +823,13 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}
@@ -864,7 +864,7 @@ func (c *SerpClient) ScrapeGoogleImages(
 }
 
 // ScrapeGoogleImagesCtx scrapes google via Oxylabs SERP API with google_images as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleImagesCtx(
 	ctx context.Context,
 	url string,
@@ -936,13 +936,13 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}
@@ -972,7 +972,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExplore(
 }
 
 // ScrapeGoogleTrendsExploreCtx scrapes google via Oxylabs SERP API with google_trends_explore as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	ctx context.Context,
 	query string,
@@ -1038,13 +1038,13 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, true, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}

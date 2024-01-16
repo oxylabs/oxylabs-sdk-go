@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 )
 
-// Custom function to unmarshal into the Response struct.
+// Custom function to unmarshal into the Resp struct.
 // Because of different return types depending on the parse option.
 func (r *Resp) UnmarshalJSON(data []byte) error {
-	// Unmarshal json data into RawResponse map.
-	var rawResponse map[string]json.RawMessage
-	if err := json.Unmarshal(data, &rawResponse); err != nil {
+	// Unmarshal json data into RawResp map.
+	var rawResp map[string]json.RawMessage
+	if err := json.Unmarshal(data, &rawResp); err != nil {
 		return err
 	}
 
 	// Unmarshal the results array.
-	if resultsData, ok := rawResponse["results"]; ok {
+	if resultsData, ok := rawResp["results"]; ok {
 		// Slice to store raw JSON messages for each result.
 		var resultsRawMessages []json.RawMessage
 		if err := json.Unmarshal(resultsData, &resultsRawMessages); err != nil {
@@ -94,7 +94,7 @@ func (r *Resp) UnmarshalJSON(data []byte) error {
 	}
 
 	// Unmarshal the job object.
-	if jobData, ok := rawResponse["job"]; ok {
+	if jobData, ok := rawResp["job"]; ok {
 		var job Job
 		if err := json.Unmarshal(jobData, &job); err != nil {
 			return err

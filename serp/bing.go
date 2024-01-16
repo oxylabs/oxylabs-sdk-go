@@ -82,7 +82,7 @@ func (c *SerpClient) ScrapeBingSearch(
 }
 
 // ScrapeBingSearchCtx scrapes bing via Oxylabs SERP API with bing_search as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
@@ -135,13 +135,13 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}
@@ -172,13 +172,13 @@ func (c *SerpClient) ScrapeBingUrl(
 }
 
 // ScrapeBingUrlCtx scrapes bing via Oxylabs SERP API with bing as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
 ) (*SerpResp, error) {
-	// Check validity of URL.
+	// Check validity of url.
 	err := internal.ValidateUrl(url, "bing")
 	if err != nil {
 		return nil, err
@@ -222,13 +222,13 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
+	// Req.
 	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
+	// Map resp.
 	resp := &SerpResp{
 		Resp: *internalResp,
 	}

@@ -9,13 +9,13 @@ import (
 	"net/http"
 )
 
-// Request to the API.
-// Ctx is the context of the request.
-// JsonPayload is the payload for the request.
-// Parse indicates whether to parse the response.
-// ParseInstructions indicates whether to parse the response
+// Req to the API.
+// Ctx is the context of the req.
+// JsonPayload is the payload for the req.
+// Parse indicates whether to parse the resp.
+// ParseInstructions indicates whether to parse the resp
 // with custom parsing instructions.
-// Method is the HTTP method of the request.
+// Method is the HTTP method of the req.
 func (c *Client) Req(
 	ctx context.Context,
 	jsonPayload []byte,
@@ -23,8 +23,8 @@ func (c *Client) Req(
 	parseInstructions bool,
 	method string,
 ) (*Resp, error) {
-	// Prepare request.
-	request, err := http.NewRequestWithContext(
+	// Prepare req.
+	req, err := http.NewRequestWithContext(
 		ctx,
 		method,
 		c.BaseUrl,
@@ -33,40 +33,40 @@ func (c *Client) Req(
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("Content-Type", "application/json")
-	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
+	req.Header.Set("Content-Type", "application/json")
+	req.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
 
-	// Get response.
-	response, err := c.HttpClient.Do(request)
+	// Get resp.
+	resp, err := c.HttpClient.Do(req)
 	if e, ok := err.(net.Error); ok && e.Timeout() {
 		return nil, fmt.Errorf("timeout error: %v", err)
 	} else if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer resp.Body.Close()
 
-	// Read the response body into a buffer.
-	responseBody, err := io.ReadAll(response.Body)
+	// Read the resp body into a buffer.
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	// If status code not 200, return error.
-	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("error with status code %s: %s", resp.Status, respBody)
 	}
 
 	// Unmarshal the JSON object.
-	resp := &Resp{}
-	resp.Parse = parse
-	resp.ParseInstructions = parseInstructions
-	if err := resp.UnmarshalJSON(responseBody); err != nil {
+	res := &Resp{}
+	res.Parse = parse
+	res.ParseInstructions = parseInstructions
+	if err := res.UnmarshalJSON(respBody); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON object: %v", err)
 	}
 
 	// Set status code and status.
-	resp.StatusCode = response.StatusCode
-	resp.Status = response.Status
+	res.StatusCode = resp.StatusCode
+	res.Status = resp.Status
 
-	return resp, nil
+	return res, nil
 }

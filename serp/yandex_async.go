@@ -23,7 +23,7 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 
 // ScrapeYandexSearchCtx scrapes yandex with async polling runtime via Oxylabs SERP API
 // and yandex_search as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	ctx context.Context,
 	query string,
@@ -102,8 +102,8 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{
@@ -128,7 +128,7 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 
 // ScrapeYandexUrlCtx scrapes yandex with async polling runtime via Oxylabs SERP API
 // and yandex as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	ctx context.Context,
 	url string,
@@ -204,8 +204,8 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{

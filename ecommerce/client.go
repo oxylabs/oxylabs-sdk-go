@@ -2,17 +2,16 @@ package ecommerce
 
 import (
 	"net/http"
+
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 )
 
-type ApiCredentials struct {
-	Username string
-	Password string
+type EcommerceResp struct {
+	internal.Resp
 }
 
 type EcommerceClient struct {
-	HttpClient     *http.Client
-	ApiCredentials *ApiCredentials
-	BaseUrl        string
+	C *internal.Client
 }
 
 // Init for Sync runtime model.
@@ -21,19 +20,19 @@ func Init(
 	password string,
 ) *EcommerceClient {
 	return &EcommerceClient{
-		ApiCredentials: &ApiCredentials{
-			Username: username,
-			Password: password,
+		C: &internal.Client{
+			BaseUrl: internal.SyncBaseUrl,
+			ApiCredentials: &internal.ApiCredentials{
+				Username: username,
+				Password: password,
+			},
+			HttpClient: &http.Client{},
 		},
-		HttpClient: &http.Client{},
-		BaseUrl:    "https://realtime.oxylabs.io/v1/queries",
 	}
 }
 
 type EcommerceClientAsync struct {
-	HttpClient     *http.Client
-	ApiCredentials *ApiCredentials
-	BaseUrl        string
+	C *internal.Client
 }
 
 // Init for Async runtime model.
@@ -42,11 +41,13 @@ func InitAsync(
 	password string,
 ) *EcommerceClientAsync {
 	return &EcommerceClientAsync{
-		ApiCredentials: &ApiCredentials{
-			Username: username,
-			Password: password,
+		C: &internal.Client{
+			BaseUrl: internal.AsyncBaseUrl,
+			ApiCredentials: &internal.ApiCredentials{
+				Username: username,
+				Password: password,
+			},
+			HttpClient: &http.Client{},
 		},
-		HttpClient: &http.Client{},
-		BaseUrl:    "https://data.oxylabs.io/v1/queries",
 	}
 }

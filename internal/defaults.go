@@ -66,3 +66,10 @@ func SetDefaultHotelOccupancy(ctx oxylabs.ContextOption) {
 		ctx["hotel_occupancy"] = 2
 	}
 }
+
+// SetDefaultSortBy sets the sort by parameter in the ctx if it is not set.
+func SetDefaultSortBy(ctx oxylabs.ContextOption) {
+	if ctx["sort_by"] == nil {
+		ctx["sort_by"] = "r"
+	}
+}

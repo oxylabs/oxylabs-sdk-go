@@ -23,7 +23,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearch(
 
 // ScrapeGoogleSearchCtx scrapes google with async polling runtime via Oxylabs SERP API
 // and google_search as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	ctx context.Context,
 	query string,
@@ -152,8 +152,8 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{
@@ -178,7 +178,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrl(
 
 // ScrapeGoogleUrlCtx scrapes google with async polling runtime via Oxylabs SERP API
 // and google as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	ctx context.Context,
 	url string,
@@ -255,8 +255,8 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{
@@ -281,7 +281,7 @@ func (c *SerpClientAsync) ScrapeGoogleAds(
 
 // ScrapeGoogleAdsCtx scrapes google with async polling runtime via Oxylabs SERP API
 // and google_ads as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	ctx context.Context,
 	query string,
@@ -381,8 +381,8 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{
@@ -407,7 +407,7 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestions(
 
 // ScrapeGoogleSuggestionsCtx scrapes google with async polling runtime via Oxylabs SERP API
 // and google_suggestions as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	ctx context.Context,
 	query string,
@@ -479,8 +479,8 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{
@@ -505,7 +505,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotels(
 
 // ScrapeGoogleHotelsCtx scrapes google with async polling runtime via Oxylabs SERP API
 // and google_hotels as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	ctx context.Context,
 	query string,
@@ -609,8 +609,8 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{
@@ -635,7 +635,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
 
 // ScrapeGoogleTravelHotelsCtx scrapes google with async polling runtime via Oxylabs SERP API
 // and google_travel_hotels as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	ctx context.Context,
 	query string,
@@ -730,8 +730,8 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{
@@ -756,7 +756,7 @@ func (c *SerpClientAsync) ScrapeGoogleImages(
 
 // ScrapeGoogleImagesCtx scrapes google with async polling runtime via Oxylabs SERP API
 // and google_images as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	ctx context.Context,
 	url string,
@@ -855,8 +855,8 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{
@@ -881,7 +881,7 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExplore(
 
 // ScrapeGoogleTrendsExploreCtx scrapes google with async polling runtime via Oxylabs SERP API
 // and google_trends_explore as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	ctx context.Context,
 	query string,
@@ -975,8 +975,8 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{

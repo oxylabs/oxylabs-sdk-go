@@ -23,7 +23,7 @@ func (c *SerpClientAsync) ScrapeBingSearch(
 
 // ScrapeBingSearchCtx scrapes bing with async polling runtime via Oxylabs SERP API
 // and bing_search as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
@@ -75,6 +75,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -103,8 +104,8 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{
@@ -129,7 +130,7 @@ func (c *SerpClientAsync) ScrapeBingUrl(
 
 // ScrapeBingUrlCtx scrapes bing with async polling runtime via Oxylabs SERP API
 // and bing as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
@@ -206,8 +207,8 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// external response channel.
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
 	internalResp := <-internalRespChan
 	go func() {
 		respChan <- &SerpResp{

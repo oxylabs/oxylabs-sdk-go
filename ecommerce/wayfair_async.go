@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -13,8 +14,8 @@ import (
 func (c *EcommerceClientAsync) ScrapeWayfairSearch(
 	query string,
 	opts ...*WayfairSearchOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *EcommerceResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeWayfairSearchCtx(ctx, query, opts...)
@@ -22,14 +23,15 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearch(
 
 // ScrapeWayfairSearchCtx scrapes wayfair with async polling runtime via Oxylabs E-Commerce API
 // and wayfair_search as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*WayfairSearchOpts,
-) (chan *Resp, error) {
-	responseChan := make(chan *Resp)
+) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
+	respChan := make(chan *EcommerceResp)
+	internalRespChan := make(chan *internal.Resp)
 
 	// Prepare options.
 	opt := &WayfairSearchOpts{}
@@ -38,10 +40,10 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_ECOMMERCE)
 
 	// Check validity of parameters.
 	err := opt.checkParametersValidity()
@@ -60,26 +62,52 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 		"callback_url":    opt.CallbackUrl,
 	}
 
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.PollInterval,
+		internalRespChan,
+		errChan,
+	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
 
-	return responseChan, nil
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &EcommerceResp{
+			Resp: *internalResp,
+		}
+	}()
+
+	return respChan, nil
 }
 
 // ScrapeWayfairUrl scrapes wayfair with async polling runtime via Oxylabs E-Commerce API
@@ -87,8 +115,8 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 func (c *EcommerceClientAsync) ScrapeWayfairUrl(
 	url string,
 	opts ...*WayfairUrlOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *EcommerceResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeWayfairUrlCtx(ctx, url, opts...)
@@ -96,17 +124,18 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrl(
 
 // ScrapeWayfairUrlCtx scrapes wayfair with async polling runtime via Oxylabs E-Commerce API
 // and wayfair as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*WayfairUrlOpts,
-) (chan *Resp, error) {
-	responseChan := make(chan *Resp)
+) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
+	respChan := make(chan *EcommerceResp)
+	internalRespChan := make(chan *internal.Resp)
 
 	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "wayfair")
+	err := internal.ValidateUrl(url, "wayfair")
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +147,7 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParametersValidity()
@@ -133,24 +162,51 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parsing_instructions"] = &opt.ParseInstructions
+		customParserFlag = true
+	}
+
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(ctx, jobID, false, responseChan, errChan)
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.Parse,
+		customParserFlag,
+		opt.PollInterval,
+		internalRespChan,
+		errChan,
+	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
 
-	return responseChan, nil
+	// Retrieve internal resp and forward it to the
+	// external resp channel.
+	internalResp := <-internalRespChan
+	go func() {
+		respChan <- &EcommerceResp{
+			Resp: *internalResp,
+		}
+	}()
+
+	return respChan, nil
 }
