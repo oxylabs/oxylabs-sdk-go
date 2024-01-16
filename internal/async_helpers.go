@@ -118,6 +118,13 @@ func (c *Client) PollJobStatus(
 	respChan chan *Resp,
 	errChan chan error,
 ) {
+	// Add default timeout if ctx has no deadline.
+	if _, ok := ctx.Deadline(); !ok {
+		context, cancel := context.WithTimeout(ctx, DefaultTimeout)
+		defer cancel()
+		ctx = context
+	}
+
 	for {
 		// Perform a request to query job status.
 		request, _ := http.NewRequest(
@@ -165,13 +172,6 @@ func (c *Client) PollJobStatus(
 			errChan <- err
 			close(respChan)
 			return
-		}
-
-		// Add default timeout if ctx has no deadline.
-		if _, ok := ctx.Deadline(); !ok {
-			context, cancel := context.WithTimeout(ctx, DefaultTimeout)
-			defer cancel()
-			ctx = context
 		}
 
 		// Set wait time between requests.
