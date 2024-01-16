@@ -6,6 +6,10 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 )
 
+type SerpResp struct {
+	internal.Resp
+}
+
 type SerpClient struct {
 	C *internal.Client
 }

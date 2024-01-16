@@ -84,7 +84,7 @@ type YandexSearchOpts struct {
 func (c *SerpClient) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -97,7 +97,7 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*YandexSearchOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &YandexSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -145,9 +145,14 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil
@@ -166,7 +171,7 @@ type YandexUrlOpts struct {
 func (c *SerpClient) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -179,7 +184,7 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*YandexUrlOpts,
-) (*internal.Resp, error) {
+) (*SerpResp, error) {
 	// Check validity of URL.
 	err := internal.ValidateUrl(url, "yandex")
 	if err != nil {
@@ -224,9 +229,14 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	}
 
 	// Request.
-	resp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
+	}
+
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
 	}
 
 	return resp, nil
