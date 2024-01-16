@@ -30,7 +30,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	opts ...*GoogleSearchOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -153,15 +153,13 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
 
 // ScrapeGoogleUrl scrapes google with async polling runtime via Oxylabs SERP API
@@ -185,7 +183,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	opts ...*GoogleUrlOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -256,15 +254,13 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
 
 // ScrapeGoogleAds scrapes google with async polling runtime via Oxylabs SERP API
@@ -288,7 +284,7 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	opts ...*GoogleAdsOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -382,15 +378,13 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
 
 // ScrapeGoogleSuggestions scrapes google with async polling runtime via Oxylabs SERP API
@@ -414,7 +408,7 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	opts ...*GoogleSuggestionsOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -480,15 +474,13 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
 
 // ScrapeGoogleHotels scrapes google with async polling runtime via Oxylabs SERP API
@@ -512,7 +504,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	opts ...*GoogleHotelsOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -610,15 +602,13 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
 
 // ScrapeGoogleTravelHotels scrapes google with async polling runtime via Oxylabs SERP API
@@ -642,7 +632,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	opts ...*GoogleTravelHotelsOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -731,15 +721,13 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
 
 // ScrapeGoogleImages scrapes google with async polling runtime via Oxylabs SERP API
@@ -763,7 +751,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	opts ...*GoogleImagesOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -856,15 +844,13 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
 
 // ScrapeGoogleTrendsExplore scrapes google with async polling runtime via Oxylabs SERP API
@@ -888,7 +874,7 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	opts ...*GoogleTrendsExploreOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -976,13 +962,11 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }

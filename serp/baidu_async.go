@@ -30,7 +30,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	opts ...*BaiduSearchOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -101,15 +101,13 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
 
 // ScrapeBaiduUrl scrapes baidu with async polling runtime via Oxylabs SERP API
@@ -133,7 +131,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	opts ...*BaiduUrlOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -202,13 +200,11 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }

@@ -30,7 +30,7 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	opts ...*YandexSearchOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -103,15 +103,13 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
 
 // ScrapeYandexUrl scrapes yandex with async polling runtime via Oxylabs SERP API
@@ -135,7 +133,7 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	opts ...*YandexUrlOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Check the validity of the URL.
@@ -205,13 +203,11 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	}
 
 	// Retrieve internal response and forward it to the
-	// external response channel.
-	internalResp := <-internalRespChan
+	// serp response channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
