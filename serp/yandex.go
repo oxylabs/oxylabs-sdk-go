@@ -139,6 +139,7 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -223,6 +224,7 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)

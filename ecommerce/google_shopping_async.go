@@ -95,6 +95,7 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 		errChan,
 	)
 
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err
@@ -225,6 +226,7 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 		errChan,
 	)
 
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err
@@ -326,6 +328,7 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 		errChan,
 	)
 
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err
@@ -431,6 +434,7 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 		errChan,
 	)
 
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err

@@ -352,6 +352,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingProductCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -465,6 +466,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingPricingCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)

@@ -305,6 +305,7 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -392,6 +393,7 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -508,6 +510,7 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -590,6 +593,7 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -710,6 +714,7 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -818,6 +823,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -931,6 +937,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -1033,6 +1040,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)

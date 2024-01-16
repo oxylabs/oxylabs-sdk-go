@@ -72,6 +72,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -94,7 +95,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 		errChan,
 	)
 
-	// Error handling.
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err
@@ -173,6 +174,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -195,7 +197,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 		errChan,
 	)
 
-	// Error handling.
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err

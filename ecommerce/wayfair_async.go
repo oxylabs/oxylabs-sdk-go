@@ -92,7 +92,7 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 		errChan,
 	)
 
-	// Error handling.
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err
@@ -193,7 +193,7 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 		errChan,
 	)
 
-	// Error handling.
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err

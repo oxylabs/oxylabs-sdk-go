@@ -98,7 +98,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		errChan,
 	)
 
-	// Error handling.
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err
@@ -179,6 +179,7 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -201,7 +202,7 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		errChan,
 	)
 
-	// Error handling.
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err
