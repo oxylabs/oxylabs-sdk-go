@@ -50,6 +50,7 @@ type BaiduSearchOpts struct {
 	Limit             int
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
+	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 }
@@ -101,12 +102,12 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 		"limit":           opt.Limit,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -118,7 +119,7 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -135,6 +136,7 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 type BaiduUrlOpts struct {
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
+	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 }
@@ -184,12 +186,12 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -201,7 +203,7 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

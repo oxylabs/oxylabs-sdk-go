@@ -365,7 +365,8 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	}
 
 	// Poll job status.
-	go c.C.PollJobStatus(ctx,
+	go c.C.PollJobStatus(
+		ctx,
 		jobID,
 		opt.Parse,
 		customParserFlag,
@@ -438,12 +439,12 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -464,7 +465,7 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
+		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,
@@ -549,6 +550,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -572,7 +574,6 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -593,7 +594,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
+		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,
@@ -673,6 +674,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 		"context": []map[string]interface{}{
 			{
 				"key":   "hotel_occupancy",
@@ -692,7 +694,6 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -713,7 +714,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
+		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,
@@ -801,6 +802,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 		"context": []map[string]interface{}{
 			{
 				"key":   "nfpr",
@@ -816,7 +818,6 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -837,7 +838,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
+		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,
@@ -935,7 +936,6 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -956,7 +956,7 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
+		true,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,

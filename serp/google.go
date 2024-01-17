@@ -536,6 +536,7 @@ type GoogleSuggestionsOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
+	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 	CallbackUrl       string
@@ -583,12 +584,12 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -600,7 +601,7 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -624,6 +625,7 @@ type GoogleHotelsOpts struct {
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	CallbackUrl       string
+	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 	Context           []func(oxylabs.ContextOption)
@@ -686,6 +688,7 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -709,7 +712,6 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -721,7 +723,7 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -743,6 +745,7 @@ type GoogleTravelHotelsOpts struct {
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	CallbackUrl       string
+	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 	Context           []func(oxylabs.ContextOption)
@@ -799,6 +802,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 		"context": []map[string]interface{}{
 			{
 				"key":   "hotel_occupancy",
@@ -818,7 +822,6 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -830,7 +833,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -853,6 +856,7 @@ type GoogleImagesOpts struct {
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	CallbackUrl       string
+	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 	Context           []func(oxylabs.ContextOption)
@@ -917,6 +921,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 		"context": []map[string]interface{}{
 			{
 				"key":   "nfpr",
@@ -932,7 +937,6 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -944,7 +948,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

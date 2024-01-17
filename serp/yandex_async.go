@@ -64,12 +64,12 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -90,7 +90,7 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
+		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,
@@ -165,12 +165,12 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -191,7 +191,7 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
+		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,

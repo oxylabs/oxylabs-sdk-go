@@ -76,6 +76,7 @@ type YandexSearchOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
+	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 }
@@ -129,12 +130,12 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -146,7 +147,7 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -164,6 +165,7 @@ type YandexUrlOpts struct {
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	CallbackUrl       string
+	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 }
@@ -214,12 +216,12 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -231,7 +233,7 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
