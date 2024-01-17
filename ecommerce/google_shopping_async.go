@@ -30,8 +30,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 	opts ...*GoogleShoppingUrlOpts,
 ) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
-	respChan := make(chan *EcommerceResp)
 	internalRespChan := make(chan *internal.Resp)
+	ecommerceRespChan := make(chan *EcommerceResp)
 
 	// Check validity of url.
 	err := internal.ValidateUrl(url, "shopping.google")
@@ -102,15 +102,13 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 	}
 
 	// Retrieve internal resp and forward it to the
-	// external resp channel.
-	internalResp := <-internalRespChan
+	// ecommerce resp channel.
 	go func() {
-		respChan <- &EcommerceResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		ecommerceRespChan <- &EcommerceResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return ecommerceRespChan, nil
 }
 
 // ScrapeGoogleShoppingSearch scrapes google shopping with async polling runtime
@@ -134,8 +132,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 	opts ...*GoogleShoppingSearchOpts,
 ) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
-	respChan := make(chan *EcommerceResp)
 	internalRespChan := make(chan *internal.Resp)
+	ecommerceRespChan := make(chan *EcommerceResp)
 
 	// Prepare options.
 	opt := &GoogleShoppingSearchOpts{}
@@ -233,15 +231,13 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 	}
 
 	// Retrieve internal resp and forward it to the
-	// external resp channel.
-	internalResp := <-internalRespChan
+	// ecommerce resp channel.
 	go func() {
-		respChan <- &EcommerceResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		ecommerceRespChan <- &EcommerceResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return ecommerceRespChan, nil
 }
 
 // ScrapeGoogleShoppingProduct scrapes google shopping with async polling runtime
@@ -265,8 +261,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 	opts ...*GoogleShoppingProductOpts,
 ) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
-	respChan := make(chan *EcommerceResp)
 	internalRespChan := make(chan *internal.Resp)
+	ecommerceRespChan := make(chan *EcommerceResp)
 
 	// Prepare options.
 	opt := &GoogleShoppingProductOpts{}
@@ -335,15 +331,13 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 	}
 
 	// Retrieve internal resp and forward it to the
-	// external resp channel.
-	internalResp := <-internalRespChan
+	// ecommerce resp channel.
 	go func() {
-		respChan <- &EcommerceResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		ecommerceRespChan <- &EcommerceResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return ecommerceRespChan, nil
 }
 
 // ScrapeGoogleShoppingPricing scrapes google shopping with async polling runtime
@@ -367,8 +361,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 	opts ...*GoogleShoppingPricingOpts,
 ) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
-	respChan := make(chan *EcommerceResp)
 	internalRespChan := make(chan *internal.Resp)
+	ecommerceRespChan := make(chan *EcommerceResp)
 
 	// Prepare options.
 	opt := &GoogleShoppingPricingOpts{}
@@ -441,13 +435,11 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 	}
 
 	// Retrieve internal resp and forward it to the
-	// external resp channel.
-	internalResp := <-internalRespChan
+	// ecommerce resp channel.
 	go func() {
-		respChan <- &EcommerceResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		ecommerceRespChan <- &EcommerceResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return ecommerceRespChan, nil
 }

@@ -30,8 +30,8 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 	opts ...*WayfairSearchOpts,
 ) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
-	respChan := make(chan *EcommerceResp)
 	internalRespChan := make(chan *internal.Resp)
+	ecommerceRespChan := make(chan *EcommerceResp)
 
 	// Prepare options.
 	opt := &WayfairSearchOpts{}
@@ -99,15 +99,13 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 	}
 
 	// Retrieve internal resp and forward it to the
-	// external resp channel.
-	internalResp := <-internalRespChan
+	// ecommerce resp channel.
 	go func() {
-		respChan <- &EcommerceResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		ecommerceRespChan <- &EcommerceResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return ecommerceRespChan, nil
 }
 
 // ScrapeWayfairUrl scrapes wayfair with async polling runtime via Oxylabs E-Commerce API
@@ -131,8 +129,8 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 	opts ...*WayfairUrlOpts,
 ) (chan *EcommerceResp, error) {
 	errChan := make(chan error)
-	respChan := make(chan *EcommerceResp)
 	internalRespChan := make(chan *internal.Resp)
+	ecommerceRespChan := make(chan *EcommerceResp)
 
 	// Check validity of url.
 	err := internal.ValidateUrl(url, "wayfair")
@@ -200,13 +198,11 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 	}
 
 	// Retrieve internal resp and forward it to the
-	// external resp channel.
-	internalResp := <-internalRespChan
+	// ecommerce resp channel.
 	go func() {
-		respChan <- &EcommerceResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		ecommerceRespChan <- &EcommerceResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return ecommerceRespChan, nil
 }
