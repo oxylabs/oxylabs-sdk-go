@@ -10,7 +10,7 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// Accepted Parameters for context options in google shopping.
+// Accepted parameters for context options in google shopping.
 var AcceptedSortByParameters = []string{
 	"r",
 	"p",
