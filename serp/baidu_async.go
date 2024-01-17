@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -13,8 +14,8 @@ import (
 func (c *SerpClientAsync) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
-) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBaiduSearchCtx(ctx, query, opts...)
@@ -27,8 +28,9 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BaiduSearchOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -38,11 +40,11 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -76,28 +78,36 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		responseChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
 
-	return responseChan, nil
+	// Retrieve internal response and forward it to the
+	// serp response channel.
+	go func() {
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
+	}()
+
+	return serpRespChan, nil
 }
 
 // ScrapeBaiduUrl scrapes baidu with async polling runtime via Oxylabs SERP API
@@ -105,8 +115,8 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 func (c *SerpClientAsync) ScrapeBaiduUrl(
 	query string,
 	opts ...*BaiduUrlOpts,
-) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBaiduUrlCtx(ctx, query, opts...)
@@ -119,12 +129,13 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BaiduUrlOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
-	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "baidu")
+	// Check validity of URL.
+	err := internal.ValidateUrl(url, "baidu")
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +147,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -166,26 +177,34 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
-		responseChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
 
-	return responseChan, nil
+	// Retrieve internal response and forward it to the
+	// serp response channel.
+	go func() {
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
+	}()
+
+	return serpRespChan, nil
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -21,7 +22,7 @@ var BingSearchAcceptedDomainParameters = []oxylabs.Domain{
 
 // checkParameterValidity checks validity of ScrapeBingSearch parameters.
 func (opt *BingSearchOpts) checkParameterValidity() error {
-	if opt.Domain != "" && !oxylabs.InList(opt.Domain, BingSearchAcceptedDomainParameters) {
+	if opt.Domain != "" && !internal.InList(opt.Domain, BingSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
 	}
 
@@ -73,8 +74,8 @@ type BingSearchOpts struct {
 func (c *SerpClient) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBingSearchCtx(ctx, query, opts...)
@@ -86,7 +87,7 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
-) (*Response, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &BingSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -94,11 +95,11 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -135,12 +136,17 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }
 
 // BingUrlOpts contains all the query parameters available for bing.
@@ -158,8 +164,8 @@ type BingUrlOpts struct {
 func (c *SerpClient) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBingUrlCtx(ctx, url, opts...)
@@ -171,9 +177,9 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
-) (*Response, error) {
-	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "bing")
+) (*SerpResp, error) {
+	// Check validity of URL.
+	err := internal.ValidateUrl(url, "bing")
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +191,7 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -217,10 +223,15 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }

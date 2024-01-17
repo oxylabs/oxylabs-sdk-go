@@ -1,4 +1,4 @@
-package serp
+package oxylabs
 
 type ContextOption map[string]interface{}
 

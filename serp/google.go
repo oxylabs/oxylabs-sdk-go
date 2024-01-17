@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -30,7 +31,7 @@ var AcceptedSearchTypeParameters = []string{
 }
 
 // checkParameterValidity checks validity of ScrapeGoogleSearch parameters.
-func (opt *GoogleSearchOpts) checkParameterValidity(ctx ContextOption) error {
+func (opt *GoogleSearchOpts) checkParameterValidity(ctx oxylabs.ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
@@ -43,7 +44,7 @@ func (opt *GoogleSearchOpts) checkParameterValidity(ctx ContextOption) error {
 		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
 	}
 
-	if ctx["tbm"] != nil && !oxylabs.InList(ctx["tbm"].(string), AcceptedTbmParameters) {
+	if ctx["tbm"] != nil && !internal.InList(ctx["tbm"].(string), AcceptedTbmParameters) {
 		return fmt.Errorf("invalid tbm parameter: %v", ctx["tbm"])
 	}
 
@@ -64,7 +65,7 @@ func (opt *GoogleUrlOpts) checkParameterValidity() error {
 }
 
 // checkParameterValidity checks validity of ScrapeGoogleAds parameters.
-func (opt *GoogleAdsOpts) checkParameterValidity(ctx ContextOption) error {
+func (opt *GoogleAdsOpts) checkParameterValidity(ctx oxylabs.ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
@@ -77,7 +78,7 @@ func (opt *GoogleAdsOpts) checkParameterValidity(ctx ContextOption) error {
 		return fmt.Errorf("pages and start_page parameters must be greater than 0")
 	}
 
-	if ctx["tbm"] != nil && !oxylabs.InList(ctx["tbm"].(string), AcceptedTbmParameters) {
+	if ctx["tbm"] != nil && !internal.InList(ctx["tbm"].(string), AcceptedTbmParameters) {
 		return fmt.Errorf("invalid tbm parameter: %v", ctx["tbm"])
 	}
 
@@ -98,7 +99,7 @@ func (opt *GoogleSuggestionsOpts) checkParameterValidity() error {
 }
 
 // checkParameterValidity checks validity of ScrapeGoogleHotels parameters.
-func (opt *GoogleHotelsOpts) checkParameterValidity(ctx ContextOption) error {
+func (opt *GoogleHotelsOpts) checkParameterValidity(ctx oxylabs.ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
@@ -119,7 +120,7 @@ func (opt *GoogleHotelsOpts) checkParameterValidity(ctx ContextOption) error {
 }
 
 // checkParameterValidity checks validity of ScrapeGoogleTravelHotels parameters.
-func (opt *GoogleTravelHotelsOpts) checkParameterValidity(ctx ContextOption) error {
+func (opt *GoogleTravelHotelsOpts) checkParameterValidity(ctx oxylabs.ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
@@ -148,12 +149,12 @@ func (opt *GoogleTravelHotelsOpts) checkParameterValidity(ctx ContextOption) err
 }
 
 // checkParameterValidity checks validity of ScrapeGoogleTrendsExplore parameters.
-func (opt *GoogleTrendsExploreOpts) checkParameterValidity(ctx ContextOption) error {
+func (opt *GoogleTrendsExploreOpts) checkParameterValidity(ctx oxylabs.ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
 
-	if ctx["search_type"] != nil && !oxylabs.InList(ctx["search_type"].(string), AcceptedSearchTypeParameters) {
+	if ctx["search_type"] != nil && !internal.InList(ctx["search_type"].(string), AcceptedSearchTypeParameters) {
 		return fmt.Errorf("invalid search_type parameter: %v", ctx["search_type"])
 	}
 
@@ -165,7 +166,7 @@ func (opt *GoogleTrendsExploreOpts) checkParameterValidity(ctx ContextOption) er
 }
 
 // checkParameterValidity checks validity of google images parameters.
-func (opt *GoogleImagesOpts) checkParameterValidity(ctx ContextOption) error {
+func (opt *GoogleImagesOpts) checkParameterValidity() error {
 
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
@@ -188,19 +189,19 @@ type GoogleSearchOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
-	CallbackURL       string
+	CallbackUrl       string
 	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
-	Context           []func(ContextOption)
+	Context           []func(oxylabs.ContextOption)
 }
 
 // ScrapeGoogleSearch scrapes google via Oxylabs SERP API with google_search as source.
 func (c *SerpClient) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleSearchCtx(ctx, query, opts...)
@@ -212,7 +213,7 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSearchOpts,
-) (*Response, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -220,7 +221,7 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	}
 
 	// Initialize the context map and apply each provided context modifier function.
-	context := make(ContextOption)
+	context := make(oxylabs.ContextOption)
 	for _, modifier := range opt.Context {
 		modifier(context)
 	}
@@ -233,11 +234,11 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity(context)
@@ -255,7 +256,7 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 		"user_agent_type": opt.UserAgent,
 		"parse":           opt.Parse,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -310,12 +311,17 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }
 
 // GoogleUrlOpts contains all the query parameters available for google.
@@ -333,8 +339,8 @@ type GoogleUrlOpts struct {
 func (c *SerpClient) ScrapeGoogleUrl(
 	url string,
 	opts ...*GoogleUrlOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleUrlCtx(ctx, url, opts...)
@@ -346,9 +352,9 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleUrlOpts,
-) (*Response, error) {
-	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "google")
+) (*SerpResp, error) {
+	// Check validity of URL.
+	err := internal.ValidateUrl(url, "google")
 	if err != nil {
 		return nil, err
 	}
@@ -360,7 +366,7 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -392,12 +398,17 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }
 
 // GoogleAdsOpts contains all the query parameters available for google_ads.
@@ -409,19 +420,19 @@ type GoogleAdsOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
-	CallbackURL       string
+	CallbackUrl       string
 	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
-	Context           []func(ContextOption)
+	Context           []func(oxylabs.ContextOption)
 }
 
 // ScrapeGoogleAds scrapes google via Oxylabs SERP API with google_ads as source.
 func (c *SerpClient) ScrapeGoogleAds(
 	query string,
 	opts ...*GoogleAdsOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleAdsCtx(ctx, query, opts...)
@@ -433,7 +444,7 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleAdsOpts,
-) (*Response, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleAdsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -441,16 +452,16 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 	}
 
 	// Initialize the context map apply each provided context modifier function.
-	context := make(ContextOption)
+	context := make(oxylabs.ContextOption)
 	for _, modifier := range opt.Context {
 		modifier(context)
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity(context)
@@ -469,7 +480,7 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 		"user_agent_type": opt.UserAgent,
 		"parse":           opt.Parse,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -503,12 +514,17 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }
 
 // GoogleSuggestionsOpts contains all the query parameters available for google_shopping.
@@ -526,8 +542,8 @@ type GoogleSuggestionsOpts struct {
 func (c *SerpClient) ScrapeGoogleSuggestions(
 	query string,
 	opts ...*GoogleSuggestionsOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleSuggestionsCtx(ctx, query, opts...)
@@ -539,7 +555,7 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSuggestionsOpts,
-) (*Response, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleSuggestionsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -547,7 +563,7 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -580,12 +596,17 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }
 
 // GoogleHotelsOpts contains all the query parameters available for google_hotels.
@@ -598,18 +619,18 @@ type GoogleHotelsOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
-	CallbackURL       string
+	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
-	Context           []func(ContextOption)
+	Context           []func(oxylabs.ContextOption)
 }
 
 // ScrapeGoogleHotels scrapes google via Oxylabs SERP API with google_hotels as source.
 func (c *SerpClient) ScrapeGoogleHotels(
 	query string,
 	opts ...*GoogleHotelsOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleHotelsCtx(ctx, query, opts...)
@@ -621,7 +642,7 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleHotelsOpts,
-) (*Response, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleHotelsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -629,18 +650,18 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	}
 
 	// Initialize the context map apply each provided context modifier function.
-	context := make(ContextOption)
+	context := make(oxylabs.ContextOption)
 	for _, modifier := range opt.Context {
 		modifier(context)
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
-	setDefaultHotelOccupancy(context)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultHotelOccupancy(context)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity(context)
@@ -660,7 +681,7 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "results_language",
@@ -695,12 +716,17 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }
 
 // GoogleTravelHotelsOpts contains all the query parameters available for google_travel_hotels.
@@ -711,18 +737,18 @@ type GoogleTravelHotelsOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
-	CallbackURL       string
+	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
-	Context           []func(ContextOption)
+	Context           []func(oxylabs.ContextOption)
 }
 
 // ScrapeGoogleTravelHotels scrapes google via Oxylabs SERP API with google_travel_hotels as source.
 func (c *SerpClient) ScrapeGoogleTravelHotels(
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleTravelHotelsCtx(ctx, query, opts...)
@@ -734,7 +760,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
-) (*Response, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleTravelHotelsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -742,14 +768,14 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Initialize the context map apply each provided context modifier function.
-	context := make(ContextOption)
+	context := make(oxylabs.ContextOption)
 	for _, modifier := range opt.Context {
 		modifier(context)
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity(context)
@@ -767,7 +793,7 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "hotel_occupancy",
@@ -798,12 +824,17 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }
 
 // GoogleImagesOpts contains all the query parameters available for google_images.
@@ -815,18 +846,18 @@ type GoogleImagesOpts struct {
 	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
-	CallbackURL       string
+	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
-	Context           []func(ContextOption)
+	Context           []func(oxylabs.ContextOption)
 }
 
 // ScrapeGoogleImages scrapes google via Oxylabs SERP API with google_images as source.
 func (c *SerpClient) ScrapeGoogleImages(
 	url string,
 	opts ...*GoogleImagesOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleImagesCtx(ctx, url, opts...)
@@ -838,9 +869,9 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleImagesOpts,
-) (*Response, error) {
-	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "google")
+) (*SerpResp, error) {
+	// Check validity of URL.
+	err := internal.ValidateUrl(url, "google")
 	if err != nil {
 		return nil, err
 	}
@@ -852,18 +883,18 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	}
 
 	// Initialize the context map apply each provided context modifier function.
-	context := make(ContextOption)
+	context := make(oxylabs.ContextOption)
 	for _, modifier := range opt.Context {
 		modifier(context)
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultPages(&opt.Pages)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultPages(&opt.Pages)
 
 	// Check validity of parameters.
-	err = opt.checkParameterValidity(context)
+	err = opt.checkParameterValidity()
 	if err != nil {
 		return nil, err
 	}
@@ -879,7 +910,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 		"context": []map[string]interface{}{
 			{
 				"key":   "nfpr",
@@ -906,20 +937,25 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }
 
 // GoogleTrendsExploreOpts contains all the query parameters available for google_trends_explore.
 type GoogleTrendsExploreOpts struct {
 	GeoLocation       string
-	Context           []func(ContextOption)
+	Context           []func(oxylabs.ContextOption)
 	UserAgent         oxylabs.UserAgent
-	CallbackURL       string
+	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 }
@@ -928,8 +964,8 @@ type GoogleTrendsExploreOpts struct {
 func (c *SerpClient) ScrapeGoogleTrendsExplore(
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeGoogleTrendsExploreCtx(ctx, query, opts...)
@@ -941,7 +977,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
-) (*Response, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &GoogleTrendsExploreOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -949,13 +985,13 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Initialize the context map apply each provided context modifier function.
-	context := make(ContextOption)
+	context := make(oxylabs.ContextOption)
 	for _, modifier := range opt.Context {
 		modifier(context)
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity(context)
@@ -987,7 +1023,7 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 			},
 		},
 		"user_agent_type": opt.UserAgent,
-		"callback_url":    opt.CallbackURL,
+		"callback_url":    opt.CallbackUrl,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
@@ -1003,10 +1039,15 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, true, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, true, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }

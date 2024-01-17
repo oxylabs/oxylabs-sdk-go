@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -13,8 +14,8 @@ import (
 func (c *SerpClientAsync) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBingSearchCtx(ctx, query, opts...)
@@ -27,8 +28,9 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -38,11 +40,11 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -79,28 +81,36 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
-		responseChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
 
-	return responseChan, nil
+	// Retrieve internal response and forward it to the
+	// serp response channel.
+	go func() {
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
+	}()
+
+	return serpRespChan, nil
 }
 
 // ScrapeBingUrl scrapes bing with async polling runtime via Oxylabs SERP API
@@ -108,8 +118,8 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 func (c *SerpClientAsync) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (chan *SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeBingUrlCtx(ctx, url, opts...)
@@ -122,12 +132,13 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *Response, error) {
-	responseChan := make(chan *Response)
+) (chan *SerpResp, error) {
+	internalRespChan := make(chan *internal.Resp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
-	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "bing")
+	// Check validity of URL.
+	err := internal.ValidateUrl(url, "bing")
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +150,7 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -171,26 +182,34 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	}
 
 	// Get job ID.
-	jobID, err := c.GetJobID(jsonPayload)
+	jobID, err := c.C.GetJobID(jsonPayload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Poll job status.
-	go c.PollJobStatus(
+	go c.C.PollJobStatus(
 		ctx,
 		jobID,
 		opt.Parse,
 		customParserFlag,
 		opt.PollInterval,
-		responseChan,
+		internalRespChan,
 		errChan,
 	)
 
+	// Error handling.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
 
-	return responseChan, nil
+	// Retrieve internal response and forward it to the
+	// serp response channel.
+	go func() {
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
+	}()
+
+	return serpRespChan, nil
 }

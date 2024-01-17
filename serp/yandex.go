@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
@@ -33,11 +34,11 @@ var YandexSearchAcceptedLocaleParameters = []oxylabs.Locale{
 
 // checkParameterValidity checks validity of ScrapeYandexSearch parameters.
 func (opt *YandexSearchOpts) checkParameterValidity() error {
-	if !oxylabs.InList(opt.Domain, YandexSearchAcceptedDomainParameters) {
+	if !internal.InList(opt.Domain, YandexSearchAcceptedDomainParameters) {
 		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
 	}
 
-	if opt.Locale != "" && !oxylabs.InList(opt.Locale, YandexSearchAcceptedLocaleParameters) {
+	if opt.Locale != "" && !internal.InList(opt.Locale, YandexSearchAcceptedLocaleParameters) {
 		return fmt.Errorf("invalid locale parameter: %s", opt.Locale)
 	}
 
@@ -83,8 +84,8 @@ type YandexSearchOpts struct {
 func (c *SerpClient) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeYandexSearchCtx(ctx, query, opts...)
@@ -96,7 +97,7 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*YandexSearchOpts,
-) (*Response, error) {
+) (*SerpResp, error) {
 	// Prepare options.
 	opt := &YandexSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -104,11 +105,11 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	}
 
 	// Set defaults.
-	SetDefaultDomain(&opt.Domain)
-	SetDefaultStartPage(&opt.StartPage)
-	SetDefaultLimit(&opt.Limit)
-	SetDefaultPages(&opt.Pages)
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
+	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err := opt.checkParameterValidity()
@@ -144,12 +145,17 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }
 
 // YandexUrlOpts contains all the query parameters available for yandex.
@@ -165,8 +171,8 @@ type YandexUrlOpts struct {
 func (c *SerpClient) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
-) (*Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), oxylabs.DefaultTimeout)
+) (*SerpResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
 	return c.ScrapeYandexUrlCtx(ctx, url, opts...)
@@ -178,9 +184,9 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*YandexUrlOpts,
-) (*Response, error) {
-	// Check validity of url.
-	err := oxylabs.ValidateURL(url, "yandex")
+) (*SerpResp, error) {
+	// Check validity of URL.
+	err := internal.ValidateUrl(url, "yandex")
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +198,7 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	}
 
 	// Set defaults.
-	SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
 	err = opt.checkParameterValidity()
@@ -223,10 +229,15 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	}
 
 	// Request.
-	res, err := c.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	// Map response.
+	resp := &SerpResp{
+		Resp: *internalResp,
+	}
+
+	return resp, nil
 }

@@ -1,4 +1,4 @@
-package serp
+package internal
 
 import (
 	"bytes"
@@ -16,20 +16,23 @@ import (
 // ParseInstructions indicates whether to parse the response
 // with custom parsing instructions.
 // Method is the HTTP method of the request.
-func (c *SerpClient) Req(
+func (c *Client) Req(
 	ctx context.Context,
 	jsonPayload []byte,
 	parse bool,
 	parseInstructions bool,
 	method string,
-) (*Response, error) {
+) (*Resp, error) {
 	// Prepare request.
-	request, _ := http.NewRequestWithContext(
+	request, err := http.NewRequestWithContext(
 		ctx,
 		method,
 		c.BaseUrl,
 		bytes.NewBuffer(jsonPayload),
 	)
+	if err != nil {
+		return nil, err
+	}
 	request.Header.Set("Content-Type", "application/json")
 	request.SetBasicAuth(c.ApiCredentials.Username, c.ApiCredentials.Password)
 
@@ -40,6 +43,7 @@ func (c *SerpClient) Req(
 	} else if err != nil {
 		return nil, err
 	}
+	defer response.Body.Close()
 
 	// Read the response body into a buffer.
 	responseBody, err := io.ReadAll(response.Body)
@@ -53,7 +57,7 @@ func (c *SerpClient) Req(
 	}
 
 	// Unmarshal the JSON object.
-	resp := &Response{}
+	resp := &Resp{}
 	resp.Parse = parse
 	resp.ParseInstructions = parseInstructions
 	if err := resp.UnmarshalJSON(responseBody); err != nil {
