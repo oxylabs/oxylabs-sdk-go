@@ -84,6 +84,7 @@ func (c *EcommerceClient) ScrapeWayfairSearchCtx(
 		"limit":           opt.Limit,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
@@ -176,6 +177,7 @@ func (c *EcommerceClient) ScrapeWayfairUrlCtx(
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
