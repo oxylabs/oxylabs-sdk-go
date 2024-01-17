@@ -30,7 +30,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	opts ...*BingSearchOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -105,15 +105,13 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	}
 
 	// Retrieve internal resp and forward it to the
-	// external resp channel.
-	internalResp := <-internalRespChan
+	// serp resp channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
 
 // ScrapeBingUrl scrapes bing with async polling runtime via Oxylabs SERP API
@@ -137,7 +135,7 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	opts ...*BingUrlOpts,
 ) (chan *SerpResp, error) {
 	internalRespChan := make(chan *internal.Resp)
-	respChan := make(chan *SerpResp)
+	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -209,13 +207,11 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	}
 
 	// Retrieve internal resp and forward it to the
-	// external resp channel.
-	internalResp := <-internalRespChan
+	// serp resp channel.
 	go func() {
-		respChan <- &SerpResp{
-			Resp: *internalResp,
-		}
+		internalResp := <-internalRespChan
+		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
-	return respChan, nil
+	return serpRespChan, nil
 }
