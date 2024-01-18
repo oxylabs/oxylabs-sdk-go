@@ -7,10 +7,64 @@ type PageLimit struct {
 	Limit int `json:"limit"`
 }
 
+type KeyValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 // LimitPerPage sets the limits_per_page context option.
 func LimitPerPage(limits []PageLimit) func(ContextOption) {
 	return func(ctx ContextOption) {
 		ctx["limit_per_page"] = limits
+	}
+}
+
+// Content sets the limits_per_page context option.
+func Content(content string) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["content"] = content
+	}
+}
+
+// Cookies sets the cookies context option.
+func Cookies(cookies []KeyValue) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["cookies"] = cookies
+	}
+}
+
+// FollowRedirects sets the follow_redirects context option.
+func FollowRedirects(follow bool) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["follow_redirects"] = follow
+	}
+}
+
+// Headers sets the headers context option.
+func Headers(headers map[string]string) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["headers"] = headers
+	}
+}
+
+// HttpMethod sets the http_method context option.
+func HttpMethod(method string) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["http_method"] = method
+	}
+}
+
+// SessionId sets the session_id context option.
+func SessionId(id string) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["session_id"] = id
+	}
+}
+
+// SuccessfulStatusCodes sets the successful_status_codes context option.
+func SuccessfulStatusCodes(codes []int) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["successful_status_codes"] = codes
 	}
 }
 

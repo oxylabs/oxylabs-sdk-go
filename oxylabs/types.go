@@ -84,6 +84,8 @@ const (
 
 	Wayfair       Source = "wayfair"
 	WayfairSearch Source = "wayfair_search"
+
+	Universal Source = "universal_ecommerce"
 )
 
 type Domain string
