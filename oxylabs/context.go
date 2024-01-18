@@ -186,3 +186,17 @@ func MaxPrice(maxPrice int) func(ContextOption) {
 		ctx["max_price"] = maxPrice
 	}
 }
+
+// MerchantId sets the category_id context option.
+func MerchantId(merchantId int) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["merchant_id"] = merchantId
+	}
+}
+
+// AutoselectVariant sets the autoselect_variant context option.
+func AutoselectVariant(variant bool) func(ContextOption) {
+	return func(ctx ContextOption) {
+		ctx["autoselect_variant"] = variant
+	}
+}

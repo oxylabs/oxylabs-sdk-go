@@ -86,6 +86,15 @@ const (
 	WayfairSearch Source = "wayfair_search"
 
 	Universal Source = "universal_ecommerce"
+
+	AmazonUrl         Source = "amazon"
+	AmazonSearch      Source = "amazon_search"
+	AmazonProduct     Source = "amazon_product"
+	AmazonPricing     Source = "amazon_pricing"
+	AmazonReviews     Source = "amazon_reviews"
+	AmazonQuestions   Source = "amazon_questions"
+	AmazonBestsellers Source = "amazon_bestsellers"
+	AmazonSellers     Source = "amazon_sellers"
 )
 
 type Domain string
