@@ -60,12 +60,12 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 		"limit":           opt.Limit,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
-		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
+		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -86,7 +86,7 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
+		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,
@@ -160,12 +160,12 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
-		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
+		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -186,7 +186,7 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
+		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,

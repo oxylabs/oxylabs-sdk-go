@@ -34,7 +34,6 @@ type WayfairSearchOpts struct {
 	Limit             int
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
-	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 }
@@ -84,12 +83,12 @@ func (c *EcommerceClient) ScrapeWayfairSearchCtx(
 		"limit":           opt.Limit,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
-		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
+		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -101,7 +100,7 @@ func (c *EcommerceClient) ScrapeWayfairSearchCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +117,6 @@ func (c *EcommerceClient) ScrapeWayfairSearchCtx(
 type WayfairUrlOpts struct {
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
-	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 }
@@ -177,11 +175,11 @@ func (c *EcommerceClient) ScrapeWayfairUrlCtx(
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
-		"parse":           opt.Parse,
 	}
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
+		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -193,7 +191,7 @@ func (c *EcommerceClient) ScrapeWayfairUrlCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
 	if err != nil {
 		return nil, err
 	}

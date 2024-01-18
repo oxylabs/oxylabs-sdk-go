@@ -62,12 +62,12 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 		"limit":           opt.Limit,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
-		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
+		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -88,7 +88,7 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
+		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,
@@ -162,12 +162,12 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
-		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
+		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
@@ -188,7 +188,7 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
+		customParserFlag,
 		customParserFlag,
 		opt.PollInterval,
 		internalRespChan,
