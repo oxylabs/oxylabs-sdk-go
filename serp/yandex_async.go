@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
@@ -29,7 +30,7 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	query string,
 	opts ...*YandexSearchOpts,
 ) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
+	httpRespChan := make(chan *http.Response)
 	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
@@ -90,10 +91,8 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -103,10 +102,16 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
 	// serp resp channel.
 	go func() {
-		internalResp := <-internalRespChan
 		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
@@ -133,7 +138,7 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	url string,
 	opts ...*YandexUrlOpts,
 ) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
+	httpRespChan := make(chan *http.Response)
 	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
@@ -191,10 +196,8 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -204,10 +207,16 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
 	// serp resp channel.
 	go func() {
-		internalResp := <-internalRespChan
 		serpRespChan <- &SerpResp{*internalResp}
 	}()
 

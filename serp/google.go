@@ -167,7 +167,6 @@ func (opt *GoogleTrendsExploreOpts) checkParameterValidity(ctx oxylabs.ContextOp
 
 // checkParameterValidity checks validity of google images parameters.
 func (opt *GoogleImagesOpts) checkParameterValidity() error {
-
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
 	}
@@ -200,7 +199,7 @@ type GoogleSearchOpts struct {
 func (c *SerpClient) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
-) (*SerpResp, error) {
+) (*GoogleSearchResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -213,7 +212,7 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSearchOpts,
-) (*SerpResp, error) {
+) (*GoogleSearchResp, error) {
 	// Prepare options.
 	opt := &GoogleSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -312,17 +311,23 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetGoogleSearchResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, nil
+	// Map response.
+	googleSearchResp := &GoogleSearchResp{
+		GoogleSearchResp: *internalResp,
+	}
+
+	return googleSearchResp, nil
 }
 
 // GoogleUrlOpts contains all the query parameters available for google.
@@ -340,7 +345,7 @@ type GoogleUrlOpts struct {
 func (c *SerpClient) ScrapeGoogleUrl(
 	url string,
 	opts ...*GoogleUrlOpts,
-) (*SerpResp, error) {
+) (*GoogleUrlResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -353,7 +358,7 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleUrlOpts,
-) (*SerpResp, error) {
+) (*GoogleUrlResp, error) {
 	// Check validity of URL.
 	err := internal.ValidateUrl(url, "google")
 	if err != nil {
@@ -400,17 +405,23 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetGoogleUrlResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, nil
+	// Map response.
+	googleUrlResp := &GoogleUrlResp{
+		GoogleUrlResp: *internalResp,
+	}
+
+	return googleUrlResp, nil
 }
 
 // GoogleAdsOpts contains all the query parameters available for google_ads.
@@ -433,7 +444,7 @@ type GoogleAdsOpts struct {
 func (c *SerpClient) ScrapeGoogleAds(
 	query string,
 	opts ...*GoogleAdsOpts,
-) (*SerpResp, error) {
+) (*GoogleAdsResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -446,7 +457,7 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleAdsOpts,
-) (*SerpResp, error) {
+) (*GoogleAdsResp, error) {
 	// Prepare options.
 	opt := &GoogleAdsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -517,17 +528,23 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetGoogleAdsResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, nil
+	// Map response.
+	googleAdsResp := &GoogleAdsResp{
+		GoogleAdsResp: *internalResp,
+	}
+
+	return googleAdsResp, nil
 }
 
 // GoogleSuggestionsOpts contains all the query parameters available for google_shopping.
@@ -599,17 +616,23 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, true, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map response.
+	serpResp := &SerpResp{
 		Resp: *internalResp,
 	}
 
-	return resp, nil
+	return serpResp, nil
 }
 
 // GoogleHotelsOpts contains all the query parameters available for google_hotels.
@@ -720,17 +743,23 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map response.
+	serpResp := &SerpResp{
 		Resp: *internalResp,
 	}
 
-	return resp, nil
+	return serpResp, nil
 }
 
 // GoogleTravelHotelsOpts contains all the query parameters available for google_travel_hotels.
@@ -829,17 +858,23 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map response.
+	serpResp := &SerpResp{
 		Resp: *internalResp,
 	}
 
-	return resp, nil
+	return serpResp, nil
 }
 
 // GoogleImagesOpts contains all the query parameters available for google_images.
@@ -862,7 +897,7 @@ type GoogleImagesOpts struct {
 func (c *SerpClient) ScrapeGoogleImages(
 	url string,
 	opts ...*GoogleImagesOpts,
-) (*SerpResp, error) {
+) (*GoogleImagesResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -875,13 +910,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleImagesOpts,
-) (*SerpResp, error) {
-	// Check validity of URL.
-	err := internal.ValidateUrl(url, "google")
-	if err != nil {
-		return nil, err
-	}
-
+) (*GoogleImagesResp, error) {
 	// Prepare options.
 	opt := &GoogleImagesOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -895,12 +924,13 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	}
 
 	// Set defaults.
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultPages(&opt.Pages)
 
 	// Check validity of parameters.
-	err = opt.checkParameterValidity()
+	err := opt.checkParameterValidity()
 	if err != nil {
 		return nil, err
 	}
@@ -944,17 +974,24 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetGoogleImagesResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, nil
+	// Map response.
+	googleImagesResp := &GoogleImagesResp{
+		GoogleImagesResp: *internalResp,
+	}
+
+	return googleImagesResp, nil
+
 }
 
 // GoogleTrendsExploreOpts contains all the query parameters available for google_trends_explore.
@@ -1008,9 +1045,8 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":       oxylabs.GoogleTrendsExplore,
-		"query":        query,
-		"geo_location": opt.GeoLocation,
+		"source": oxylabs.GoogleTrendsExplore,
+		"query":  query,
 		"context": []map[string]interface{}{
 			{
 				"key":   "search_type",
@@ -1033,6 +1069,11 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 		"callback_url":    opt.CallbackUrl,
 	}
 
+	// Add geo_location to the payload if provided.
+	if opt.GeoLocation != "" {
+		payload["geo_location"] = opt.GeoLocation
+	}
+
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
@@ -1047,15 +1088,21 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, true, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map response.
+	serpResp := &SerpResp{
 		Resp: *internalResp,
 	}
 
-	return resp, nil
+	return serpResp, nil
 }

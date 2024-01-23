@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
@@ -14,7 +15,7 @@ import (
 func (c *SerpClientAsync) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
-) (chan *SerpResp, error) {
+) (chan *GoogleSearchResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,9 +29,9 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSearchOpts,
-) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
-	serpRespChan := make(chan *SerpResp)
+) (chan *GoogleSearchResp, error) {
+	httpRespChan := make(chan *http.Response)
+	googleSearchRespChan := make(chan *GoogleSearchResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -140,10 +141,8 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -153,14 +152,20 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetGoogleSearchResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// serp resp channel.
+	// googleSearch resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		serpRespChan <- &SerpResp{*internalResp}
+		googleSearchRespChan <- &GoogleSearchResp{*internalResp}
 	}()
 
-	return serpRespChan, nil
+	return googleSearchRespChan, nil
 }
 
 // ScrapeGoogleUrl scrapes google with async polling runtime via Oxylabs SERP API
@@ -168,7 +173,7 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 func (c *SerpClientAsync) ScrapeGoogleUrl(
 	url string,
 	opts ...*GoogleUrlOpts,
-) (chan *SerpResp, error) {
+) (chan *GoogleUrlResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -182,9 +187,9 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleUrlOpts,
-) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
-	serpRespChan := make(chan *SerpResp)
+) (chan *GoogleUrlResp, error) {
+	httpRespChan := make(chan *http.Response)
+	googleUrlResp := make(chan *GoogleUrlResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -242,10 +247,8 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -255,14 +258,20 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetGoogleUrlResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// serp resp channel.
+	// googleUrl resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		serpRespChan <- &SerpResp{*internalResp}
+		googleUrlResp <- &GoogleUrlResp{*internalResp}
 	}()
 
-	return serpRespChan, nil
+	return googleUrlResp, nil
 }
 
 // ScrapeGoogleAds scrapes google with async polling runtime via Oxylabs SERP API
@@ -270,7 +279,7 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 func (c *SerpClientAsync) ScrapeGoogleAds(
 	query string,
 	opts ...*GoogleAdsOpts,
-) (chan *SerpResp, error) {
+) (chan *GoogleAdsResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -284,9 +293,9 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleAdsOpts,
-) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
-	serpRespChan := make(chan *SerpResp)
+) (chan *GoogleAdsResp, error) {
+	httpRespChan := make(chan *http.Response)
+	googleAdsResp := make(chan *GoogleAdsResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -368,10 +377,8 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -381,14 +388,20 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetGoogleAdsResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// serp resp channel.
+	// googleAds resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		serpRespChan <- &SerpResp{*internalResp}
+		googleAdsResp <- &GoogleAdsResp{*internalResp}
 	}()
 
-	return serpRespChan, nil
+	return googleAdsResp, nil
 }
 
 // ScrapeGoogleSuggestions scrapes google with async polling runtime via Oxylabs SERP API
@@ -411,7 +424,7 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	query string,
 	opts ...*GoogleSuggestionsOpts,
 ) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
+	httpRespChan := make(chan *http.Response)
 	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
@@ -464,10 +477,8 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		true,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -477,10 +488,16 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
 	// serp resp channel.
 	go func() {
-		internalResp := <-internalRespChan
 		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
@@ -507,7 +524,7 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	query string,
 	opts ...*GoogleHotelsOpts,
 ) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
+	httpRespChan := make(chan *http.Response)
 	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
@@ -593,10 +610,8 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -606,10 +621,16 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
 	// serp resp channel.
 	go func() {
-		internalResp := <-internalRespChan
 		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
@@ -636,7 +657,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
 ) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
+	httpRespChan := make(chan *http.Response)
 	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
@@ -713,10 +734,8 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -726,10 +745,16 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
 	// serp resp channel.
 	go func() {
-		internalResp := <-internalRespChan
 		serpRespChan <- &SerpResp{*internalResp}
 	}()
 
@@ -741,7 +766,7 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 func (c *SerpClientAsync) ScrapeGoogleImages(
 	url string,
 	opts ...*GoogleImagesOpts,
-) (chan *SerpResp, error) {
+) (chan *GoogleImagesResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -755,9 +780,9 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleImagesOpts,
-) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
-	serpRespChan := make(chan *SerpResp)
+) (chan *GoogleImagesResp, error) {
+	httpRespChan := make(chan *http.Response)
+	googleImagesRespChan := make(chan *GoogleImagesResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -779,6 +804,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	}
 
 	// Set defaults.
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultPages(&opt.Pages)
@@ -837,10 +863,8 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -850,14 +874,20 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetGoogleImagesResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// serp resp channel.
+	// googleImages resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		serpRespChan <- &SerpResp{*internalResp}
+		googleImagesRespChan <- &GoogleImagesResp{*internalResp}
 	}()
 
-	return serpRespChan, nil
+	return googleImagesRespChan, nil
 }
 
 // ScrapeGoogleTrendsExplore scrapes google with async polling runtime via Oxylabs SERP API
@@ -880,7 +910,7 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
 ) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
+	httpRespChan := make(chan *http.Response)
 	serpRespChan := make(chan *SerpResp)
 	errChan := make(chan error)
 
@@ -955,10 +985,8 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		true,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -968,10 +996,16 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
 	// serp resp channel.
 	go func() {
-		internalResp := <-internalRespChan
 		serpRespChan <- &SerpResp{*internalResp}
 	}()
 

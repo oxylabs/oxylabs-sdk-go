@@ -9,6 +9,25 @@ import (
 type SerpResp struct {
 	internal.Resp
 }
+type BingResp struct {
+	internal.BingResp
+}
+
+type GoogleSearchResp struct {
+	internal.GoogleSearchResp
+}
+
+type GoogleUrlResp struct {
+	internal.GoogleUrlResp
+}
+
+type GoogleAdsResp struct {
+	internal.GoogleAdsResp
+}
+
+type GoogleImagesResp struct {
+	internal.GoogleImagesResp
+}
 
 type SerpClient struct {
 	C *internal.Client

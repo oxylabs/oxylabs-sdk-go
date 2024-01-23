@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
@@ -14,7 +15,7 @@ import (
 func (c *SerpClientAsync) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *SerpResp, error) {
+) (chan *BingResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,9 +29,9 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
-	serpRespChan := make(chan *SerpResp)
+) (chan *BingResp, error) {
+	httpRespChan := make(chan *http.Response)
+	bingRespChan := make(chan *BingResp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -91,10 +92,8 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -104,14 +103,20 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetBingResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// serp resp channel.
+	// bing resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		serpRespChan <- &SerpResp{*internalResp}
+		bingRespChan <- &BingResp{*internalResp}
 	}()
 
-	return serpRespChan, nil
+	return bingRespChan, nil
 }
 
 // ScrapeBingUrl scrapes bing with async polling runtime via Oxylabs SERP API
@@ -119,7 +124,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 func (c *SerpClientAsync) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *SerpResp, error) {
+) (chan *BingResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -133,9 +138,9 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
-	serpRespChan := make(chan *SerpResp)
+) (chan *BingResp, error) {
+	httpRespChan := make(chan *http.Response)
+	bingRespChan := make(chan *BingResp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -193,10 +198,8 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -206,12 +209,18 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the internal Response.
+	httpResp := <-httpRespChan
+	internalResp, err := internal.GetBingResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// serp resp channel.
+	// bing resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		serpRespChan <- &SerpResp{*internalResp}
+		bingRespChan <- &BingResp{*internalResp}
 	}()
 
-	return serpRespChan, nil
+	return bingRespChan, nil
 }

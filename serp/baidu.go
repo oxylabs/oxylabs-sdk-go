@@ -118,17 +118,23 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map response.
+	serpResp := &SerpResp{
 		Resp: *internalResp,
 	}
 
-	return resp, nil
+	return serpResp, nil
 }
 
 // BaiduUrlOpts contains all the query parameters available for baidu.
@@ -201,15 +207,21 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map response.
+	serpResp := &SerpResp{
 		Resp: *internalResp,
 	}
 
-	return resp, nil
+	return serpResp, nil
 }

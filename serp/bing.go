@@ -74,7 +74,7 @@ type BingSearchOpts struct {
 func (c *SerpClient) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (*SerpResp, error) {
+) (*BingResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -87,7 +87,7 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
-) (*SerpResp, error) {
+) (*BingResp, error) {
 	// Prepare options.
 	opt := &BingSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -137,17 +137,23 @@ func (c *SerpClient) ScrapeBingSearchCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetBingResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, nil
+	// Map response.
+	bingResp := &BingResp{
+		BingResp: *internalResp,
+	}
+
+	return bingResp, nil
 }
 
 // BingUrlOpts contains all the query parameters available for bing.
@@ -165,7 +171,7 @@ type BingUrlOpts struct {
 func (c *SerpClient) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (*SerpResp, error) {
+) (*BingResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -178,7 +184,7 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
-) (*SerpResp, error) {
+) (*BingResp, error) {
 	// Check validity of url.
 	err := internal.ValidateUrl(url, "bing")
 	if err != nil {
@@ -225,15 +231,21 @@ func (c *SerpClient) ScrapeBingUrlCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the internal Response.
+	internalResp, err := internal.GetBingResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, nil
+	// Map response.
+	bingResp := &BingResp{
+		BingResp: *internalResp,
+	}
+
+	return bingResp, nil
 }
