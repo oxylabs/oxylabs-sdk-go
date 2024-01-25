@@ -44,12 +44,10 @@ func (c *Client) GetJobID(
 	return job.ID, nil
 }
 
-// Helper function for handling resp parsing and error checking.
-func (c *Client) GetResp(
+// Helper function for getting the http response from the request.
+func (c *Client) GetHttpResp(
 	jobID string,
-	parse bool,
-	parseInstructions bool,
-	respChan chan *Resp,
+	httpChan chan *http.Response,
 	errChan chan error,
 ) {
 	req, _ := http.NewRequest(
@@ -65,57 +63,25 @@ func (c *Client) GetResp(
 	resp, err := c.HttpClient.Do(req)
 	if err != nil {
 		errChan <- err
-		close(respChan)
+		close(httpChan)
 		return
 	}
 
-	// Read the resp body into a buffer.
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		err = fmt.Errorf("error reading resp body: %v", err)
-		errChan <- err
-		close(respChan)
-		return
-	}
-	resp.Body.Close()
-
-	// Check status code.
-	if resp.StatusCode != 200 {
-		err = fmt.Errorf("error with status code %s: %s", resp.Status, respBody)
-		errChan <- err
-		close(respChan)
-		return
-	}
-
-	// Unmarshal the JSON object.
-	res := &Resp{}
-	res.Parse = parse
-	if err := res.UnmarshalJSON(respBody); err != nil {
-		err = fmt.Errorf("failed to parse JSON object: %v", err)
-		errChan <- err
-		close(respChan)
-		return
-	}
-	res.StatusCode = resp.StatusCode
-	res.Status = resp.Status
+	// Return.
 	close(errChan)
-	respChan <- res
+	httpChan <- resp
 }
 
 // PollJobStatus polls the job status and manages the resp/error channels.
-// Ctx is the context of the req.
-// JsonPayload is the payload for the req.
-// Parse indicates whether to parse the resp.
-// ParseInstructions indicates whether to parse the resp with custom parsing instructions.
-// PollInterval is the time to wait between each subsequent polling req.
-// respChan and errChan are the channels for the resp and error respectively.
+// ctx is the context of the req.
+// jsonPayload is the payload for the req.
+// pollInterval is the time to wait between each subsequent polling req.
+// httpRespChan and errChan are the channels for the http resp and error respectively.
 func (c *Client) PollJobStatus(
 	ctx context.Context,
 	jobID string,
-	parse bool,
-	parseInstructions bool,
 	pollInterval time.Duration,
-	respChan chan *Resp,
+	httpRespChan chan *http.Response,
 	errChan chan error,
 ) {
 	// Add default timeout if ctx has no deadline.
@@ -123,6 +89,12 @@ func (c *Client) PollJobStatus(
 		context, cancel := context.WithTimeout(ctx, DefaultTimeout)
 		defer cancel()
 		ctx = context
+	}
+
+	// Set wait time between requests.
+	sleepTime := DefaultPollInterval
+	if pollInterval != 0 {
+		sleepTime = pollInterval
 	}
 
 	for {
@@ -140,7 +112,7 @@ func (c *Client) PollJobStatus(
 		resp, err := c.HttpClient.Do(req)
 		if err != nil {
 			errChan <- err
-			close(respChan)
+			close(httpRespChan)
 			return
 		}
 
@@ -150,7 +122,7 @@ func (c *Client) PollJobStatus(
 		if err != nil {
 			err = fmt.Errorf("error reading resp body: %v", err)
 			errChan <- err
-			close(respChan)
+			close(httpRespChan)
 			return
 		}
 
@@ -159,35 +131,35 @@ func (c *Client) PollJobStatus(
 		if err = json.Unmarshal(respBody, &job); err != nil {
 			err = fmt.Errorf("error unmarshalling job resp body: %v", err)
 			errChan <- err
-			close(respChan)
+			close(httpRespChan)
 			return
 		}
 
 		// Check job status.
 		if job.Status == "done" {
-			c.GetResp(job.ID, parse, parseInstructions, respChan, errChan)
+			c.GetHttpResp(job.ID, httpRespChan, errChan)
 			return
 		} else if job.Status == "faulted" {
 			err = fmt.Errorf("there was an error processing your query")
 			errChan <- err
-			close(respChan)
+			close(httpRespChan)
 			return
-		}
-
-		// Set wait time between requests.
-		sleepTime := DefaultPollInterval
-		if pollInterval != 0 {
-			sleepTime = pollInterval
 		}
 
 		select {
 		case <-ctx.Done():
 			err = fmt.Errorf("timeout exceeded")
 			errChan <- err
-			close(respChan)
+			close(httpRespChan)
 			return
 		default:
 			time.Sleep(sleepTime)
 		}
 	}
+}
+
+// Job struct to get job id and status for the async polling.
+type Job struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
 }
