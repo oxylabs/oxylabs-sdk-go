@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
@@ -14,7 +15,7 @@ import (
 func (c *EcommerceClientAsync) ScrapeWayfairSearch(
 	query string,
 	opts ...*WayfairSearchOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,10 +29,10 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*WayfairSearchOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &WayfairSearchOpts{}
@@ -86,10 +87,8 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -99,14 +98,20 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeWayfairUrl scrapes wayfair with async polling runtime via Oxylabs E-Commerce API
@@ -114,7 +119,7 @@ func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 func (c *EcommerceClientAsync) ScrapeWayfairUrl(
 	url string,
 	opts ...*WayfairUrlOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -128,10 +133,10 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*WayfairUrlOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Check validity of url.
 	err := internal.ValidateUrl(url, "wayfair")
@@ -186,10 +191,8 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -199,12 +202,18 @@ func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }

@@ -6,10 +6,6 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 )
 
-type EcommerceResp struct {
-	internal.Resp
-}
-
 type EcommerceClient struct {
 	C *internal.Client
 }

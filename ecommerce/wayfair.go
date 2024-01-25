@@ -42,7 +42,7 @@ type WayfairSearchOpts struct {
 func (c *EcommerceClient) ScrapeWayfairSearch(
 	query string,
 	opts ...*WayfairSearchOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -55,7 +55,7 @@ func (c *EcommerceClient) ScrapeWayfairSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*WayfairSearchOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &WayfairSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -100,14 +100,15 @@ func (c *EcommerceClient) ScrapeWayfairSearchCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -134,7 +135,7 @@ func (opt *WayfairUrlOpts) checkParametersValidity() error {
 func (c *EcommerceClient) ScrapeWayfairUrl(
 	url string,
 	opts ...*WayfairUrlOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -147,7 +148,7 @@ func (c *EcommerceClient) ScrapeWayfairUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*WayfairUrlOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Check validity of url.
 	err := internal.ValidateUrl(url, "wayfair")
 	if err != nil {
@@ -191,14 +192,15 @@ func (c *EcommerceClient) ScrapeWayfairUrlCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil

@@ -51,7 +51,7 @@ func (opt *UniversalUrlOpts) checkParametersValidity(ctx oxylabs.ContextOption) 
 func (c *EcommerceClient) ScrapeUniversalUrl(
 	url string,
 	opts ...*UniversalUrlOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -64,7 +64,7 @@ func (c *EcommerceClient) ScrapeUniversalUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*UniversalUrlOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &UniversalUrlOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -146,14 +146,15 @@ func (c *EcommerceClient) ScrapeUniversalUrlCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
@@ -14,7 +15,7 @@ import (
 func (c *EcommerceClientAsync) ScrapeUniversalUrl(
 	url string,
 	opts ...*UniversalUrlOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,10 +29,10 @@ func (c *EcommerceClientAsync) ScrapeUniversalUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*UniversalUrlOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &UniversalUrlOpts{}
@@ -123,10 +124,8 @@ func (c *EcommerceClientAsync) ScrapeUniversalUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -136,12 +135,18 @@ func (c *EcommerceClientAsync) ScrapeUniversalUrlCtx(
 		return nil, err
 	}
 
+	/// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }

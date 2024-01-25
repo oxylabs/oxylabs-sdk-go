@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
@@ -13,7 +14,7 @@ import (
 func (c *EcommerceClientAsync) ScrapeAmazonUrl(
 	url string,
 	opts ...*AmazonUrlOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -26,10 +27,10 @@ func (c *EcommerceClientAsync) ScrapeAmazonUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*AmazonUrlOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	/// Check validity of url.
 	err := internal.ValidateUrl(url, "amazon")
@@ -85,10 +86,8 @@ func (c *EcommerceClientAsync) ScrapeAmazonUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -98,21 +97,27 @@ func (c *EcommerceClientAsync) ScrapeAmazonUrlCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeAmazonSearch scrapes amazon via Oxylabs E-Commerce API with amazon_search as source.
 func (c *EcommerceClientAsync) ScrapeAmazonSearch(
 	query string,
 	opts ...*AmazonSearchOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -125,10 +130,10 @@ func (c *EcommerceClientAsync) ScrapeAmazonSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonSearchOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &AmazonSearchOpts{}
@@ -201,10 +206,8 @@ func (c *EcommerceClientAsync) ScrapeAmazonSearchCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -214,21 +217,27 @@ func (c *EcommerceClientAsync) ScrapeAmazonSearchCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeAmazonProduct scrapes amazon via Oxylabs E-Commerce API with amazon_product as source.
 func (c *EcommerceClientAsync) ScrapeAmazonProduct(
 	query string,
 	opts ...*AmazonProductOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -241,10 +250,10 @@ func (c *EcommerceClientAsync) ScrapeAmazonProductCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonProductOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &AmazonProductOpts{}
@@ -309,10 +318,8 @@ func (c *EcommerceClientAsync) ScrapeAmazonProductCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -322,21 +329,27 @@ func (c *EcommerceClientAsync) ScrapeAmazonProductCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeAmazonPricing scrapes amazon via Oxylabs E-Commerce API with amazon_pricing as source.
 func (c *EcommerceClientAsync) ScrapeAmazonPricing(
 	query string,
 	opts ...*AmazonPricingOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -349,10 +362,10 @@ func (c *EcommerceClientAsync) ScrapeAmazonPricingCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonPricingOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &AmazonPricingOpts{}
@@ -409,10 +422,8 @@ func (c *EcommerceClientAsync) ScrapeAmazonPricingCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -422,21 +433,27 @@ func (c *EcommerceClientAsync) ScrapeAmazonPricingCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeAmazonReviews scrapes amazon via Oxylabs E-Commerce API with amazon_reviews as source.
 func (c *EcommerceClientAsync) ScrapeAmazonReviews(
 	query string,
 	opts ...*AmazonReviewsOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -449,10 +466,10 @@ func (c *EcommerceClientAsync) ScrapeAmazonReviewsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonReviewsOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &AmazonReviewsOpts{}
@@ -509,10 +526,8 @@ func (c *EcommerceClientAsync) ScrapeAmazonReviewsCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -522,21 +537,27 @@ func (c *EcommerceClientAsync) ScrapeAmazonReviewsCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeAmazonQuestions scrapes amazon via Oxylabs E-Commerce API with amazon_questions as source.
 func (c *EcommerceClientAsync) ScrapeAmazonQuestions(
 	query string,
 	opts ...*AmazonQuestionsOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -549,10 +570,10 @@ func (c *EcommerceClientAsync) ScrapeAmazonQuestionsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonQuestionsOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &AmazonQuestionsOpts{}
@@ -605,10 +626,8 @@ func (c *EcommerceClientAsync) ScrapeAmazonQuestionsCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -618,21 +637,27 @@ func (c *EcommerceClientAsync) ScrapeAmazonQuestionsCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeAmazonBestSellers scrapes amazon via Oxylabs E-Commerce API with amazon_bestsellers as source.
 func (c *EcommerceClientAsync) ScrapeAmazonBestsellers(
 	query string,
 	opts ...*AmazonBestsellersOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -645,10 +670,10 @@ func (c *EcommerceClientAsync) ScrapeAmazonBestsellersCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonBestsellersOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &AmazonBestsellersOpts{}
@@ -705,10 +730,8 @@ func (c *EcommerceClientAsync) ScrapeAmazonBestsellersCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -718,21 +741,27 @@ func (c *EcommerceClientAsync) ScrapeAmazonBestsellersCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeAmazonSellers scrapes amazon via Oxylabs E-Commerce API with amazon_sellers as source.
 func (c *EcommerceClientAsync) ScrapeAmazonSellers(
 	query string,
 	opts ...*AmazonSellersOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -745,10 +774,10 @@ func (c *EcommerceClientAsync) ScrapeAmazonSellersCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonSellersOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &AmazonSellersOpts{}
@@ -801,10 +830,8 @@ func (c *EcommerceClientAsync) ScrapeAmazonSellersCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -814,12 +841,18 @@ func (c *EcommerceClientAsync) ScrapeAmazonSellersCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }

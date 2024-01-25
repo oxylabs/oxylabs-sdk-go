@@ -37,7 +37,7 @@ func (opt *AmazonUrlOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeAmazonUrl(
 	url string,
 	opts ...*AmazonUrlOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -50,7 +50,7 @@ func (c *EcommerceClient) ScrapeAmazonUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*AmazonUrlOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Check validity of url.
 	err := internal.ValidateUrl(url, "amazon")
 	if err != nil {
@@ -96,14 +96,15 @@ func (c *EcommerceClient) ScrapeAmazonUrlCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -145,7 +146,7 @@ func (opt *AmazonSearchOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeAmazonSearch(
 	query string,
 	opts ...*AmazonSearchOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -158,7 +159,7 @@ func (c *EcommerceClient) ScrapeAmazonSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonSearchOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &AmazonSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -221,14 +222,15 @@ func (c *EcommerceClient) ScrapeAmazonSearchCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -264,7 +266,7 @@ func (opt *AmazonProductOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeAmazonProduct(
 	query string,
 	opts ...*AmazonProductOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -277,7 +279,7 @@ func (c *EcommerceClient) ScrapeAmazonProductCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonProductOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &AmazonProductOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -332,14 +334,15 @@ func (c *EcommerceClient) ScrapeAmazonProductCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -380,7 +383,7 @@ func (opt *AmazonPricingOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeAmazonPricing(
 	query string,
 	opts ...*AmazonPricingOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -393,7 +396,7 @@ func (c *EcommerceClient) ScrapeAmazonPricingCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonPricingOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &AmazonPricingOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -440,14 +443,15 @@ func (c *EcommerceClient) ScrapeAmazonPricingCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -488,7 +492,7 @@ func (opt *AmazonReviewsOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeAmazonReviews(
 	query string,
 	opts ...*AmazonReviewsOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -501,7 +505,7 @@ func (c *EcommerceClient) ScrapeAmazonReviewsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonReviewsOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &AmazonReviewsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -548,14 +552,15 @@ func (c *EcommerceClient) ScrapeAmazonReviewsCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -590,7 +595,7 @@ func (opt *AmazonQuestionsOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeAmazonQuestions(
 	query string,
 	opts ...*AmazonQuestionsOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -603,7 +608,7 @@ func (c *EcommerceClient) ScrapeAmazonQuestionsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonQuestionsOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &AmazonQuestionsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -646,14 +651,15 @@ func (c *EcommerceClient) ScrapeAmazonQuestionsCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -694,7 +700,7 @@ func (opt *AmazonBestsellersOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeAmazonBestsellers(
 	query string,
 	opts ...*AmazonBestsellersOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -707,7 +713,7 @@ func (c *EcommerceClient) ScrapeAmazonBestsellersCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonBestsellersOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &AmazonBestsellersOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -754,14 +760,15 @@ func (c *EcommerceClient) ScrapeAmazonBestsellersCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -796,7 +803,7 @@ func (opt *AmazonSellersOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeAmazonSellers(
 	query string,
 	opts ...*AmazonSellersOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -809,7 +816,7 @@ func (c *EcommerceClient) ScrapeAmazonSellersCtx(
 	ctx context.Context,
 	query string,
 	opts ...*AmazonSellersOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &AmazonSellersOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -852,14 +859,15 @@ func (c *EcommerceClient) ScrapeAmazonSellersCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil

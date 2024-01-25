@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
@@ -14,7 +15,7 @@ import (
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrl(
 	url string,
 	opts ...*GoogleShoppingUrlOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -28,10 +29,10 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleShoppingUrlOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Check validity of url.
 	err := internal.ValidateUrl(url, "shopping.google")
@@ -88,10 +89,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -101,14 +100,20 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeGoogleShoppingSearch scrapes google shopping with async polling runtime
@@ -116,7 +121,7 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingUrlCtx(
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearch(
 	query string,
 	opts ...*GoogleShoppingSearchOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -130,10 +135,10 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleShoppingSearchOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &GoogleShoppingSearchOpts{}
@@ -217,10 +222,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -230,14 +233,20 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeGoogleShoppingProduct scrapes google shopping with async polling runtime
@@ -245,7 +254,7 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingProduct(
 	query string,
 	opts ...*GoogleShoppingProductOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -259,10 +268,10 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleShoppingProductOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &GoogleShoppingProductOpts{}
@@ -312,15 +321,12 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 	if err != nil {
 		return nil, err
 	}
-
 	// Poll job status.
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -330,14 +336,20 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 		return nil, err
 	}
 
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeGoogleShoppingPricing scrapes google shopping with async polling runtime
@@ -345,7 +357,7 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricing(
 	query string,
 	opts ...*GoogleShoppingPricingOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -359,10 +371,10 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleShoppingPricingOpts,
-) (chan *EcommerceResp, error) {
+) (chan *Resp, error) {
 	errChan := make(chan error)
-	internalRespChan := make(chan *internal.Resp)
-	ecommerceRespChan := make(chan *EcommerceResp)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 
 	// Prepare options.
 	opt := &GoogleShoppingPricingOpts{}
@@ -421,10 +433,8 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		opt.Parse,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
@@ -434,12 +444,18 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 		return nil, err
 	}
 
+	/// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve internal resp and forward it to the
-	// ecommerce resp channel.
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		ecommerceRespChan <- &EcommerceResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return ecommerceRespChan, nil
+	return respChan, nil
 }

@@ -46,7 +46,7 @@ func (opt *GoogleShoppingUrlOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeGoogleShoppingUrl(
 	url string,
 	opts ...*GoogleShoppingUrlOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -59,7 +59,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleShoppingUrlOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Check validity of url.
 	err := internal.ValidateUrl(url, "shopping.google")
 	if err != nil {
@@ -106,14 +106,15 @@ func (c *EcommerceClient) ScrapeGoogleShoppingUrlCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -167,7 +168,7 @@ func (opt *GoogleShoppingSearchOpts) checkParameterValidity(ctx oxylabs.ContextO
 func (c *EcommerceClient) ScrapeGoogleShoppingSearch(
 	query string,
 	opts ...*GoogleShoppingSearchOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -181,7 +182,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleShoppingSearchOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &GoogleShoppingSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -255,14 +256,15 @@ func (c *EcommerceClient) ScrapeGoogleShoppingSearchCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -300,7 +302,7 @@ func (opt *GoogleShoppingProductOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeGoogleShoppingProduct(
 	query string,
 	opts ...*GoogleShoppingProductOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -314,7 +316,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingProductCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleShoppingProductOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &GoogleShoppingProductOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -359,14 +361,15 @@ func (c *EcommerceClient) ScrapeGoogleShoppingProductCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -410,7 +413,7 @@ func (opt *GoogleShoppingPricingOpts) checkParameterValidity() error {
 func (c *EcommerceClient) ScrapeGoogleShoppingPricing(
 	query string,
 	opts ...*GoogleShoppingPricingOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -424,7 +427,7 @@ func (c *EcommerceClient) ScrapeGoogleShoppingPricingCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleShoppingPricingOpts,
-) (*EcommerceResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &GoogleShoppingPricingOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -473,14 +476,15 @@ func (c *EcommerceClient) ScrapeGoogleShoppingPricingCtx(
 	}
 
 	// Req.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map resp.
-	resp := &EcommerceResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
