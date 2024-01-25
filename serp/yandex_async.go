@@ -15,7 +15,7 @@ import (
 func (c *SerpClientAsync) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
-) (chan *SerpResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -29,9 +29,9 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*YandexSearchOpts,
-) (chan *SerpResp, error) {
+) (chan *Resp, error) {
 	httpRespChan := make(chan *http.Response)
-	serpRespChan := make(chan *SerpResp)
+	respChan := make(chan *Resp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -102,20 +102,20 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 		return nil, err
 	}
 
-	// Unmarshal the http Response and get the internal Response.
+	// Unmarshal the http Response and get the response.
 	httpResp := <-httpRespChan
-	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
 	if err != nil {
 		return nil, err
 	}
 
 	// Retrieve internal resp and forward it to the
-	// serp resp channel.
+	// resp channel.
 	go func() {
-		serpRespChan <- &SerpResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return serpRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeYandexUrl scrapes yandex with async polling runtime via Oxylabs SERP API
@@ -123,7 +123,7 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 func (c *SerpClientAsync) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
-) (chan *SerpResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -137,9 +137,9 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*YandexUrlOpts,
-) (chan *SerpResp, error) {
+) (chan *Resp, error) {
 	httpRespChan := make(chan *http.Response)
-	serpRespChan := make(chan *SerpResp)
+	respChan := make(chan *Resp)
 	errChan := make(chan error)
 
 	// Check the validity of the URL.
@@ -207,18 +207,18 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 		return nil, err
 	}
 
-	// Unmarshal the http Response and get the internal Response.
+	// Unmarshal the http Response and get the response.
 	httpResp := <-httpRespChan
-	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
 	if err != nil {
 		return nil, err
 	}
 
 	// Retrieve internal resp and forward it to the
-	// serp resp channel.
+	// resp channel.
 	go func() {
-		serpRespChan <- &SerpResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return serpRespChan, nil
+	return respChan, nil
 }

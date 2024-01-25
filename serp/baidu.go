@@ -58,7 +58,7 @@ type BaiduSearchOpts struct {
 func (c *SerpClient) ScrapeBaiduSearch(
 	query string,
 	opts ...*BaiduSearchOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -71,7 +71,7 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BaiduSearchOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &BaiduSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -123,18 +123,13 @@ func (c *SerpClient) ScrapeBaiduSearchCtx(
 		return nil, err
 	}
 
-	// Unmarshal the http Response and get the internal Response.
-	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	serpResp := &SerpResp{
-		Resp: *internalResp,
-	}
-
-	return serpResp, nil
+	return resp, nil
 }
 
 // BaiduUrlOpts contains all the query parameters available for baidu.
@@ -149,7 +144,7 @@ type BaiduUrlOpts struct {
 func (c *SerpClient) ScrapeBaiduUrl(
 	url string,
 	opts ...*BaiduUrlOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -162,7 +157,7 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BaiduUrlOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Check validity of URL.
 	err := internal.ValidateUrl(url, "baidu")
 	if err != nil {
@@ -212,16 +207,11 @@ func (c *SerpClient) ScrapeBaiduUrlCtx(
 		return nil, err
 	}
 
-	// Unmarshal the http Response and get the internal Response.
-	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	serpResp := &SerpResp{
-		Resp: *internalResp,
-	}
-
-	return serpResp, nil
+	return resp, nil
 }

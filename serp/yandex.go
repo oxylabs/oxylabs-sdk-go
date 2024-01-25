@@ -84,7 +84,7 @@ type YandexSearchOpts struct {
 func (c *SerpClient) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -97,7 +97,7 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*YandexSearchOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &YandexSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -151,18 +151,13 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 		return nil, err
 	}
 
-	// Unmarshal the http Response and get the internal Response.
-	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	serpResp := &SerpResp{
-		Resp: *internalResp,
-	}
-
-	return serpResp, nil
+	return resp, nil
 }
 
 // YandexUrlOpts contains all the query parameters available for yandex.
@@ -178,7 +173,7 @@ type YandexUrlOpts struct {
 func (c *SerpClient) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -191,7 +186,7 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*YandexUrlOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Check validity of URL.
 	err := internal.ValidateUrl(url, "yandex")
 	if err != nil {
@@ -242,16 +237,11 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 		return nil, err
 	}
 
-	// Unmarshal the http Response and get the internal Response.
-	internalResp, err := internal.GetResp(httpResp, customParserFlag)
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	serpResp := &SerpResp{
-		Resp: *internalResp,
-	}
-
-	return serpResp, nil
+	return resp, nil
 }

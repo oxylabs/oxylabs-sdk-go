@@ -15,7 +15,7 @@ import (
 func (c *SerpClientAsync) ScrapeBingSearch(
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *BingResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -29,9 +29,9 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*BingSearchOpts,
-) (chan *BingResp, error) {
+) (chan *Resp, error) {
 	httpRespChan := make(chan *http.Response)
-	bingRespChan := make(chan *BingResp)
+	respChan := make(chan *Resp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -103,20 +103,20 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 		return nil, err
 	}
 
-	// Unmarshal the http Response and get the internal Response.
+	// Unmarshal the http Response and get the response.
 	httpResp := <-httpRespChan
-	internalResp, err := internal.GetBingResp(httpResp, opt.Parse, customParserFlag)
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
 	if err != nil {
 		return nil, err
 	}
 
 	// Retrieve internal resp and forward it to the
-	// bing resp channel.
+	// resp channel.
 	go func() {
-		bingRespChan <- &BingResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return bingRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeBingUrl scrapes bing with async polling runtime via Oxylabs SERP API
@@ -124,7 +124,7 @@ func (c *SerpClientAsync) ScrapeBingSearchCtx(
 func (c *SerpClientAsync) ScrapeBingUrl(
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *BingResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -138,9 +138,9 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*BingUrlOpts,
-) (chan *BingResp, error) {
+) (chan *Resp, error) {
 	httpRespChan := make(chan *http.Response)
-	bingRespChan := make(chan *BingResp)
+	respChan := make(chan *Resp)
 	errChan := make(chan error)
 
 	// Check validity of URL.
@@ -209,18 +209,18 @@ func (c *SerpClientAsync) ScrapeBingUrlCtx(
 		return nil, err
 	}
 
-	// Unmarshal the http Response and get the internal Response.
+	// Unmarshal the http Response and get the response.
 	httpResp := <-httpRespChan
-	internalResp, err := internal.GetBingResp(httpResp, opt.Parse, customParserFlag)
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
 	if err != nil {
 		return nil, err
 	}
 
 	// Retrieve internal resp and forward it to the
-	// bing resp channel.
+	// resp channel.
 	go func() {
-		bingRespChan <- &BingResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return bingRespChan, nil
+	return respChan, nil
 }
