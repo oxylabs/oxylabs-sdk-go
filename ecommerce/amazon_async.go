@@ -1,4 +1,4 @@
-package serp
+package ecommerce
 
 import (
 	"context"
@@ -10,32 +10,133 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// ScrapeGoogleSearch scrapes google with async polling runtime via Oxylabs SERP API
-// and google_search as source.
-func (c *SerpClientAsync) ScrapeGoogleSearch(
-	query string,
-	opts ...*GoogleSearchOpts,
+// ScrapeAmazonUrl scrapes amazon via Oxylabs E-Commerce API with amazon as source.
+func (c *EcommerceClientAsync) ScrapeAmazonUrl(
+	url string,
+	opts ...*AmazonUrlOpts,
 ) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
-	return c.ScrapeGoogleSearchCtx(ctx, query, opts...)
+	return c.ScrapeAmazonUrlCtx(ctx, url, opts...)
 }
 
-// ScrapeGoogleSearchCtx scrapes google with async polling runtime via Oxylabs SERP API
-// and google_search as source.
+// ScrapeAmazonUrlCtx scrapes amazon via Oxylabs E-Commerce API with amazon as source.
 // The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
+func (c *EcommerceClientAsync) ScrapeAmazonUrlCtx(
 	ctx context.Context,
-	query string,
-	opts ...*GoogleSearchOpts,
+	url string,
+	opts ...*AmazonUrlOpts,
 ) (chan *Resp, error) {
+	errChan := make(chan error)
 	httpRespChan := make(chan *http.Response)
 	respChan := make(chan *Resp)
-	errChan := make(chan error)
+
+	/// Check validity of url.
+	err := internal.ValidateUrl(url, "amazon")
+	if err != nil {
+		return nil, err
+	}
 
 	// Prepare options.
-	opt := &GoogleSearchOpts{}
+	opt := &AmazonUrlOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Set defaults.
+	internal.SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err = opt.checkParameterValidity()
+	if err != nil {
+		return nil, err
+	}
+
+	//Prepare payload.
+	payload := map[string]interface{}{
+		"source":          oxylabs.AmazonUrl,
+		"url":             url,
+		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
+	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse_instructions"] = opt.ParseInstructions
+		customParserFlag = true
+	}
+
+	// Marshal.
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	// Get job ID.
+	jobID, err := c.C.GetJobID(jsonPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	// Poll job status.
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.PollInterval,
+		httpRespChan,
+		errChan,
+	)
+
+	// Handle error.
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Retrieve internal resp and forward it to the
+	// resp channel.
+	go func() {
+		respChan <- resp
+	}()
+
+	return respChan, nil
+}
+
+// ScrapeAmazonSearch scrapes amazon via Oxylabs E-Commerce API with amazon_search as source.
+func (c *EcommerceClientAsync) ScrapeAmazonSearch(
+	query string,
+	opts ...*AmazonSearchOpts,
+) (chan *Resp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeAmazonSearchCtx(ctx, query, opts...)
+}
+
+// ScrapeAmazonSearchCtx scrapes amazon via Oxylabs E-Commerce API with amazon_search as source.
+// The provided context allows customization of the HTTP req, including setting timeouts.
+func (c *EcommerceClientAsync) ScrapeAmazonSearchCtx(
+	ctx context.Context,
+	query string,
+	opts ...*AmazonSearchOpts,
+) (chan *Resp, error) {
+	errChan := make(chan error)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
+
+	// Prepare options.
+	opt := &AmazonSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -46,188 +147,46 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 		modifier(context)
 	}
 
-	// Check if limit_per_page context parameter is used together with limit, start_page or pages parameters.
-	if (opt.Limit != 0 || opt.StartPage != 0 || opt.Pages != 0) && context["limit_per_page"] != nil {
-		return nil, fmt.Errorf(
-			"limit, start_page and pages parameters cannot be used together with limit_per_page context parameter",
-		)
-	}
-
 	// Set defaults.
 	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 	internal.SetDefaultStartPage(&opt.StartPage)
-	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
 	internal.SetDefaultPages(&opt.Pages)
-	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
-	err := opt.checkParameterValidity(context)
-	if err != nil {
-		return nil, err
-	}
-
-	// Prepare payload with common parameters.
-	payload := map[string]interface{}{
-		"source":          oxylabs.GoogleSearch,
-		"domain":          opt.Domain,
-		"query":           query,
-		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
-		"user_agent_type": opt.UserAgent,
-		"parse":           opt.Parse,
-		"render":          opt.Render,
-		"callback_url":    opt.CallbackUrl,
-		"context": []map[string]interface{}{
-			{
-				"key":   "results_language",
-				"value": context["results_language"],
-			},
-			{
-				"key":   "filter",
-				"value": context["filter"],
-			},
-			{
-				"key":   "nfpr",
-				"value": context["nfpr"],
-			},
-			{
-				"key":   "safe_search",
-				"value": context["safe_search"],
-			},
-			{
-				"key":   "fpstate",
-				"value": context["fpstate"],
-			},
-			{
-				"key":   "tbm",
-				"value": context["tbm"],
-			},
-			{
-				"key":   "tbs",
-				"value": context["tbs"],
-			},
-		},
-	}
-
-	// If user sends limit_per_page context parameter, use it instead of limit, start_page, and pages parameters.
-	if context["limit_per_page"] != nil {
-		payload["limit_per_page"] = context["limit_per_page"]
-	} else {
-		payload["start_page"] = opt.StartPage
-		payload["pages"] = opt.Pages
-		payload["limit"] = opt.Limit
-	}
-
-	// Add custom parsing instructions to the payload if provided.
-	customParserFlag := false
-	if opt.ParseInstructions != nil {
-		payload["parsing_instructions"] = &opt.ParseInstructions
-		customParserFlag = true
-	}
-
-	// Marshal.
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling payload: %v", err)
-	}
-
-	// Get job ID.
-	jobID, err := c.C.GetJobID(jsonPayload)
-	if err != nil {
-		return nil, err
-	}
-
-	// Poll job status.
-	go c.C.PollJobStatus(
-		ctx,
-		jobID,
-		opt.PollInterval,
-		httpRespChan,
-		errChan,
-	)
-
-	// Handle error.
-	err = <-errChan
-	if err != nil {
-		return nil, err
-	}
-
-	// Unmarshal the http Response and get the response.
-	httpResp := <-httpRespChan
-	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
-	if err != nil {
-		return nil, err
-	}
-
-	// Retrieve internal resp and forward it to the
-	// resp channel.
-	go func() {
-		respChan <- resp
-	}()
-
-	return respChan, nil
-}
-
-// ScrapeGoogleUrl scrapes google with async polling runtime via Oxylabs SERP API
-// and google as source.
-func (c *SerpClientAsync) ScrapeGoogleUrl(
-	url string,
-	opts ...*GoogleUrlOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
-	defer cancel()
-
-	return c.ScrapeGoogleUrlCtx(ctx, url, opts...)
-}
-
-// ScrapeGoogleUrlCtx scrapes google with async polling runtime via Oxylabs SERP API
-// and google as source.
-// The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
-	ctx context.Context,
-	url string,
-	opts ...*GoogleUrlOpts,
-) (chan *Resp, error) {
-	httpRespChan := make(chan *http.Response)
-	respChan := make(chan *Resp)
-	errChan := make(chan error)
-
-	// Check validity of URL.
-	err := internal.ValidateUrl(url, "google")
-	if err != nil {
-		return nil, err
-	}
-
-	// Prepare options.
-	opt := &GoogleUrlOpts{}
-	if len(opts) > 0 && opts[len(opts)-1] != nil {
-		opt = opts[len(opts)-1]
-	}
-
-	// Set defaults.
-	internal.SetDefaultUserAgent(&opt.UserAgent)
-
-	// Check validity of parameters.
-	err = opt.checkParameterValidity()
+	err := opt.checkParameterValidity()
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          oxylabs.GoogleUrl,
-		"url":             url,
+		"source":          oxylabs.AmazonSearch,
+		"domain":          opt.Domain,
+		"query":           query,
+		"start_page":      opt.StartPage,
+		"pages":           opt.Pages,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
-		"geo_location":    opt.GeoLocation,
 		"parse":           opt.Parse,
+		"context": []map[string]interface{}{
+			{
+				"key":   "category_id",
+				"value": context["category_id"],
+			},
+			{
+				"key":   "merchant_id",
+				"value": context["merchant_id"],
+			},
+		},
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parsing_instructions"] = &opt.ParseInstructions
+		payload["parse_instructions"] = opt.ParseInstructions
 		customParserFlag = true
 	}
 
@@ -274,37 +233,35 @@ func (c *SerpClientAsync) ScrapeGoogleUrlCtx(
 	return respChan, nil
 }
 
-// ScrapeGoogleAds scrapes google with async polling runtime via Oxylabs SERP API
-// and google_ads as source.
-func (c *SerpClientAsync) ScrapeGoogleAds(
+// ScrapeAmazonProduct scrapes amazon via Oxylabs E-Commerce API with amazon_product as source.
+func (c *EcommerceClientAsync) ScrapeAmazonProduct(
 	query string,
-	opts ...*GoogleAdsOpts,
+	opts ...*AmazonProductOpts,
 ) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
-	return c.ScrapeGoogleAdsCtx(ctx, query, opts...)
+	return c.ScrapeAmazonProductCtx(ctx, query, opts...)
 }
 
-// ScrapeGoogleAdsCtx scrapes google with async polling runtime via Oxylabs SERP API
-// and google_ads as source.
+// ScrapeAmazonProductCtx scrapes amazon via Oxylabs E-Commerce API with amazon_product as source.
 // The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
+func (c *EcommerceClientAsync) ScrapeAmazonProductCtx(
 	ctx context.Context,
 	query string,
-	opts ...*GoogleAdsOpts,
+	opts ...*AmazonProductOpts,
 ) (chan *Resp, error) {
+	errChan := make(chan error)
 	httpRespChan := make(chan *http.Response)
 	respChan := make(chan *Resp)
-	errChan := make(chan error)
 
 	// Prepare options.
-	opt := &GoogleAdsOpts{}
+	opt := &AmazonProductOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
 
-	// Initialize the context map apply each provided context modifier function.
+	// Initialize the context map and apply each provided context modifier function.
 	context := make(oxylabs.ContextOption)
 	for _, modifier := range opt.Context {
 		modifier(context)
@@ -312,129 +269,6 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 
 	// Set defaults.
 	internal.SetDefaultDomain(&opt.Domain)
-	internal.SetDefaultStartPage(&opt.StartPage)
-	internal.SetDefaultPages(&opt.Pages)
-	internal.SetDefaultUserAgent(&opt.UserAgent)
-
-	// Check validity of parameters.
-	err := opt.checkParameterValidity(context)
-	if err != nil {
-		return nil, err
-	}
-
-	payload := map[string]interface{}{
-		"source":          oxylabs.GoogleAds,
-		"domain":          opt.Domain,
-		"query":           query,
-		"start_page":      opt.StartPage,
-		"pages":           opt.Pages,
-		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
-		"user_agent_type": opt.UserAgent,
-		"parse":           opt.Parse,
-		"render":          opt.Render,
-		"callback_url":    opt.CallbackUrl,
-		"context": []map[string]interface{}{
-			{
-				"key":   "results_language",
-				"value": context["results_language"],
-			},
-			{
-				"key":   "nfpr",
-				"value": context["nfpr"],
-			},
-			{
-				"key":   "tbm",
-				"value": context["tbm"],
-			},
-			{
-				"key":   "tbs",
-				"value": context["tbs"],
-			},
-		},
-	}
-
-	// Add custom parsing instructions to the payload if provided.
-	customParserFlag := false
-	if opt.ParseInstructions != nil {
-		payload["parsing_instructions"] = &opt.ParseInstructions
-		customParserFlag = true
-	}
-
-	// Marshal.
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling payload: %v", err)
-	}
-
-	// Get job ID.
-	jobID, err := c.C.GetJobID(jsonPayload)
-	if err != nil {
-		return nil, err
-	}
-
-	// Poll job status.
-	go c.C.PollJobStatus(
-		ctx,
-		jobID,
-		opt.PollInterval,
-		httpRespChan,
-		errChan,
-	)
-
-	// Handle error.
-	err = <-errChan
-	if err != nil {
-		return nil, err
-	}
-
-	// Unmarshal the http Response and get the response.
-	httpResp := <-httpRespChan
-	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
-	if err != nil {
-		return nil, err
-	}
-
-	// Retrieve internal resp and forward it to the
-	// resp channel.
-	go func() {
-		respChan <- resp
-	}()
-
-	return respChan, nil
-}
-
-// ScrapeGoogleSuggestions scrapes google with async polling runtime via Oxylabs SERP API
-// and google_suggestions as source.
-func (c *SerpClientAsync) ScrapeGoogleSuggestions(
-	query string,
-	opts ...*GoogleSuggestionsOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
-	defer cancel()
-
-	return c.ScrapeGoogleSuggestionsCtx(ctx, query, opts...)
-}
-
-// ScrapeGoogleSuggestionsCtx scrapes google with async polling runtime via Oxylabs SERP API
-// and google_suggestions as source.
-// The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
-	ctx context.Context,
-	query string,
-	opts ...*GoogleSuggestionsOpts,
-) (chan *Resp, error) {
-	httpRespChan := make(chan *http.Response)
-	respChan := make(chan *Resp)
-	errChan := make(chan error)
-
-	// Prepare options.
-	opt := &GoogleSuggestionsOpts{}
-	if len(opts) > 0 && opts[len(opts)-1] != nil {
-		opt = opts[len(opts)-1]
-	}
-
-	// Set defaults.
 	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
@@ -445,384 +279,9 @@ func (c *SerpClientAsync) ScrapeGoogleSuggestionsCtx(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          oxylabs.GoogleSuggestions,
-		"query":           query,
-		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
-		"user_agent_type": opt.UserAgent,
-		"render":          opt.Render,
-		"callback_url":    opt.CallbackUrl,
-	}
-
-	// Add custom parsing instructions to the payload if provided.
-	customParserFlag := false
-	if opt.ParseInstructions != nil {
-		payload["parsing_instructions"] = &opt.ParseInstructions
-		customParserFlag = true
-	}
-
-	// Marshal.
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling payload: %v", err)
-	}
-
-	// Get job ID.
-	jobID, err := c.C.GetJobID(jsonPayload)
-	if err != nil {
-		return nil, err
-	}
-
-	// Poll job status.
-	go c.C.PollJobStatus(
-		ctx,
-		jobID,
-		opt.PollInterval,
-		httpRespChan,
-		errChan,
-	)
-
-	// Handle error.
-	err = <-errChan
-	if err != nil {
-		return nil, err
-	}
-
-	// Unmarshal the http Response and get the response.
-	httpResp := <-httpRespChan
-	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
-	if err != nil {
-		return nil, err
-	}
-
-	// Retrieve internal resp and forward it to the
-	// resp channel.
-	go func() {
-		respChan <- resp
-	}()
-
-	return respChan, nil
-}
-
-// ScrapeGoogleHotels scrapes google with async polling runtime via Oxylabs SERP API
-// and google_hotels as source.
-func (c *SerpClientAsync) ScrapeGoogleHotels(
-	query string,
-	opts ...*GoogleHotelsOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
-	defer cancel()
-
-	return c.ScrapeGoogleHotelsCtx(ctx, query, opts...)
-}
-
-// ScrapeGoogleHotelsCtx scrapes google with async polling runtime via Oxylabs SERP API
-// and google_hotels as source.
-// The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
-	ctx context.Context,
-	query string,
-	opts ...*GoogleHotelsOpts,
-) (chan *Resp, error) {
-	httpRespChan := make(chan *http.Response)
-	respChan := make(chan *Resp)
-	errChan := make(chan error)
-
-	// Prepare options.
-	opt := &GoogleHotelsOpts{}
-	if len(opts) > 0 && opts[len(opts)-1] != nil {
-		opt = opts[len(opts)-1]
-	}
-
-	// Initialize the context map apply each provided context modifier function.
-	context := make(oxylabs.ContextOption)
-	for _, modifier := range opt.Context {
-		modifier(context)
-	}
-
-	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
-	internal.SetDefaultStartPage(&opt.StartPage)
-	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
-	internal.SetDefaultPages(&opt.Pages)
-	internal.SetDefaultUserAgent(&opt.UserAgent)
-
-	// Check validity of parameters.
-	err := opt.checkParameterValidity(context)
-	if err != nil {
-		return nil, err
-	}
-
-	// Prepare payload.
-	payload := map[string]interface{}{
-		"source":          oxylabs.GoogleHotels,
+		"source":          oxylabs.AmazonProduct,
 		"domain":          opt.Domain,
 		"query":           query,
-		"start_page":      opt.StartPage,
-		"pages":           opt.Pages,
-		"limit":           opt.Limit,
-		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
-		"user_agent_type": opt.UserAgent,
-		"render":          opt.Render,
-		"callback_url":    opt.CallbackUrl,
-		"context": []map[string]interface{}{
-			{
-				"key":   "results_language",
-				"value": context["results_language"],
-			},
-			{
-				"key":   "nfpr",
-				"value": context["nfpr"],
-			},
-			{
-				"key":   "hotel_occupancy",
-				"value": context["hotel_occupancy"],
-			},
-			{
-				"key":   "hotel_dates",
-				"value": context["hotel_dates"],
-			},
-		},
-	}
-
-	// Add custom parsing instructions to the payload if provided.
-	customParserFlag := false
-	if opt.ParseInstructions != nil {
-		payload["parse"] = true
-		payload["parsing_instructions"] = &opt.ParseInstructions
-		customParserFlag = true
-	}
-
-	// Marshal.
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling payload: %v", err)
-	}
-
-	// Get job ID.
-	jobID, err := c.C.GetJobID(jsonPayload)
-	if err != nil {
-		return nil, err
-	}
-
-	// Poll job status.
-	go c.C.PollJobStatus(
-		ctx,
-		jobID,
-		opt.PollInterval,
-		httpRespChan,
-		errChan,
-	)
-
-	// Handle error.
-	err = <-errChan
-	if err != nil {
-		return nil, err
-	}
-
-	// Unmarshal the http Response and get the response.
-	httpResp := <-httpRespChan
-	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
-	if err != nil {
-		return nil, err
-	}
-
-	// Retrieve internal resp and forward it to the
-	// resp channel.
-	go func() {
-		respChan <- resp
-	}()
-
-	return respChan, nil
-}
-
-// ScrapeGoogleTravelHotels scrapes google with async polling runtime via Oxylabs SERP API
-// and google_travel_hotels as source.
-func (c *SerpClientAsync) ScrapeGoogleTravelHotels(
-	query string,
-	opts ...*GoogleTravelHotelsOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
-	defer cancel()
-
-	return c.ScrapeGoogleTravelHotelsCtx(ctx, query, opts...)
-}
-
-// ScrapeGoogleTravelHotelsCtx scrapes google with async polling runtime via Oxylabs SERP API
-// and google_travel_hotels as source.
-// The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
-	ctx context.Context,
-	query string,
-	opts ...*GoogleTravelHotelsOpts,
-) (chan *Resp, error) {
-	httpRespChan := make(chan *http.Response)
-	respChan := make(chan *Resp)
-	errChan := make(chan error)
-
-	// Prepare options.
-	opt := &GoogleTravelHotelsOpts{}
-	if len(opts) > 0 && opts[len(opts)-1] != nil {
-		opt = opts[len(opts)-1]
-	}
-
-	// Initialize the context map apply each provided context modifier function.
-	context := make(oxylabs.ContextOption)
-	for _, modifier := range opt.Context {
-		modifier(context)
-	}
-
-	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
-	internal.SetDefaultStartPage(&opt.StartPage)
-
-	// Check validity of parameters.
-	err := opt.checkParameterValidity(context)
-	if err != nil {
-		return nil, err
-	}
-
-	// Prepare payload.
-	payload := map[string]interface{}{
-		"source":          oxylabs.GoogleTravelHotels,
-		"domain":          opt.Domain,
-		"query":           query,
-		"start_page":      opt.StartPage,
-		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
-		"user_agent_type": opt.UserAgent,
-		"render":          opt.Render,
-		"callback_url":    opt.CallbackUrl,
-		"context": []map[string]interface{}{
-			{
-				"key":   "hotel_occupancy",
-				"value": context["hotel_occupancy"],
-			},
-			{
-				"key":   "hotel_classes",
-				"value": context["hotel_classes"],
-			},
-			{
-				"key":   "hotel_dates",
-				"value": context["hotel_dates"],
-			},
-		},
-	}
-
-	// Add custom parsing instructions to the payload if provided.
-	customParserFlag := false
-	if opt.ParseInstructions != nil {
-		payload["parse"] = true
-		payload["parsing_instructions"] = &opt.ParseInstructions
-		customParserFlag = true
-	}
-
-	// Marshal.
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling payload: %v", err)
-	}
-
-	// Get job ID.
-	jobID, err := c.C.GetJobID(jsonPayload)
-	if err != nil {
-		return nil, err
-	}
-
-	// Poll job status.
-	go c.C.PollJobStatus(
-		ctx,
-		jobID,
-		opt.PollInterval,
-		httpRespChan,
-		errChan,
-	)
-
-	// Handle error.
-	err = <-errChan
-	if err != nil {
-		return nil, err
-	}
-
-	// Unmarshal the http Response and get the response.
-	httpResp := <-httpRespChan
-	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
-	if err != nil {
-		return nil, err
-	}
-
-	// Retrieve internal resp and forward it to the
-	// resp channel.
-	go func() {
-		respChan <- resp
-	}()
-
-	return respChan, nil
-}
-
-// ScrapeGoogleImages scrapes google with async polling runtime via Oxylabs SERP API
-// and google_images as source.
-func (c *SerpClientAsync) ScrapeGoogleImages(
-	url string,
-	opts ...*GoogleImagesOpts,
-) (chan *Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
-	defer cancel()
-
-	return c.ScrapeGoogleImagesCtx(ctx, url, opts...)
-}
-
-// ScrapeGoogleImagesCtx scrapes google with async polling runtime via Oxylabs SERP API
-// and google_images as source.
-// The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
-	ctx context.Context,
-	url string,
-	opts ...*GoogleImagesOpts,
-) (chan *Resp, error) {
-	httpRespChan := make(chan *http.Response)
-	respChan := make(chan *Resp)
-	errChan := make(chan error)
-
-	// Check validity of URL.
-	err := internal.ValidateUrl(url, "google")
-	if err != nil {
-		return nil, err
-	}
-
-	// Prepare options.
-	opt := &GoogleImagesOpts{}
-	if len(opts) > 0 && opts[len(opts)-1] != nil {
-		opt = opts[len(opts)-1]
-	}
-
-	// Initialize the context map apply each provided context modifier function.
-	context := make(oxylabs.ContextOption)
-	for _, modifier := range opt.Context {
-		modifier(context)
-	}
-
-	// Set defaults.
-	internal.SetDefaultUserAgent(&opt.UserAgent)
-	internal.SetDefaultDomain(&opt.Domain)
-	internal.SetDefaultStartPage(&opt.StartPage)
-	internal.SetDefaultPages(&opt.Pages)
-
-	// Check validity of parameters.
-	err = opt.checkParameterValidity()
-	if err != nil {
-		return nil, err
-	}
-
-	// Prepare payload.
-	payload := map[string]interface{}{
-		"source":          oxylabs.GoogleImages,
-		"domain":          opt.Domain,
-		"query":           url,
-		"start_page":      opt.StartPage,
-		"pages":           opt.Pages,
-		"locale":          opt.Locale,
 		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
@@ -830,12 +289,8 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 		"parse":           opt.Parse,
 		"context": []map[string]interface{}{
 			{
-				"key":   "nfpr",
-				"value": context["nfpr"],
-			},
-			{
-				"key":   "results_language",
-				"value": context["results_language"],
+				"key":   "autoselect_variant",
+				"value": context["autoselect_variant"],
 			},
 		},
 	}
@@ -843,7 +298,7 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parsing_instructions"] = &opt.ParseInstructions
+		payload["parse_instructions"] = opt.ParseInstructions
 		customParserFlag = true
 	}
 
@@ -867,6 +322,12 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 		httpRespChan,
 		errChan,
 	)
+
+	// Handle error.
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
 
 	// Unmarshal the http Response and get the response.
 	httpResp := <-httpRespChan
@@ -884,82 +345,64 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	return respChan, nil
 }
 
-// ScrapeGoogleTrendsExplore scrapes google with async polling runtime via Oxylabs SERP API
-// and google_trends_explore as source.
-func (c *SerpClientAsync) ScrapeGoogleTrendsExplore(
+// ScrapeAmazonPricing scrapes amazon via Oxylabs E-Commerce API with amazon_pricing as source.
+func (c *EcommerceClientAsync) ScrapeAmazonPricing(
 	query string,
-	opts ...*GoogleTrendsExploreOpts,
+	opts ...*AmazonPricingOpts,
 ) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
-	return c.ScrapeGoogleTrendsExploreCtx(ctx, query, opts...)
+	return c.ScrapeAmazonPricingCtx(ctx, query, opts...)
 }
 
-// ScrapeGoogleTrendsExploreCtx scrapes google with async polling runtime via Oxylabs SERP API
-// and google_trends_explore as source.
+// ScrapeAmazonPricingCtx scrapes amazon via Oxylabs E-Commerce API with amazon_pricing as source.
 // The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
+func (c *EcommerceClientAsync) ScrapeAmazonPricingCtx(
 	ctx context.Context,
 	query string,
-	opts ...*GoogleTrendsExploreOpts,
+	opts ...*AmazonPricingOpts,
 ) (chan *Resp, error) {
+	errChan := make(chan error)
 	httpRespChan := make(chan *http.Response)
 	respChan := make(chan *Resp)
-	errChan := make(chan error)
 
 	// Prepare options.
-	opt := &GoogleTrendsExploreOpts{}
+	opt := &AmazonPricingOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
 
-	// Initialize the context map apply each provided context modifier function.
-	context := make(oxylabs.ContextOption)
-	for _, modifier := range opt.Context {
-		modifier(context)
-	}
-
 	// Set defaults.
+	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultPages(&opt.Pages)
 
 	// Check validity of parameters.
-	err := opt.checkParameterValidity(context)
+	err := opt.checkParameterValidity()
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":       oxylabs.GoogleTrendsExplore,
-		"query":        query,
-		"geo_location": opt.GeoLocation,
-		"context": []map[string]interface{}{
-			{
-				"key":   "search_type",
-				"value": context["search_type"],
-			},
-			{
-				"key":   "date_from",
-				"value": context["date_from"],
-			},
-			{
-				"key":   "date_to",
-				"value": context["date_to"],
-			},
-			{
-				"key":   "category_id",
-				"value": context["category_id"],
-			},
-		},
+		"source":          oxylabs.AmazonPricing,
+		"domain":          opt.Domain,
+		"query":           query,
+		"start_page":      opt.StartPage,
+		"pages":           opt.Pages,
+		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 	}
 
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parsing_instructions"] = &opt.ParseInstructions
+		payload["parse_instructions"] = opt.ParseInstructions
 		customParserFlag = true
 	}
 
@@ -992,7 +435,415 @@ func (c *SerpClientAsync) ScrapeGoogleTrendsExploreCtx(
 
 	// Unmarshal the http Response and get the response.
 	httpResp := <-httpRespChan
-	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Retrieve internal resp and forward it to the
+	// resp channel.
+	go func() {
+		respChan <- resp
+	}()
+
+	return respChan, nil
+}
+
+// ScrapeAmazonReviews scrapes amazon via Oxylabs E-Commerce API with amazon_reviews as source.
+func (c *EcommerceClientAsync) ScrapeAmazonReviews(
+	query string,
+	opts ...*AmazonReviewsOpts,
+) (chan *Resp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeAmazonReviewsCtx(ctx, query, opts...)
+}
+
+// ScrapeAmazonReviewsCtx scrapes amazon via Oxylabs E-Commerce API with amazon_reviews as source.
+// The provided context allows customization of the HTTP req, including setting timeouts.
+func (c *EcommerceClientAsync) ScrapeAmazonReviewsCtx(
+	ctx context.Context,
+	query string,
+	opts ...*AmazonReviewsOpts,
+) (chan *Resp, error) {
+	errChan := make(chan error)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
+
+	// Prepare options.
+	opt := &AmazonReviewsOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Set defaults.
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultPages(&opt.Pages)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity()
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload.
+	payload := map[string]interface{}{
+		"source":          oxylabs.AmazonReviews,
+		"domain":          opt.Domain,
+		"query":           query,
+		"geo_location":    opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"start_page":      opt.StartPage,
+		"pages":           opt.Pages,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
+	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse_instructions"] = opt.ParseInstructions
+		customParserFlag = true
+	}
+
+	// Marshal.
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	// Get job ID.
+	jobID, err := c.C.GetJobID(jsonPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	// Poll job status.
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.PollInterval,
+		httpRespChan,
+		errChan,
+	)
+
+	// Handle error.
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Retrieve internal resp and forward it to the
+	// resp channel.
+	go func() {
+		respChan <- resp
+	}()
+
+	return respChan, nil
+}
+
+// ScrapeAmazonQuestions scrapes amazon via Oxylabs E-Commerce API with amazon_questions as source.
+func (c *EcommerceClientAsync) ScrapeAmazonQuestions(
+	query string,
+	opts ...*AmazonQuestionsOpts,
+) (chan *Resp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeAmazonQuestionsCtx(ctx, query, opts...)
+}
+
+// ScrapeAmazonQuestionsCtx scrapes amazon via Oxylabs E-Commerce API with amazon_questions as source.
+// The provided context allows customization of the HTTP req, including setting timeouts.
+func (c *EcommerceClientAsync) ScrapeAmazonQuestionsCtx(
+	ctx context.Context,
+	query string,
+	opts ...*AmazonQuestionsOpts,
+) (chan *Resp, error) {
+	errChan := make(chan error)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
+
+	// Prepare options.
+	opt := &AmazonQuestionsOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Set defaults.
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity()
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload.
+	payload := map[string]interface{}{
+		"source":          oxylabs.AmazonQuestions,
+		"domain":          opt.Domain,
+		"query":           query,
+		"geo_location":    opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
+	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse_instructions"] = opt.ParseInstructions
+		customParserFlag = true
+	}
+
+	// Marshal.
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	// Get job ID.
+	jobID, err := c.C.GetJobID(jsonPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	// Poll job status.
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.PollInterval,
+		httpRespChan,
+		errChan,
+	)
+
+	// Handle error.
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Retrieve internal resp and forward it to the
+	// resp channel.
+	go func() {
+		respChan <- resp
+	}()
+
+	return respChan, nil
+}
+
+// ScrapeAmazonBestSellers scrapes amazon via Oxylabs E-Commerce API with amazon_bestsellers as source.
+func (c *EcommerceClientAsync) ScrapeAmazonBestsellers(
+	query string,
+	opts ...*AmazonBestsellersOpts,
+) (chan *Resp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeAmazonBestsellersCtx(ctx, query, opts...)
+}
+
+// ScrapeAmazonBestsellersCtx scrapes amazon via Oxylabs E-Commerce API with amazon_bestsellers as source.
+// The provided context allows customization of the HTTP req, including setting timeouts.
+func (c *EcommerceClientAsync) ScrapeAmazonBestsellersCtx(
+	ctx context.Context,
+	query string,
+	opts ...*AmazonBestsellersOpts,
+) (chan *Resp, error) {
+	errChan := make(chan error)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
+
+	// Prepare options.
+	opt := &AmazonBestsellersOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Set defaults.
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultStartPage(&opt.StartPage)
+	internal.SetDefaultPages(&opt.Pages)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity()
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload.
+	payload := map[string]interface{}{
+		"source":          oxylabs.AmazonBestsellers,
+		"domain":          opt.Domain,
+		"query":           query,
+		"start_page":      opt.StartPage,
+		"pages":           opt.Pages,
+		"geo_location":    opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
+	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse_instructions"] = opt.ParseInstructions
+		customParserFlag = true
+	}
+
+	// Marshal.
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	// Get job ID.
+	jobID, err := c.C.GetJobID(jsonPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	// Poll job status.
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.PollInterval,
+		httpRespChan,
+		errChan,
+	)
+
+	// Handle error.
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Retrieve internal resp and forward it to the
+	// resp channel.
+	go func() {
+		respChan <- resp
+	}()
+
+	return respChan, nil
+}
+
+// ScrapeAmazonSellers scrapes amazon via Oxylabs E-Commerce API with amazon_sellers as source.
+func (c *EcommerceClientAsync) ScrapeAmazonSellers(
+	query string,
+	opts ...*AmazonSellersOpts,
+) (chan *Resp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
+	defer cancel()
+
+	return c.ScrapeAmazonSellersCtx(ctx, query, opts...)
+}
+
+// ScrapeAmazonSellersCtx scrapes amazon via Oxylabs E-Commerce API with amazon_sellers as source.
+// The provided context allows customization of the HTTP req, including setting timeouts.
+func (c *EcommerceClientAsync) ScrapeAmazonSellersCtx(
+	ctx context.Context,
+	query string,
+	opts ...*AmazonSellersOpts,
+) (chan *Resp, error) {
+	errChan := make(chan error)
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
+
+	// Prepare options.
+	opt := &AmazonSellersOpts{}
+	if len(opts) > 0 && opts[len(opts)-1] != nil {
+		opt = opts[len(opts)-1]
+	}
+
+	// Set defaults.
+	internal.SetDefaultDomain(&opt.Domain)
+	internal.SetDefaultUserAgent(&opt.UserAgent)
+
+	// Check validity of parameters.
+	err := opt.checkParameterValidity()
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare payload.
+	payload := map[string]interface{}{
+		"source":          oxylabs.AmazonSellers,
+		"domain":          opt.Domain,
+		"query":           query,
+		"geo_location":    opt.GeoLocation,
+		"user_agent_type": opt.UserAgent,
+		"render":          opt.Render,
+		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
+	}
+
+	// Add custom parsing instructions to the payload if provided.
+	customParserFlag := false
+	if opt.ParseInstructions != nil {
+		payload["parse_instructions"] = opt.ParseInstructions
+		customParserFlag = true
+	}
+
+	// Marshal.
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	// Get job ID.
+	jobID, err := c.C.GetJobID(jsonPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	// Poll job status.
+	go c.C.PollJobStatus(
+		ctx,
+		jobID,
+		opt.PollInterval,
+		httpRespChan,
+		errChan,
+	)
+
+	// Handle error.
+	err = <-errChan
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
 	if err != nil {
 		return nil, err
 	}

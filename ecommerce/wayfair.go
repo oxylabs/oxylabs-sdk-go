@@ -1,4 +1,4 @@
-package serp
+package ecommerce
 
 import (
 	"context"
@@ -10,38 +10,8 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// Accepted parameters for yandex.
-var YandexSearchAcceptedDomainParameters = []oxylabs.Domain{
-	oxylabs.DOMAIN_COM,
-	oxylabs.DOMAIN_RU,
-	oxylabs.DOMAIN_UA,
-	oxylabs.DOMAIN_BY,
-	oxylabs.DOMAIN_KZ,
-	oxylabs.DOMAIN_TR,
-}
-var YandexSearchAcceptedLocaleParameters = []oxylabs.Locale{
-	oxylabs.LOCALE_EN,
-	oxylabs.LOCALE_RU,
-	oxylabs.LOCALE_BY,
-	oxylabs.LOCALE_DE,
-	oxylabs.LOCALE_FR,
-	oxylabs.LOCALE_ID,
-	oxylabs.LOCALE_KK,
-	oxylabs.LOCALE_TT,
-	oxylabs.LOCALE_TR,
-	oxylabs.LOCALE_UK,
-}
-
-// checkParameterValidity checks validity of ScrapeYandexSearch parameters.
-func (opt *YandexSearchOpts) checkParameterValidity() error {
-	if !internal.InList(opt.Domain, YandexSearchAcceptedDomainParameters) {
-		return fmt.Errorf("invalid domain parameter: %s", opt.Domain)
-	}
-
-	if opt.Locale != "" && !internal.InList(opt.Locale, YandexSearchAcceptedLocaleParameters) {
-		return fmt.Errorf("invalid locale parameter: %s", opt.Locale)
-	}
-
+// checkParameterValidity checks validity of ScrapeWayfairSearch parameters.
+func (opt *WayfairSearchOpts) checkParametersValidity() error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
 	}
@@ -50,83 +20,67 @@ func (opt *YandexSearchOpts) checkParameterValidity() error {
 		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
 	}
 
-	return nil
-}
-
-// checkParameterValidity checks validity of ScrapeYandexUrl parameters.
-func (opt *YandexUrlOpts) checkParameterValidity() error {
-	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
-		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
-	}
-
-	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
-		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	if opt.Limit != 24 && opt.Limit != 48 && opt.Limit != 96 {
+		return fmt.Errorf("invalid limit parameter: %v", opt.Limit)
 	}
 
 	return nil
 }
 
-// YandexSearchOpts contains all the query parameters available for yandex_search.
-type YandexSearchOpts struct {
-	Domain            oxylabs.Domain
+// WayfairSearchOpts contains all the query parameters available for wayfair_search.
+type WayfairSearchOpts struct {
 	StartPage         int
 	Pages             int
 	Limit             int
-	Locale            oxylabs.Locale
-	GeoLocation       string
 	UserAgent         oxylabs.UserAgent
 	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 }
 
-// ScrapeYandexSearch scrapes yandex via Oxylabs SERP API with yandex_search as source.
-func (c *SerpClient) ScrapeYandexSearch(
+// ScrapeWayfairSearch scrapes wayfair via Oxylabs E-Commerce API with wayfair_search as source.
+func (c *EcommerceClient) ScrapeWayfairSearch(
 	query string,
-	opts ...*YandexSearchOpts,
+	opts ...*WayfairSearchOpts,
 ) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
-	return c.ScrapeYandexSearchCtx(ctx, query, opts...)
+	return c.ScrapeWayfairSearchCtx(ctx, query, opts...)
 }
 
-// ScrapeYandexSearchCtx scrapes yandex via Oxylabs SERP API with yandex_search as source.
+// ScrapeWayfairSearchCtx scrapes wayfair via Oxylabs E-Commerce API with wayfair_search as source.
 // The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClient) ScrapeYandexSearchCtx(
+func (c *EcommerceClient) ScrapeWayfairSearchCtx(
 	ctx context.Context,
 	query string,
-	opts ...*YandexSearchOpts,
+	opts ...*WayfairSearchOpts,
 ) (*Resp, error) {
 	// Prepare options.
-	opt := &YandexSearchOpts{}
+	opt := &WayfairSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
-	internal.SetDefaultStartPage(&opt.StartPage)
-	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
 	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_ECOMMERCE)
 
 	// Check validity of parameters.
-	err := opt.checkParameterValidity()
+	err := opt.checkParametersValidity()
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          oxylabs.YandexSearch,
-		"domain":          opt.Domain,
+		"source":          oxylabs.WayfairSearch,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
 		"limit":           opt.Limit,
-		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,
 	}
@@ -160,41 +114,49 @@ func (c *SerpClient) ScrapeYandexSearchCtx(
 	return resp, nil
 }
 
-// YandexUrlOpts contains all the query parameters available for yandex.
-type YandexUrlOpts struct {
+// WayfairUrlOpts contains all the query parameters available for wayfair.
+type WayfairUrlOpts struct {
 	UserAgent         oxylabs.UserAgent
-	Render            oxylabs.Render
 	CallbackUrl       string
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 }
 
-// ScrapeYandexUrl scrapes a yandex url via Oxylabs SERP API with yandex as source.
-func (c *SerpClient) ScrapeYandexUrl(
+// checkParameterValidity checks validity of ScrapeWayfairUrl parameters.
+func (opt *WayfairUrlOpts) checkParametersValidity() error {
+	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
+		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	return nil
+}
+
+// ScrapeWayfairUrl scrapes wayfair via Oxylabs E-Commerce API with wayfair as source.
+func (c *EcommerceClient) ScrapeWayfairUrl(
 	url string,
-	opts ...*YandexUrlOpts,
+	opts ...*WayfairUrlOpts,
 ) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
-	return c.ScrapeYandexUrlCtx(ctx, url, opts...)
+	return c.ScrapeWayfairUrlCtx(ctx, url, opts...)
 }
 
-// ScapeYandexUrlCtx scrapes a yandex url via Oxylabs SERP API with yandex as source.
+// ScrapeWayfairUrlCtx scrapes wayfair via Oxylabs E-Commerce API with wayfair as source.
 // The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClient) ScrapeYandexUrlCtx(
+func (c *EcommerceClient) ScrapeWayfairUrlCtx(
 	ctx context.Context,
 	url string,
-	opts ...*YandexUrlOpts,
+	opts ...*WayfairUrlOpts,
 ) (*Resp, error) {
-	// Check validity of URL.
-	err := internal.ValidateUrl(url, "yandex")
+	// Check validity of url.
+	err := internal.ValidateUrl(url, "wayfair")
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare options.
-	opt := &YandexUrlOpts{}
+	opt := &WayfairUrlOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -203,20 +165,18 @@ func (c *SerpClient) ScrapeYandexUrlCtx(
 	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
-	err = opt.checkParameterValidity()
+	err = opt.checkParametersValidity()
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          oxylabs.YandexUrl,
+		"source":          oxylabs.Wayfair,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
-		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
 	}
-
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {

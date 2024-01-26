@@ -1,4 +1,4 @@
-package serp
+package ecommerce
 
 import (
 	"context"
@@ -10,53 +10,51 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
 )
 
-// ScrapeBaiduSearch scrapes baidu with async polling runtime via Oxylabs SERP API
-// and baidu_search as source.
-func (c *SerpClientAsync) ScrapeBaiduSearch(
+// ScrapeWayfairSearch scrapes wayfair with async polling runtime via Oxylabs E-Commerce API
+// and wayfair_search as source.
+func (c *EcommerceClientAsync) ScrapeWayfairSearch(
 	query string,
-	opts ...*BaiduSearchOpts,
+	opts ...*WayfairSearchOpts,
 ) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
-	return c.ScrapeBaiduSearchCtx(ctx, query, opts...)
+	return c.ScrapeWayfairSearchCtx(ctx, query, opts...)
 }
 
-// ScrapeBaiduSearchCtx scrapes baidu with async polling runtime via Oxylabs SERP API
-// and baidu_search as source.
+// ScrapeWayfairSearchCtx scrapes wayfair with async polling runtime via Oxylabs E-Commerce API
+// and wayfair_search as source.
 // The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
+func (c *EcommerceClientAsync) ScrapeWayfairSearchCtx(
 	ctx context.Context,
 	query string,
-	opts ...*BaiduSearchOpts,
+	opts ...*WayfairSearchOpts,
 ) (chan *Resp, error) {
+	errChan := make(chan error)
 	httpRespChan := make(chan *http.Response)
 	respChan := make(chan *Resp)
-	errChan := make(chan error)
 
 	// Prepare options.
-	opt := &BaiduSearchOpts{}
+	opt := &WayfairSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
-	internal.SetDefaultStartPage(&opt.StartPage)
-	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
 	internal.SetDefaultPages(&opt.Pages)
+	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
+	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_ECOMMERCE)
 
 	// Check validity of parameters.
-	err := opt.checkParameterValidity()
+	err := opt.checkParametersValidity()
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          oxylabs.BaiduSearch,
-		"domain":          opt.Domain,
+		"source":          oxylabs.WayfairSearch,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
@@ -116,38 +114,38 @@ func (c *SerpClientAsync) ScrapeBaiduSearchCtx(
 	return respChan, nil
 }
 
-// ScrapeBaiduUrl scrapes baidu with async polling runtime via Oxylabs SERP API
-// and baidu as source.
-func (c *SerpClientAsync) ScrapeBaiduUrl(
-	query string,
-	opts ...*BaiduUrlOpts,
+// ScrapeWayfairUrl scrapes wayfair with async polling runtime via Oxylabs E-Commerce API
+// and wayfair as source.
+func (c *EcommerceClientAsync) ScrapeWayfairUrl(
+	url string,
+	opts ...*WayfairUrlOpts,
 ) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
-	return c.ScrapeBaiduUrlCtx(ctx, query, opts...)
+	return c.ScrapeWayfairUrlCtx(ctx, url, opts...)
 }
 
-// ScrapeBaiduUrlCtx scrapes baidu with async polling runtime via Oxylabs SERP API
-// and baidu as source.
+// ScrapeWayfairUrlCtx scrapes wayfair with async polling runtime via Oxylabs E-Commerce API
+// and wayfair as source.
 // The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
+func (c *EcommerceClientAsync) ScrapeWayfairUrlCtx(
 	ctx context.Context,
 	url string,
-	opts ...*BaiduUrlOpts,
+	opts ...*WayfairUrlOpts,
 ) (chan *Resp, error) {
+	errChan := make(chan error)
 	httpRespChan := make(chan *http.Response)
 	respChan := make(chan *Resp)
-	errChan := make(chan error)
 
-	// Check validity of URL.
-	err := internal.ValidateUrl(url, "baidu")
+	// Check validity of url.
+	err := internal.ValidateUrl(url, "wayfair")
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare options.
-	opt := &BaiduUrlOpts{}
+	opt := &WayfairUrlOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
 		opt = opts[len(opts)-1]
 	}
@@ -156,14 +154,14 @@ func (c *SerpClientAsync) ScrapeBaiduUrlCtx(
 	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
-	err = opt.checkParameterValidity()
+	err = opt.checkParametersValidity()
 	if err != nil {
 		return nil, err
 	}
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":          oxylabs.BaiduUrl,
+		"source":          oxylabs.Wayfair,
 		"url":             url,
 		"user_agent_type": opt.UserAgent,
 		"callback_url":    opt.CallbackUrl,

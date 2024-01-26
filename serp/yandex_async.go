@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
@@ -14,7 +15,7 @@ import (
 func (c *SerpClientAsync) ScrapeYandexSearch(
 	query string,
 	opts ...*YandexSearchOpts,
-) (chan *SerpResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -23,14 +24,14 @@ func (c *SerpClientAsync) ScrapeYandexSearch(
 
 // ScrapeYandexSearchCtx scrapes yandex with async polling runtime via Oxylabs SERP API
 // and yandex_search as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*YandexSearchOpts,
-) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
-	serpRespChan := make(chan *SerpResp)
+) (chan *Resp, error) {
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 	errChan := make(chan error)
 
 	// Prepare options.
@@ -69,13 +70,14 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
+		payload["parse"] = true
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
@@ -89,27 +91,31 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
-	// Error handling.
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// serp response channel.
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Retrieve internal resp and forward it to the
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		serpRespChan <- &SerpResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return serpRespChan, nil
+	return respChan, nil
 }
 
 // ScrapeYandexUrl scrapes yandex with async polling runtime via Oxylabs SERP API
@@ -117,7 +123,7 @@ func (c *SerpClientAsync) ScrapeYandexSearchCtx(
 func (c *SerpClientAsync) ScrapeYandexUrl(
 	url string,
 	opts ...*YandexUrlOpts,
-) (chan *SerpResp, error) {
+) (chan *Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -126,14 +132,14 @@ func (c *SerpClientAsync) ScrapeYandexUrl(
 
 // ScrapeYandexUrlCtx scrapes yandex with async polling runtime via Oxylabs SERP API
 // and yandex as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*YandexUrlOpts,
-) (chan *SerpResp, error) {
-	internalRespChan := make(chan *internal.Resp)
-	serpRespChan := make(chan *SerpResp)
+) (chan *Resp, error) {
+	httpRespChan := make(chan *http.Response)
+	respChan := make(chan *Resp)
 	errChan := make(chan error)
 
 	// Check the validity of the URL.
@@ -174,6 +180,7 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
@@ -189,25 +196,29 @@ func (c *SerpClientAsync) ScrapeYandexUrlCtx(
 	go c.C.PollJobStatus(
 		ctx,
 		jobID,
-		customParserFlag,
-		customParserFlag,
 		opt.PollInterval,
-		internalRespChan,
+		httpRespChan,
 		errChan,
 	)
 
-	// Error handling.
+	// Handle error.
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
 
-	// Retrieve internal response and forward it to the
-	// serp response channel.
+	// Unmarshal the http Response and get the response.
+	httpResp := <-httpRespChan
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	if err != nil {
+		return nil, err
+	}
+
+	// Retrieve internal resp and forward it to the
+	// resp channel.
 	go func() {
-		internalResp := <-internalRespChan
-		serpRespChan <- &SerpResp{*internalResp}
+		respChan <- resp
 	}()
 
-	return serpRespChan, nil
+	return respChan, nil
 }

@@ -1,4 +1,4 @@
-package serp
+package ecommerce
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"github.com/mslmio/oxylabs-sdk-go/internal"
 )
 
-type SerpClient struct {
+type EcommerceClient struct {
 	C *internal.Client
 }
 
@@ -14,8 +14,8 @@ type SerpClient struct {
 func Init(
 	username string,
 	password string,
-) *SerpClient {
-	return &SerpClient{
+) *EcommerceClient {
+	return &EcommerceClient{
 		C: &internal.Client{
 			BaseUrl: internal.SyncBaseUrl,
 			ApiCredentials: &internal.ApiCredentials{
@@ -27,7 +27,7 @@ func Init(
 	}
 }
 
-type SerpClientAsync struct {
+type EcommerceClientAsync struct {
 	C *internal.Client
 }
 
@@ -35,8 +35,8 @@ type SerpClientAsync struct {
 func InitAsync(
 	username string,
 	password string,
-) *SerpClientAsync {
-	return &SerpClientAsync{
+) *EcommerceClientAsync {
+	return &EcommerceClientAsync{
 		C: &internal.Client{
 			BaseUrl: internal.AsyncBaseUrl,
 			ApiCredentials: &internal.ApiCredentials{

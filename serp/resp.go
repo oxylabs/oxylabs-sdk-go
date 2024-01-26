@@ -1,164 +1,23 @@
-package internal
+package serp
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 )
 
-// Custom function to unmarshal into the Response struct.
-// Because of different return types depending on the parse option.
-func (r *Resp) UnmarshalJSON(data []byte) error {
-	// Unmarshal json data into RawResponse map.
-	var rawResponse map[string]json.RawMessage
-	if err := json.Unmarshal(data, &rawResponse); err != nil {
-		return err
-	}
-
-	// Unmarshal the results array.
-	if resultsData, ok := rawResponse["results"]; ok {
-		// Slice to store raw JSON messages for each result.
-		var resultsRawMessages []json.RawMessage
-		if err := json.Unmarshal(resultsData, &resultsRawMessages); err != nil {
-			return err
-		}
-
-		// Unmarshal each result into the Results slice.
-		for _, resultRawMessage := range resultsRawMessages {
-			if r.Parse && !r.ParseInstructions {
-				var result struct {
-					ContentParsed Content `json:"content"`
-					CreatedAt     string  `json:"created_at"`
-					UpdatedAt     string  `json:"updated_at"`
-					Page          int     `json:"page"`
-					Url           string  `json:"url"`
-					JobID         string  `json:"job_id"`
-					StatusCode    int     `json:"status_code"`
-				}
-				if err := json.Unmarshal(resultRawMessage, &result); err != nil {
-					return err
-				}
-				r.Results = append(r.Results, Result{
-					ContentParsed: result.ContentParsed,
-					CreatedAt:     result.CreatedAt,
-					UpdatedAt:     result.UpdatedAt,
-					Page:          result.Page,
-					Url:           result.Url,
-					JobID:         result.JobID,
-					StatusCode:    result.StatusCode,
-				})
-			} else if r.Parse && r.ParseInstructions {
-				var result struct {
-					CustomContentParsed map[string]interface{} `json:"content"`
-					CreatedAt           string                 `json:"created_at"`
-					UpdatedAt           string                 `json:"updated_at"`
-					Page                int                    `json:"page"`
-					Url                 string                 `json:"url"`
-					JobID               string                 `json:"job_id"`
-					StatusCode          int                    `json:"status_code"`
-				}
-				if err := json.Unmarshal(resultRawMessage, &result); err != nil {
-					return err
-				}
-				r.Results = append(r.Results, Result{
-					CustomContentParsed: result.CustomContentParsed,
-					CreatedAt:           result.CreatedAt,
-					UpdatedAt:           result.UpdatedAt,
-					Page:                result.Page,
-					Url:                 result.Url,
-					JobID:               result.JobID,
-					StatusCode:          result.StatusCode,
-				})
-			} else if !r.Parse {
-				var result struct {
-					Content    string `json:"content"`
-					CreatedAt  string `json:"created_at"`
-					UpdatedAt  string `json:"updated_at"`
-					Page       int    `json:"page"`
-					Url        string `json:"url"`
-					JobID      string `json:"job_id"`
-					StatusCode int    `json:"status_code"`
-				}
-				if err := json.Unmarshal(resultRawMessage, &result); err != nil {
-					return err
-				}
-				r.Results = append(r.Results, Result{
-					Content:    result.Content,
-					CreatedAt:  result.CreatedAt,
-					UpdatedAt:  result.UpdatedAt,
-					Page:       result.Page,
-					Url:        result.Url,
-					JobID:      result.JobID,
-					StatusCode: result.StatusCode,
-				})
-			}
-		}
-	}
-
-	// Unmarshal the job object.
-	if jobData, ok := rawResponse["job"]; ok {
-		var job Job
-		if err := json.Unmarshal(jobData, &job); err != nil {
-			return err
-		}
-		r.Job = job
-	}
-
-	return nil
-}
-
+// Resp is the response struct for all serp sources.
 type Resp struct {
-	Parse             bool     `json:"parse"`
-	ParseInstructions bool     `json:"parse_instructions"`
-	Results           []Result `json:"results"`
-	Job               Job      `json:"job"`
-	StatusCode        int      `json:"status_code"`
-	Status            string   `json:"status"`
+	Parse             bool      `json:"parse"`
+	ParseInstructions bool      `json:"parse_instructions"`
+	Results           []Results `json:"results"`
+	Job               Job       `json:"job"`
+	StatusCode        int       `json:"status_code"`
+	Status            string    `json:"status"`
 }
 
-type Job struct {
-	CallbackUrl         string        `json:"callback_url"`
-	ClientID            int           `json:"client_id"`
-	Context             []Context     `json:"context"`
-	CreatedAt           string        `json:"created_at"`
-	Domain              string        `json:"domain"`
-	GeoLocation         interface{}   `json:"geo_location"`
-	ID                  string        `json:"id"`
-	Limit               int           `json:"limit"`
-	Locale              interface{}   `json:"locale"`
-	Pages               int           `json:"pages"`
-	Parse               bool          `json:"parse"`
-	ParserType          interface{}   `json:"parser_type"`
-	ParsingInstructions interface{}   `json:"parsing_instructions"`
-	BrowserInstructions interface{}   `json:"browser_instructions"`
-	Render              interface{}   `json:"render"`
-	Url                 interface{}   `json:"url"`
-	Query               string        `json:"query"`
-	Source              string        `json:"source"`
-	StartPage           int           `json:"start_page"`
-	Status              string        `json:"status"`
-	StorageType         interface{}   `json:"storage_type"`
-	StorageUrl          interface{}   `json:"storage_url"`
-	Subdomain           string        `json:"subdomain"`
-	ContentEncoding     string        `json:"content_encoding"`
-	UpdatedAt           string        `json:"updated_at"`
-	UserAgentType       string        `json:"user_agent_type"`
-	SessionInfo         interface{}   `json:"session_info"`
-	Statuses            []interface{} `json:"statuses"`
-	ClientNotes         interface{}   `json:"client_notes"`
-	Links               []Link        `json:"_links"`
-}
-
-type Context struct {
-	Key   string      `json:"key"`
-	Value interface{} `json:"value"`
-}
-
-type Link struct {
-	Rel    string `json:"rel"`
-	Href   string `json:"href"`
-	Method string `json:"method"`
-}
-
-type Result struct {
+type Results struct {
 	CustomContentParsed map[string]interface{}
 	ContentParsed       Content
 	Content             string
@@ -172,19 +31,20 @@ type Result struct {
 }
 
 type Content struct {
-	Url             string  `json:"url"`
-	Page            int     `json:"page"`
-	Results         Results `json:"results"`
-	LastVisiblePage int     `json:"last_visible_page"`
-	ParseStatusCode int     `json:"parse_status_code"`
+	Url             string      `json:"url"`
+	Page            int         `json:"page"`
+	Errors          interface{} `json:"_errors"`
+	Results         Result      `json:"results"`
+	LastVisiblePage int         `json:"last_visible_page"`
+	ParseStatusCode int         `json:"parse_status_code"`
 }
 
-type Results struct {
+type Result struct {
 	Pla                        Pla                          `json:"pla"`
 	Paid                       []Paid                       `json:"paid"`
 	Images                     Image                        `json:"images"`
 	Organic                    []Organic                    `json:"organic"`
-	Twitter                    []Twitter                    `json:"twitter"`
+	Twitter                    Twitter                      `json:"twitter"`
 	Knowledge                  Knowledge                    `json:"knowledge"`
 	LocalPack                  LocalPack                    `json:"local_pack"`
 	TopStories                 TopStory                     `json:"top_stories"`
@@ -201,7 +61,11 @@ type Results struct {
 	Flights                    Flights                      `json:"flights"`
 	VideoBox                   VideoBox                     `json:"video_box"`
 	LocalServiceAds            LocalServiceAds              `json:"local_service_ads"`
-	TotalResultsCount          int                          `json:"total_results_count"`
+	Navigation                 []Navigation                 `json:"navigation"`
+	InstantAnswers             []InstantAnswers             `json:"instant_answers"`
+	VisuallySimilarImages      VisuallySimilarImages        `json:"visually_similar_images"`
+
+	TotalResultsCount int `json:"total_results_count"`
 }
 
 type Pla struct {
@@ -254,9 +118,11 @@ type Image struct {
 }
 
 type ImageItem struct {
-	Alt string `json:"alt"`
-	Pos int    `json:"pos"`
-	Url string `json:"url"`
+	Alt    string `json:"alt"`
+	Pos    int    `json:"pos"`
+	Url    string `json:"url"`
+	Data   string `json:"data"`
+	Source string `json:"source"`
 }
 
 type Organic struct {
@@ -328,8 +194,13 @@ type LocalPack struct {
 }
 
 type LocalPackItem struct {
-	Cid         string `json:"cid"`
-	Pos         int    `json:"pos"`
+	Cid   string `json:"cid"`
+	Pos   int    `json:"pos"`
+	Links []struct {
+		Href  string `json:"href"`
+		Title string `json:"title"`
+	} `json:"links"`
+	Phone       string `json:"phone"`
 	Title       string `json:"title"`
 	Rating      int    `json:"rating"`
 	Address     string `json:"address"`
@@ -386,6 +257,12 @@ type Source struct {
 }
 
 type SearchInformation struct {
+	Image struct {
+		Url        string      `json:"url"`
+		Width      int         `json:"width"`
+		Height     int         `json:"height"`
+		OtherSizes interface{} `json:"other_sizes"`
+	} `json:"image"`
 	Query             string `json:"query"`
 	ShowingResultsFor string `json:"showing_results_for"`
 	TotalResultsCount int    `json:"total_results_count"`
@@ -498,4 +375,196 @@ type LocalServiceAds struct {
 		GoogleGuaranteed bool   `json:"google_guaranteed"`
 	} `json:"items"`
 	PosOverall int `json:"pos_overall"`
+}
+
+type Navigation struct {
+	Pos   int    `json:"pos"`
+	Url   string `json:"url"`
+	Title string `json:"title"`
+}
+
+type InstantAnswers struct {
+	Type       string `json:"type"`
+	Parsed     bool   `json:"_parsed"`
+	PosOverall int    `json:"pos_overall"`
+}
+
+type VisuallySimilarImages struct {
+	AllImagesUrl   string   `json:"all_images_url"`
+	FeaturedImages []string `json:"featured_images"`
+}
+
+type Job struct {
+	CallbackUrl string `json:"callback_url"`
+	ClientID    int    `json:"client_id"`
+	Context     []struct {
+		Key   string      `json:"key"`
+		Value interface{} `json:"value"`
+	} `json:"context,omitempty"`
+	CreatedAt           string        `json:"created_at"`
+	Domain              string        `json:"domain"`
+	GeoLocation         interface{}   `json:"geo_location"`
+	ID                  string        `json:"id"`
+	Limit               int           `json:"limit"`
+	Locale              interface{}   `json:"locale"`
+	Pages               int           `json:"pages"`
+	Parse               bool          `json:"parse"`
+	ParserType          interface{}   `json:"parser_type"`
+	ParsingInstructions interface{}   `json:"parsing_instructions"`
+	BrowserInstructions interface{}   `json:"browser_instructions"`
+	Render              interface{}   `json:"render"`
+	Url                 interface{}   `json:"url"`
+	Query               string        `json:"query"`
+	Source              string        `json:"source"`
+	StartPage           int           `json:"start_page"`
+	Status              string        `json:"status"`
+	StorageType         interface{}   `json:"storage_type"`
+	StorageUrl          interface{}   `json:"storage_url"`
+	Subdomain           string        `json:"subdomain"`
+	ContentEncoding     string        `json:"content_encoding"`
+	UpdatedAt           string        `json:"updated_at"`
+	UserAgentType       string        `json:"user_agent_type"`
+	SessionInfo         interface{}   `json:"session_info"`
+	Statuses            []interface{} `json:"statuses"`
+	ClientNotes         interface{}   `json:"client_notes"`
+	Links               []struct {
+		Rel    string `json:"rel"`
+		Href   string `json:"href"`
+		Method string `json:"method"`
+	} `json:"_links,omitempty"`
+}
+
+// Custom function to unmarshal into the Resp struct.
+// Because of different return types depending on the parse option.
+func (r *Resp) UnmarshalJSON(data []byte) error {
+	// Unmarshal json data into RawResp map.
+	var rawResp map[string]json.RawMessage
+	if err := json.Unmarshal(data, &rawResp); err != nil {
+		return err
+	}
+
+	// Unmarshal the results array.
+	if resultsData, ok := rawResp["results"]; ok {
+		// Slice to store raw JSON messages for each result.
+		var resultsRawMessages []json.RawMessage
+		if err := json.Unmarshal(resultsData, &resultsRawMessages); err != nil {
+			return err
+		}
+
+		// Unmarshal each result into the Results slice.
+		for _, resultRawMessage := range resultsRawMessages {
+			if r.Parse && !r.ParseInstructions {
+				var result struct {
+					ContentParsed Content `json:"content"`
+					CreatedAt     string  `json:"created_at"`
+					UpdatedAt     string  `json:"updated_at"`
+					Page          int     `json:"page"`
+					Url           string  `json:"url"`
+					JobID         string  `json:"job_id"`
+					StatusCode    int     `json:"status_code"`
+				}
+				if err := json.Unmarshal(resultRawMessage, &result); err != nil {
+					return err
+				}
+				r.Results = append(r.Results, Results{
+					ContentParsed: result.ContentParsed,
+					CreatedAt:     result.CreatedAt,
+					UpdatedAt:     result.UpdatedAt,
+					Page:          result.Page,
+					Url:           result.Url,
+					JobID:         result.JobID,
+					StatusCode:    result.StatusCode,
+				})
+			} else if r.Parse && r.ParseInstructions {
+				var result struct {
+					CustomContentParsed map[string]interface{} `json:"content"`
+					CreatedAt           string                 `json:"created_at"`
+					UpdatedAt           string                 `json:"updated_at"`
+					Page                int                    `json:"page"`
+					Url                 string                 `json:"url"`
+					JobID               string                 `json:"job_id"`
+					StatusCode          int                    `json:"status_code"`
+				}
+				if err := json.Unmarshal(resultRawMessage, &result); err != nil {
+					return err
+				}
+				r.Results = append(r.Results, Results{
+					CustomContentParsed: result.CustomContentParsed,
+					CreatedAt:           result.CreatedAt,
+					UpdatedAt:           result.UpdatedAt,
+					Page:                result.Page,
+					Url:                 result.Url,
+					JobID:               result.JobID,
+					StatusCode:          result.StatusCode,
+				})
+			} else if !r.Parse {
+				var result struct {
+					Content    string `json:"content"`
+					CreatedAt  string `json:"created_at"`
+					UpdatedAt  string `json:"updated_at"`
+					Page       int    `json:"page"`
+					Url        string `json:"url"`
+					JobID      string `json:"job_id"`
+					StatusCode int    `json:"status_code"`
+				}
+				if err := json.Unmarshal(resultRawMessage, &result); err != nil {
+					return err
+				}
+				r.Results = append(r.Results, Results{
+					Content:    result.Content,
+					CreatedAt:  result.CreatedAt,
+					UpdatedAt:  result.UpdatedAt,
+					Page:       result.Page,
+					Url:        result.Url,
+					JobID:      result.JobID,
+					StatusCode: result.StatusCode,
+				})
+			}
+		}
+	}
+
+	// Unmarshal the job object.
+	if jobData, ok := rawResp["job"]; ok {
+		var job Job
+		if err := json.Unmarshal(jobData, &job); err != nil {
+			return err
+		}
+		r.Job = job
+	}
+
+	return nil
+}
+
+// GetResp returns a Resp struct from the http.Response object.
+// It will use the parse and customParserFlag parameters
+// to determine how to parse the response.
+func GetResp(
+	httpResp *http.Response,
+	parse bool,
+	customParserFlag bool,
+) (*Resp, error) {
+	// Read the resp body into a buffer.
+	respBody, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// If status code not 200, return error.
+	if httpResp.StatusCode != 200 {
+		return nil, fmt.Errorf("error with status code %s: %s", httpResp.Status, respBody)
+	}
+
+	// Unmarshal the JSON object.
+	res := &Resp{}
+	res.Parse = parse
+	res.ParseInstructions = customParserFlag
+	if err := res.UnmarshalJSON(respBody); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON object: %v", err)
+	}
+
+	// Set status code and status.
+	res.StatusCode = httpResp.StatusCode
+	res.Status = httpResp.Status
+
+	return res, nil
 }

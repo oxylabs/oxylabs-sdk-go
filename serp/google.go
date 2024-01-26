@@ -167,7 +167,6 @@ func (opt *GoogleTrendsExploreOpts) checkParameterValidity(ctx oxylabs.ContextOp
 
 // checkParameterValidity checks validity of google images parameters.
 func (opt *GoogleImagesOpts) checkParameterValidity() error {
-
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
 	}
@@ -200,7 +199,7 @@ type GoogleSearchOpts struct {
 func (c *SerpClient) ScrapeGoogleSearch(
 	query string,
 	opts ...*GoogleSearchOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -208,12 +207,12 @@ func (c *SerpClient) ScrapeGoogleSearch(
 }
 
 // ScrapeGoogleSearchCtx scrapes google via Oxylabs SERP API with google_search as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleSearchCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSearchOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &GoogleSearchOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -305,20 +304,22 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	// Req.
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -339,7 +340,7 @@ type GoogleUrlOpts struct {
 func (c *SerpClient) ScrapeGoogleUrl(
 	url string,
 	opts ...*GoogleUrlOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -347,12 +348,12 @@ func (c *SerpClient) ScrapeGoogleUrl(
 }
 
 // ScrapeGoogleUrlCtx scrapes google via Oxylabs SERP API with google as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleUrlCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleUrlOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Check validity of URL.
 	err := internal.ValidateUrl(url, "google")
 	if err != nil {
@@ -392,20 +393,22 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	// Req.
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -431,7 +434,7 @@ type GoogleAdsOpts struct {
 func (c *SerpClient) ScrapeGoogleAds(
 	query string,
 	opts ...*GoogleAdsOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -439,12 +442,12 @@ func (c *SerpClient) ScrapeGoogleAds(
 }
 
 // ScrapeGoogleAdsCtx scrapes google via Oxylabs SERP API with google_ads as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleAdsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleAdsOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &GoogleAdsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -508,20 +511,22 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
-	internalResp, err := c.C.Req(ctx, jsonPayload, opt.Parse, customParserFlag, "POST")
+	// Req.
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -542,7 +547,7 @@ type GoogleSuggestionsOpts struct {
 func (c *SerpClient) ScrapeGoogleSuggestions(
 	query string,
 	opts ...*GoogleSuggestionsOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -550,12 +555,12 @@ func (c *SerpClient) ScrapeGoogleSuggestions(
 }
 
 // ScrapeGoogleSuggestionsCtx scrapes google via  Oxylabs SERP API with google_suggestions as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleSuggestionsOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &GoogleSuggestionsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -585,25 +590,26 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	// Req.
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -629,7 +635,7 @@ type GoogleHotelsOpts struct {
 func (c *SerpClient) ScrapeGoogleHotels(
 	query string,
 	opts ...*GoogleHotelsOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -637,12 +643,12 @@ func (c *SerpClient) ScrapeGoogleHotels(
 }
 
 // ScrapeGoogleHotelsCtx scrapes google via the google_hotels source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleHotelsOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &GoogleHotelsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -710,20 +716,22 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	// Req.
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -747,7 +755,7 @@ type GoogleTravelHotelsOpts struct {
 func (c *SerpClient) ScrapeGoogleTravelHotels(
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -755,12 +763,12 @@ func (c *SerpClient) ScrapeGoogleTravelHotels(
 }
 
 // ScrapeGoogleTravelHotelsCtx scrapes google via Oxylabs SERP API with google_travel_hotels as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleTravelHotelsOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &GoogleTravelHotelsOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -818,20 +826,22 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	// Req.
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -847,6 +857,7 @@ type GoogleImagesOpts struct {
 	UserAgent         oxylabs.UserAgent
 	Render            oxylabs.Render
 	CallbackUrl       string
+	Parse             bool
 	ParseInstructions *map[string]interface{}
 	PollInterval      time.Duration
 	Context           []func(oxylabs.ContextOption)
@@ -856,7 +867,7 @@ type GoogleImagesOpts struct {
 func (c *SerpClient) ScrapeGoogleImages(
 	url string,
 	opts ...*GoogleImagesOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -864,18 +875,12 @@ func (c *SerpClient) ScrapeGoogleImages(
 }
 
 // ScrapeGoogleImagesCtx scrapes google via Oxylabs SERP API with google_images as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleImagesCtx(
 	ctx context.Context,
 	url string,
 	opts ...*GoogleImagesOpts,
-) (*SerpResp, error) {
-	// Check validity of URL.
-	err := internal.ValidateUrl(url, "google")
-	if err != nil {
-		return nil, err
-	}
-
+) (*Resp, error) {
 	// Prepare options.
 	opt := &GoogleImagesOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -889,12 +894,13 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	}
 
 	// Set defaults.
+	internal.SetDefaultUserAgent(&opt.UserAgent)
 	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultPages(&opt.Pages)
 
 	// Check validity of parameters.
-	err = opt.checkParameterValidity()
+	err := opt.checkParameterValidity()
 	if err != nil {
 		return nil, err
 	}
@@ -911,6 +917,7 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 		"user_agent_type": opt.UserAgent,
 		"render":          opt.Render,
 		"callback_url":    opt.CallbackUrl,
+		"parse":           opt.Parse,
 		"context": []map[string]interface{}{
 			{
 				"key":   "nfpr",
@@ -926,28 +933,30 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
-		payload["parse"] = true
 		payload["parsing_instructions"] = &opt.ParseInstructions
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
-	internalResp, err := c.C.Req(ctx, jsonPayload, customParserFlag, customParserFlag, "POST")
+	// Req.
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
+
 }
 
 // GoogleTrendsExploreOpts contains all the query parameters available for google_trends_explore.
@@ -964,7 +973,7 @@ type GoogleTrendsExploreOpts struct {
 func (c *SerpClient) ScrapeGoogleTrendsExplore(
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
 	defer cancel()
 
@@ -972,12 +981,12 @@ func (c *SerpClient) ScrapeGoogleTrendsExplore(
 }
 
 // ScrapeGoogleTrendsExploreCtx scrapes google via Oxylabs SERP API with google_trends_explore as source.
-// The provided context allows customization of the HTTP request, including setting timeouts.
+// The provided context allows customization of the HTTP req, including setting timeouts.
 func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 	ctx context.Context,
 	query string,
 	opts ...*GoogleTrendsExploreOpts,
-) (*SerpResp, error) {
+) (*Resp, error) {
 	// Prepare options.
 	opt := &GoogleTrendsExploreOpts{}
 	if len(opts) > 0 && opts[len(opts)-1] != nil {
@@ -1001,9 +1010,8 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 
 	// Prepare payload.
 	payload := map[string]interface{}{
-		"source":       oxylabs.GoogleTrendsExplore,
-		"query":        query,
-		"geo_location": opt.GeoLocation,
+		"source": oxylabs.GoogleTrendsExplore,
+		"query":  query,
 		"context": []map[string]interface{}{
 			{
 				"key":   "search_type",
@@ -1026,6 +1034,11 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 		"callback_url":    opt.CallbackUrl,
 	}
 
+	// Add geo_location to the payload if provided.
+	if opt.GeoLocation != "" {
+		payload["geo_location"] = opt.GeoLocation
+	}
+
 	// Add custom parsing instructions to the payload if provided.
 	customParserFlag := false
 	if opt.ParseInstructions != nil {
@@ -1033,20 +1046,22 @@ func (c *SerpClient) ScrapeGoogleTrendsExploreCtx(
 		customParserFlag = true
 	}
 
+	// Marshal.
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling payload: %v", err)
 	}
 
-	// Request.
-	internalResp, err := c.C.Req(ctx, jsonPayload, true, customParserFlag, "POST")
+	// Req.
+	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
 	if err != nil {
 		return nil, err
 	}
 
-	// Map response.
-	resp := &SerpResp{
-		Resp: *internalResp,
+	// Unmarshal the http Response and get the response.
+	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil

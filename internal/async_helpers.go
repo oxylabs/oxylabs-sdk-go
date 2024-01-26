@@ -10,112 +10,78 @@ import (
 	"time"
 )
 
-// Helper function to make a POST request and retrieve the Job ID.
+// Helper function to make a POST req and retrieve the Job ID.
 func (c *Client) GetJobID(
 	jsonPayload []byte,
 ) (string, error) {
-	request, _ := http.NewRequest(
+	req, _ := http.NewRequest(
 		"POST",
 		c.BaseUrl,
 		bytes.NewBuffer(jsonPayload),
 	)
-	request.Header.Add("Content-type", "application/json")
-	request.SetBasicAuth(
+	req.Header.Add("Content-type", "application/json")
+	req.SetBasicAuth(
 		c.ApiCredentials.Username,
 		c.ApiCredentials.Password,
 	)
-	response, err := c.HttpClient.Do(request)
+	resp, err := c.HttpClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("error performing request: %v", err)
+		return "", fmt.Errorf("error performing req: %v", err)
 	}
 
-	responseBody, err := io.ReadAll(response.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("error reading response body: %v", err)
+		return "", fmt.Errorf("error reading resp body: %v", err)
 	}
-	response.Body.Close()
+	resp.Body.Close()
 
 	// Unmarshal into job.
 	job := &Job{}
-	if err = json.Unmarshal(responseBody, &job); err != nil {
-		return "", fmt.Errorf("error unmarshalling job response body: %v", err)
+	if err = json.Unmarshal(respBody, &job); err != nil {
+		return "", fmt.Errorf("error unmarshalling job resp body: %v", err)
 	}
 
 	return job.ID, nil
 }
 
-// Helper function for handling response parsing and error checking.
-func (c *Client) GetResponse(
+// Helper function for getting the http response from the request.
+func (c *Client) GetHttpResp(
 	jobID string,
-	parse bool,
-	parseInstructions bool,
-	respChan chan *Resp,
+	httpChan chan *http.Response,
 	errChan chan error,
 ) {
-	request, _ := http.NewRequest(
+	req, _ := http.NewRequest(
 		"GET",
 		fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", jobID),
 		nil,
 	)
-	request.Header.Add("Content-type", "application/json")
-	request.SetBasicAuth(
+	req.Header.Add("Content-type", "application/json")
+	req.SetBasicAuth(
 		c.ApiCredentials.Username,
 		c.ApiCredentials.Password,
 	)
-	response, err := c.HttpClient.Do(request)
+	resp, err := c.HttpClient.Do(req)
 	if err != nil {
 		errChan <- err
-		close(respChan)
+		close(httpChan)
 		return
 	}
 
-	// Read the response body into a buffer.
-	responseBody, err := io.ReadAll(response.Body)
-	if err != nil {
-		err = fmt.Errorf("error reading response body: %v", err)
-		errChan <- err
-		close(respChan)
-		return
-	}
-	response.Body.Close()
-
-	// Check status code.
-	if response.StatusCode != 200 {
-		err = fmt.Errorf("error with status code %s: %s", response.Status, responseBody)
-		errChan <- err
-		close(respChan)
-		return
-	}
-
-	// Unmarshal the JSON object.
-	resp := &Resp{}
-	resp.Parse = parse
-	if err := resp.UnmarshalJSON(responseBody); err != nil {
-		err = fmt.Errorf("failed to parse JSON object: %v", err)
-		errChan <- err
-		close(respChan)
-		return
-	}
-	resp.StatusCode = response.StatusCode
-	resp.Status = response.Status
+	// Return.
 	close(errChan)
-	respChan <- resp
+	httpChan <- resp
 }
 
-// PollJobStatus polls the job status and manages the response/error channels.
-// Ctx is the context of the request.
-// JsonPayload is the payload for the request.
-// Parse indicates whether to parse the response.
-// ParseInstructions indicates whether to parse the response with custom parsing instructions.
-// PollInterval is the time to wait between each subsequent polling request.
-// respChan and errChan are the channels for the response and error respectively.
+// PollJobStatus polls the job status and manages the resp/error channels.
+// ctx is the context of the req.
+// jsonPayload is the payload for the req.
+// pollInterval is the time to wait between each subsequent polling req.
+// httpRespChan and errChan are the channels for the http resp and error respectively.
 func (c *Client) PollJobStatus(
 	ctx context.Context,
 	jobID string,
-	parse bool,
-	parseInstructions bool,
 	pollInterval time.Duration,
-	respChan chan *Resp,
+	httpRespChan chan *http.Response,
 	errChan chan error,
 ) {
 	// Add default timeout if ctx has no deadline.
@@ -125,69 +91,75 @@ func (c *Client) PollJobStatus(
 		ctx = context
 	}
 
+	// Set wait time between requests.
+	sleepTime := DefaultPollInterval
+	if pollInterval != 0 {
+		sleepTime = pollInterval
+	}
+
 	for {
-		// Perform a request to query job status.
-		request, _ := http.NewRequest(
+		// Perform a req to query job status.
+		req, _ := http.NewRequest(
 			"GET",
 			fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", jobID),
 			nil,
 		)
-		request.Header.Add("Content-type", "application/json")
-		request.SetBasicAuth(
+		req.Header.Add("Content-type", "application/json")
+		req.SetBasicAuth(
 			c.ApiCredentials.Username,
 			c.ApiCredentials.Password,
 		)
-		response, err := c.HttpClient.Do(request)
+		resp, err := c.HttpClient.Do(req)
 		if err != nil {
 			errChan <- err
-			close(respChan)
+			close(httpRespChan)
 			return
 		}
 
-		// Read the response body into a buffer.
-		responseBody, err := io.ReadAll(response.Body)
-		response.Body.Close()
+		// Read the resp body into a buffer.
+		respBody, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
 		if err != nil {
-			err = fmt.Errorf("error reading response body: %v", err)
+			err = fmt.Errorf("error reading resp body: %v", err)
 			errChan <- err
-			close(respChan)
+			close(httpRespChan)
 			return
 		}
 
 		// Unmarshal into job.
 		job := &Job{}
-		if err = json.Unmarshal(responseBody, &job); err != nil {
-			err = fmt.Errorf("error unmarshalling job response body: %v", err)
+		if err = json.Unmarshal(respBody, &job); err != nil {
+			err = fmt.Errorf("error unmarshalling job resp body: %v", err)
 			errChan <- err
-			close(respChan)
+			close(httpRespChan)
 			return
 		}
 
 		// Check job status.
 		if job.Status == "done" {
-			c.GetResponse(job.ID, parse, parseInstructions, respChan, errChan)
+			c.GetHttpResp(job.ID, httpRespChan, errChan)
 			return
 		} else if job.Status == "faulted" {
 			err = fmt.Errorf("there was an error processing your query")
 			errChan <- err
-			close(respChan)
+			close(httpRespChan)
 			return
-		}
-
-		// Set wait time between requests.
-		sleepTime := DefaultPollInterval
-		if pollInterval != 0 {
-			sleepTime = pollInterval
 		}
 
 		select {
 		case <-ctx.Done():
 			err = fmt.Errorf("timeout exceeded")
 			errChan <- err
-			close(respChan)
+			close(httpRespChan)
 			return
 		default:
 			time.Sleep(sleepTime)
 		}
 	}
+}
+
+// Job struct to get job id and status for the async polling.
+type Job struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
 }

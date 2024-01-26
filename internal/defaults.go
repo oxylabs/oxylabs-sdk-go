@@ -66,3 +66,24 @@ func SetDefaultHotelOccupancy(ctx oxylabs.ContextOption) {
 		ctx["hotel_occupancy"] = 2
 	}
 }
+
+// SetDefaultSortBy sets the sort_by parameter in the ctx if it is not set.
+func SetDefaultSortBy(ctx oxylabs.ContextOption) {
+	if ctx["sort_by"] == nil {
+		ctx["sort_by"] = "r"
+	}
+}
+
+// SetDefaultHttpMethod sets the http_method parameter in the ctx if it is not set.
+func SetDefaultHttpMethod(ctx oxylabs.ContextOption) {
+	if ctx["http_method"] == nil {
+		ctx["http_method"] = "get"
+	}
+}
+
+// SetDefaultContentEncoding sets the content_encoding parameter if it is not set.
+func SetDefaultContentEncoding(contentEncoding *string) {
+	if *contentEncoding == "" {
+		*contentEncoding = "base64"
+	}
+}
