@@ -1,34 +1,19 @@
-# Oxylabs SDK Go
+# Oxylabs Go SDK
 
 This is a Go SDK for the [Oxylabs](https://oxylabs.io) [Scraper APIs](https://developers.oxylabs.io/scraper-apis/getting-started).
 
 This will help simplify integrating with Oxylabs's APIs, which can help you with retrieving search engine results (SERP), eCommerce data, real estate data, and more.
 
-Some technical features include but are not limited to:
+The Go SDK provides you with several benefits over using the raw APIs directly:
 
-### Simplified Interface
+- **Simplified Interface**: abstracts away complexities, offering a straightforward user interface for interacting with the Oxylabs SERP API.
+- **Automated Request Management**: streamlines the handling of API requests and responses for enhanced efficiency and reliability.
+- **Error Handling**: provides meaningful error messages and handles common API errors, simplifying troubleshooting.
+- **Result Parsing**: streamlines the process of extracting relevant data from SERP results, allowing developers to focus on application logic.
 
-Abstracts away complexities, offering a straightforward user interface for interacting with the Oxylabs SERP API.
+## Requirements
 
-### Automated Request Management
-
-Streamlines the handling of API requests and responses for enhanced efficiency and reliability.
-
-### Error Handling
-
-Provides meaningful error messages and handles common API errors, simplifying troubleshooting.
-
-### Result Parsing
-
-Streamlines the process of extracting relevant data from SERP results, allowing developers to focus on application logic.
-
-## Getting Started
-
-You will need an Oxylabs API username and password which you can get by signing up at https://oxylabs.io. You can check things out with a free trial at https://oxylabs.io/products/scraper-api/serp for a week.
-
-### Setting Up
-
-This SDK requires a minimum version of `go 1.21`.
+- Go 1.21.0 or above.
 
 You can check your go version by running the following command in your preferred terminal:
 
@@ -38,23 +23,31 @@ go version
 
 If you need to install or update go you can do so by following the steps mentioned [here](https://go.dev/doc/install).
 
-#### Initialize Project
+## Authentication
 
-```sh
-$ mkdir ~/oxylabs-sdk
-$ cd ~/oxylabs-sdk
-$ go mod init oxylabs-sdk 
+You will need an Oxylabs API username and password which you can get by signing up at https://oxylabs.io. You can check things out with a free trial at https://oxylabs.io/products/scraper-api/serp.
+
+## Installation
+
+```bash
+go get github.com/mslmio/oxylabs-sdk-go
 ```
 
-#### Install SDK package
+## Usage
 
-```sh
-$ go get github.com/mslmio/oxylabs-sdk-go
+Start a local Go project if you don't have one:
+
+```bash
+go mod init
+```
+
+Install the package:
+
+```bash
+go get github.com/mslmio/oxylabs-sdk-go
 ```
 
 ### Quick Start
-
-Basic usage of the SDK.
 
 ```go
 package main
@@ -85,28 +78,22 @@ func main() {
 }
 ```
 
-## General Information
-
 ### Integration Methods
 
-There are three integration method for the Oxylabs SERP API.
-    - Realtime (Sync)
-    - Push-Pull (Async)
-    - Proxy Endpoint
+There are three integration method for the Oxylabs SERP API, each exposed via different packages:
 
-To use either them you can just use the following init functions respectively:
+- Realtime (Sync) - `serp.Init(username, password)`
+- Push-Pull (Async) - `serp.InitAsync(username, password)`
+- Proxy Endpoint - `proxy.Init(username, password)`
 
-- `serp.Init(username,password)`
-
-- `serp.InitAsync(username,password)`
-
-- `proxy.Init(username,password)`
-
-Learn more about integration methods [on the official documentation](https://developers.oxylabs.io/scraper-apis/getting-started/integration-methods) and how this SDk uses them [here](#integration-methods-1).
+Learn more about integration methods [on the official documentation](https://developers.oxylabs.io/scraper-apis/getting-started/integration-methods) and how this SDK uses them [here](#integration-methods-1).
 
 ### Sources
 
-The Oxylabs SERP API scrapes according to the source provided to the API. There are currently four search engines you can scrape with the Oxylabs SERP API all with different sources.
+The Oxylabs SERP API scrapes according to the source provided via the API.
+
+There are currently four search engines you can scrape with the Oxylabs SERP API, each with different sources.
+
 | Search Engine | Sources
 | ------------- | --------------
 | **Google**    | `google`, `google_search`, `google_ads`, `google_hotels`, `google_travel_hotels`, `google_images`, `google_suggest`, `google_trends_explore`  
@@ -114,20 +101,19 @@ The Oxylabs SERP API scrapes according to the source provided to the API. There 
 | **Bing**      | `bing`, `bing_search`
 | **Baidu**     | `baidu`, `baidu_search`
 
-Our SDK makes it easy for you, you just need to call the relevant function name from the client. For example if you wish to scrape Yandex with `yandex_search` as a source you
-just need to invoke:
+In the SDK you'll just need to call the relevant function name from the client.
+
+For example if you wish to scrape Yandex with `yandex_search` as a source:
 
 ```go
-res, err := c.ScrapeYandexSearch(
-	"football",
-)
+res, err := c.ScrapeYandexSearch("football")
 ```
 
 ### Query Parameters
 
 Each source has different accepted query parameters. For a detailed list of accepted parameters by each source you can head over to https://developers.oxylabs.io/scraper-apis/serp-scraper-api.
 
-This SDK provides you with the option to query with default parameters by not sending anything as the second argument as seen in the above example. Lets say we want to send in some query parameters it is as simple as:
+By default, scrape functions will use default parameters. If you need to send specific query parameters, here is an example of how to do it:
 
 ```go
 res, err := c.ScrapeYandexSearch(
@@ -154,13 +140,13 @@ import (
 
 Currently these are available for the `Render` and`UserAgent` parameters. For the full list you can check `oxylabs/types.go`. You can send in these values as strings too.
 
-These can be used like this:
+These can be used as follows:
 
 ```go
 res, err := c.ScrapeGoogleSearch(
 	"adidas",
 	&serp.GoogleSearchOpts{
-		UserAgent: oxylabs.UA_DESKTOP_CHROME, //desktop_chrome
+		UserAgent: oxylabs.UA_DESKTOP_CHROME, // desktop_chrome
 		Render:    oxylabs.HTML,              // html
 		Domain:    oxylabs.DOMAIN_COM,        // com
 	},
@@ -169,9 +155,7 @@ res, err := c.ScrapeGoogleSearch(
 
 ### Context Options for Google sources
 
-The SDK easily allows you to send in context options relevant to google sources. 
-
-Here is an example of how you could send context options for Google Search:
+You can send in context options relevant to `google` sources. Here's an example for Google Search scraping:
 
 ```go
 res, err := c.ScrapeGoogleSearch(
@@ -281,6 +265,25 @@ func main() {
 	fmt.Println(string(resp))
 }
 ```
+
+## Additional Resources
+
+See the official [API Documentation](https://developers.oxylabs.io/) for
+details on each API's actual interface, which is implemented by this SDK.
+
+## Contributing
+
+See [CONTRIBUTING](CONTRIBUTING.md) for more information.
+
+## Security
+
+See [Security Issue
+Notifications](CONTRIBUTING.md#security-issue-notifications) for more
+information.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ## About Oxylabs
 
