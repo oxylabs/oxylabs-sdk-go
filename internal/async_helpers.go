@@ -33,7 +33,11 @@ func (c *Client) GetJobID(
 	if err != nil {
 		return "", fmt.Errorf("error reading resp body: %v", err)
 	}
-	resp.Body.Close()
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		return "", fmt.Errorf("error with status code %s: %s", resp.Status, respBody)
+	}
 
 	// Unmarshal into job.
 	job := &Job{}
