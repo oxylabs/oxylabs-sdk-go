@@ -30,6 +30,12 @@ func (opt *BaiduSearchOpts) checkParameterValidity() error {
 		return fmt.Errorf("limit, pages and start_page parameters must be greater than 0")
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -37,6 +43,12 @@ func (opt *BaiduSearchOpts) checkParameterValidity() error {
 func (opt *BaiduUrlOpts) checkParameterValidity() error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil

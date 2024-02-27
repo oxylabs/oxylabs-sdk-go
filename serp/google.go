@@ -48,6 +48,12 @@ func (opt *GoogleSearchOpts) checkParameterValidity(ctx oxylabs.ContextOption) e
 		return fmt.Errorf("invalid tbm parameter: %v", ctx["tbm"])
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -59,6 +65,12 @@ func (opt *GoogleUrlOpts) checkParameterValidity() error {
 
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil
@@ -82,6 +94,12 @@ func (opt *GoogleAdsOpts) checkParameterValidity(ctx oxylabs.ContextOption) erro
 		return fmt.Errorf("invalid tbm parameter: %v", ctx["tbm"])
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -93,6 +111,12 @@ func (opt *GoogleSuggestionsOpts) checkParameterValidity() error {
 
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil
@@ -114,6 +138,12 @@ func (opt *GoogleHotelsOpts) checkParameterValidity(ctx oxylabs.ContextOption) e
 
 	if ctx["hotel_occupancy"] != nil && ctx["hotel_occupancy"].(int) < 0 {
 		return fmt.Errorf("invalid hotel_occupancy parameter: %v", ctx["hotel_occupancy"])
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil
@@ -145,6 +175,12 @@ func (opt *GoogleTravelHotelsOpts) checkParameterValidity(ctx oxylabs.ContextOpt
 		}
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -162,10 +198,16 @@ func (opt *GoogleTrendsExploreOpts) checkParameterValidity(ctx oxylabs.ContextOp
 		return fmt.Errorf("invalid category_id")
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
-// checkParameterValidity checks validity of google images parameters.
+// checkParameterValidity checks validity of ScrapeGoogleImages parameters.
 func (opt *GoogleImagesOpts) checkParameterValidity() error {
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
@@ -173,6 +215,12 @@ func (opt *GoogleImagesOpts) checkParameterValidity() error {
 
 	if opt.Pages <= 0 || opt.StartPage <= 0 {
 		return fmt.Errorf("pages and start_page parameters must be greater than 0")
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil

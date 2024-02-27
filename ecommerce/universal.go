@@ -44,6 +44,12 @@ func (opt *UniversalUrlOpts) checkParametersValidity(ctx oxylabs.ContextOption) 
 		return fmt.Errorf("content is useful only if http method is post")
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 

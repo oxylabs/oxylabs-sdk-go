@@ -30,6 +30,12 @@ func (opt *AmazonUrlOpts) checkParameterValidity() error {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -137,6 +143,12 @@ func (opt *AmazonSearchOpts) checkParameterValidity() error {
 
 	if opt.Pages <= 0 || opt.StartPage <= 0 {
 		return fmt.Errorf("pages and start_page parameters must be greater than 0")
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil
@@ -259,6 +271,12 @@ func (opt *AmazonProductOpts) checkParameterValidity() error {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -376,6 +394,12 @@ func (opt *AmazonPricingOpts) checkParameterValidity() error {
 		return fmt.Errorf("pages and start_page parameters must be greater than 0")
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -485,6 +509,12 @@ func (opt *AmazonReviewsOpts) checkParameterValidity() error {
 		return fmt.Errorf("pages and start_page parameters must be greater than 0")
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -586,6 +616,12 @@ func (opt *AmazonQuestionsOpts) checkParameterValidity() error {
 
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil
@@ -693,6 +729,12 @@ func (opt *AmazonBestsellersOpts) checkParameterValidity() error {
 		return fmt.Errorf("pages and start_page parameters must be greater than 0")
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -794,6 +836,12 @@ func (opt *AmazonSellersOpts) checkParameterValidity() error {
 
 	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil
