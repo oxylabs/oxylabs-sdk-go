@@ -12,12 +12,16 @@ func Init(
 	username string,
 	password string,
 ) (*http.Client, error) {
+	// Encode username and password.
+	encodedUsername := url.QueryEscape(username)
+	encodedPassword := url.QueryEscape(password)
+
 	// Prepare proxy URL.
 	proxyUrl, err := url.Parse(
 		fmt.Sprintf(
 			"http://%s:%s@realtime.oxylabs.io:60000",
-			username,
-			password,
+			encodedUsername,
+			encodedPassword,
 		),
 	)
 	if err != nil {
