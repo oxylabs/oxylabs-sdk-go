@@ -39,6 +39,12 @@ func (opt *GoogleShoppingUrlOpts) checkParameterValidity() error {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -158,6 +164,12 @@ func (opt *GoogleShoppingSearchOpts) checkParameterValidity(ctx oxylabs.ContextO
 	if (ctx["min_price"] != nil || ctx["max_price"] != nil) &&
 		(ctx["min_price"].(int) < 0 || ctx["max_price"].(int) < 0) {
 		return fmt.Errorf("min and max prices should be greater than 0")
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil
@@ -294,6 +306,12 @@ func (opt *GoogleShoppingProductOpts) checkParameterValidity() error {
 		return fmt.Errorf("invalid render parameter: %v", opt.Render)
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -403,6 +421,12 @@ func (opt *GoogleShoppingPricingOpts) checkParameterValidity() error {
 
 	if opt.Pages <= 0 || opt.StartPage <= 0 {
 		return fmt.Errorf("pages and start_page parameters must be greater than 0")
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil

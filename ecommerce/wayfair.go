@@ -24,6 +24,12 @@ func (opt *WayfairSearchOpts) checkParametersValidity() error {
 		return fmt.Errorf("invalid limit parameter: %v", opt.Limit)
 	}
 
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -126,6 +132,12 @@ type WayfairUrlOpts struct {
 func (opt *WayfairUrlOpts) checkParametersValidity() error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
 		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
+	}
+
+	if opt.ParseInstructions != nil {
+		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
+			return fmt.Errorf("invalid parse instructions: %w", err)
+		}
 	}
 
 	return nil

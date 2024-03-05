@@ -162,14 +162,70 @@ res, err := c.ScrapeGoogleSearch(
 	"adidas",
 	&serp.GoogleSearchOpts{
 		Parse: true,
-		Context: []func(serp.ContextOption){
-			serp.ResultsLanguage("en"),
-			serp.Filter(1),
-			serp.Tbm("isch"),
-			serp.LimitPerPage([]serp.PageLimit{{Page: 1, Limit: 1}, {Page: 2, Limit: 6}}),
+		Context: []func(oxylabs.ContextOption){
+			oxylabs.ResultsLanguage("en"),
+			oxylabs.Filter(1),
+			oxylabs.Tbm("isch"),
+			oxylabs.LimitPerPage([]serp.PageLimit{{Page: 1, Limit: 1}, {Page: 2, Limit: 6}}),
 		},
 	},
 )
+```
+
+### Parse instructions
+
+SDK supports [custom parsing](https://developers.oxylabs.io/scraper-apis/custom-parser). 
+There are 2 ways to provide `parsing_instructions` `_fns`:
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/mslmio/oxylabs-sdk-go/ecommerce"
+	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
+)
+
+func main() {
+	const username = "username"
+	const password = "password"
+
+	// Initialize the SERP push-pull client with your credentials.
+	c := ecommerce.InitAsync(username, password)
+
+	ch, err := c.ScrapeUniversalUrl(
+		"https://example.com",
+		&ecommerce.UniversalUrlOpts{
+			Parse: true,
+			ParseInstructions: &map[string]interface{}{
+				"title": map[string]interface{}{
+					// Providing `_fns` as a map[string]interface{}.
+					"_fns": []map[string]interface{}{
+						{
+							"_fn":   oxylabs.Xpath,
+							"_args": []string{"//h1/text()"},
+						},
+					},
+				},
+				"second_paragraph": map[string]interface{}{
+					// Providing `_fns` as a `[]oxylabs.Fn`.
+					"_fns": []oxylabs.Fn{
+						{
+							Name: oxylabs.Xpath,
+							Args: []string{"/html/body/div/p[2]"},
+						},
+					},
+				},
+			},
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	res := <-ch
+	fmt.Println(res)
+}
 ```
 
 ## Integration Methods
