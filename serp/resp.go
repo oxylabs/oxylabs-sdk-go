@@ -48,7 +48,7 @@ type Result struct {
 	Knowledge                  Knowledge                    `json:"knowledge"`
 	LocalPack                  LocalPack                    `json:"local_pack"`
 	TopStories                 TopStory                     `json:"top_stories"`
-	PopularProducts            PopularProducts              `json:"popular_products"`
+	PopularProducts            []PopularProducts            `json:"popular_products"`
 	RelatedSearches            RelatedSearches              `json:"related_searches"`
 	RelatedQuestions           RelatedQuestions             `json:"related_questions"`
 	SearchInformation          SearchInformation            `json:"search_information"`
@@ -229,6 +229,8 @@ type PopularProducts struct {
 type PopularProductsItem struct {
 	Pos       int    `json:"pos"`
 	Price     string `json:"price"`
+	Rating    string `json:"rating"`
+	Seller    string `json:"seller"`
 	Title     string `json:"title"`
 	ImageData string `json:"image_data"`
 }
