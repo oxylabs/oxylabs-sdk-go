@@ -3,7 +3,7 @@ package internal
 import (
 	"time"
 
-	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
+	"github.com/oxylabs/oxylabs-sdk-go/oxylabs"
 )
 
 const (

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mslmio/oxylabs-sdk-go/internal"
-	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
+	"github.com/oxylabs/oxylabs-sdk-go/internal"
+	"github.com/oxylabs/oxylabs-sdk-go/oxylabs"
 )
 
 // Accepted parameters for bing.

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/mslmio/oxylabs-sdk-go/internal"
-	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
+	"github.com/oxylabs/oxylabs-sdk-go/internal"
+	"github.com/oxylabs/oxylabs-sdk-go/oxylabs"
 )
 
 // ScrapeYandexSearch scrapes yandex with async polling runtime via Oxylabs SERP API
