@@ -1,4 +1,4 @@
-module github.com/mslmio/oxylabs-sdk-go
+module github.com/oxylabs/oxylabs-sdk-go
 
 go 1.21.0
 

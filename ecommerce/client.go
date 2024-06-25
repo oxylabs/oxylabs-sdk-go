@@ -3,7 +3,7 @@ package ecommerce
 import (
 	"net/http"
 
-	"github.com/mslmio/oxylabs-sdk-go/internal"
+	"github.com/oxylabs/oxylabs-sdk-go/internal"
 )
 
 type EcommerceClient struct {

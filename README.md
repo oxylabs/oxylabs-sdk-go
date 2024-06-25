@@ -19,7 +19,7 @@ You can check your go version by running the following command in your preferred
 
 ```sh
 go version
-``` 
+```
 
 If you need to install or update go you can do so by following the steps mentioned [here](https://go.dev/doc/install).
 
@@ -30,7 +30,7 @@ You will need an Oxylabs API username and password which you can get by signing 
 ## Installation
 
 ```bash
-go get github.com/mslmio/oxylabs-sdk-go
+go get github.com/oxylabs/oxylabs-sdk-go
 ```
 
 ## Usage
@@ -44,7 +44,7 @@ go mod init
 Install the package:
 
 ```bash
-go get github.com/mslmio/oxylabs-sdk-go
+go get github.com/oxylabs/oxylabs-sdk-go
 ```
 
 ### Quick Start
@@ -55,7 +55,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/mslmio/oxylabs-sdk-go/serp"
+	"github.com/oxylabs/oxylabs-sdk-go/serp"
 )
 
 func main() {
@@ -96,8 +96,8 @@ There are currently four search engines you can scrape with the Oxylabs SERP API
 
 | Search Engine | Sources
 | ------------- | --------------
-| **Google**    | `google`, `google_search`, `google_ads`, `google_hotels`, `google_travel_hotels`, `google_images`, `google_suggest`, `google_trends_explore`  
-| **Yandex**    | `yandex`, `yandex_search`  
+| **Google**    | `google`, `google_search`, `google_ads`, `google_hotels`, `google_travel_hotels`, `google_images`, `google_suggest`, `google_trends_explore`
+| **Yandex**    | `yandex`, `yandex_search`
 | **Bing**      | `bing`, `bing_search`
 | **Baidu**     | `baidu`, `baidu_search`
 
@@ -134,7 +134,7 @@ For consistency and ease of use, this SDK provides a list of pre-defined commonl
 
 ```go
 import (
-	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
+	"github.com/oxylabs/oxylabs-sdk-go/oxylabs"
 )
 ```
 
@@ -174,7 +174,7 @@ res, err := c.ScrapeGoogleSearch(
 
 ### Parse instructions
 
-SDK supports [custom parsing](https://developers.oxylabs.io/scraper-apis/custom-parser). 
+SDK supports [custom parsing](https://developers.oxylabs.io/scraper-apis/custom-parser).
 There are 2 ways to provide `parsing_instructions` `_fns`:
 
 ```go
@@ -182,8 +182,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/mslmio/oxylabs-sdk-go/ecommerce"
-	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
+	"github.com/oxylabs/oxylabs-sdk-go/ecommerce"
+	"github.com/oxylabs/oxylabs-sdk-go/oxylabs"
 )
 
 func main() {
@@ -248,8 +248,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
-	"github.com/mslmio/oxylabs-sdk-go/serp"
+	"github.com/oxylabs/oxylabs-sdk-go/oxylabs"
+	"github.com/oxylabs/oxylabs-sdk-go/serp"
 )
 
 func main() {
@@ -292,8 +292,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/mslmio/oxylabs-sdk-go/oxylabs"
-	"github.com/mslmio/oxylabs-sdk-go/proxy"
+	"github.com/oxylabs/oxylabs-sdk-go/oxylabs"
+	"github.com/oxylabs/oxylabs-sdk-go/proxy"
 )
 
 func main() {
