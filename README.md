@@ -97,16 +97,14 @@ There are currently four search engines you can scrape with the Oxylabs SERP API
 | Search Engine | Sources
 | ------------- | --------------
 | **Google**    | `google`, `google_search`, `google_ads`, `google_hotels`, `google_travel_hotels`, `google_images`, `google_suggest`, `google_trends_explore`
-| **Yandex**    | `yandex`, `yandex_search`
 | **Bing**      | `bing`, `bing_search`
-| **Baidu**     | `baidu`, `baidu_search`
 
 In the SDK you'll just need to call the relevant function name from the client.
 
-For example if you wish to scrape Yandex with `yandex_search` as a source:
+For example if you wish to scrape Google with `google_search` as a source:
 
 ```go
-res, err := c.ScrapeYandexSearch("football")
+res, err := c.ScrapeGoogleSearch("football")
 ```
 
 ### Query Parameters
@@ -116,9 +114,9 @@ Each source has different accepted query parameters. For a detailed list of acce
 By default, scrape functions will use default parameters. If you need to send specific query parameters, here is an example of how to do it:
 
 ```go
-res, err := c.ScrapeYandexSearch(
+res, err := c.ScrapeGoogleSearch(
 	"football",
-	&serp.YandexSearchOpts{
+	&serp.GoogleSearchOpts{
 		StartPage: 1,
 		Pages:     3,
 		Limit:     4,

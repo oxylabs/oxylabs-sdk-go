@@ -71,12 +71,6 @@ const (
 	BingUrl    Source = "bing"
 	BingSearch Source = "bing_search"
 
-	YandexUrl    Source = "yandex"
-	YandexSearch Source = "yandex_search"
-
-	BaiduUrl    Source = "baidu"
-	BaiduSearch Source = "baidu_search"
-
 	GoogleShoppingUrl     Source = "google_shopping"
 	GoogleShoppingSearch  Source = "google_shopping_search"
 	GoogleShoppingProduct Source = "google_shopping_product"
