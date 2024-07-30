@@ -1,6 +1,6 @@
 # Oxylabs Go SDK
 
-This is a Go SDK for the [Oxylabs](https://oxylabs.io) [Scraper APIs](https://developers.oxylabs.io/scraper-apis/getting-started).
+This is a Go SDK for the [Oxylabs](https://oxylabs.io) [Scraper APIs](https://developers.oxylabs.io/scraper-apis/serp-scraper-api#getting-started).
 
 This will help simplify integrating with Oxylabs's APIs, which can help you with retrieving search engine results (SERP), eCommerce data, real estate data, and more.
 
@@ -86,7 +86,7 @@ There are three integration method for the Oxylabs SERP API, each exposed via di
 - Push-Pull (Async) - `serp.InitAsync(username, password)`
 - Proxy Endpoint - `proxy.Init(username, password)`
 
-Learn more about integration methods [on the official documentation](https://developers.oxylabs.io/scraper-apis/getting-started/integration-methods) and how this SDK uses them [here](#integration-methods-1).
+Learn more about integration methods [on the official documentation](https://developers.oxylabs.io/scraper-apis/serp-scraper-api/integration-methods) and how this SDK uses them [here](#integration-methods-1).
 
 ### Sources
 
@@ -97,28 +97,26 @@ There are currently four search engines you can scrape with the Oxylabs SERP API
 | Search Engine | Sources
 | ------------- | --------------
 | **Google**    | `google`, `google_search`, `google_ads`, `google_hotels`, `google_travel_hotels`, `google_images`, `google_suggest`, `google_trends_explore`
-| **Yandex**    | `yandex`, `yandex_search`
 | **Bing**      | `bing`, `bing_search`
-| **Baidu**     | `baidu`, `baidu_search`
 
 In the SDK you'll just need to call the relevant function name from the client.
 
-For example if you wish to scrape Yandex with `yandex_search` as a source:
+For example if you wish to scrape Google with `google_search` as a source:
 
 ```go
-res, err := c.ScrapeYandexSearch("football")
+res, err := c.ScrapeGoogleSearch("football")
 ```
 
 ### Query Parameters
 
-Each source has different accepted query parameters. For a detailed list of accepted parameters by each source you can head over to https://developers.oxylabs.io/scraper-apis/serp-scraper-api.
+Each source has different accepted query parameters. For a detailed list of accepted parameters by each source you can head over to https://developers.oxylabs.io/scraper-apis/serp-scraper-api#request-parameter-values.
 
 By default, scrape functions will use default parameters. If you need to send specific query parameters, here is an example of how to do it:
 
 ```go
-res, err := c.ScrapeYandexSearch(
+res, err := c.ScrapeGoogleSearch(
 	"football",
-	&serp.YandexSearchOpts{
+	&serp.GoogleSearchOpts{
 		StartPage: 1,
 		Pages:     3,
 		Limit:     4,
@@ -280,7 +278,7 @@ func main() {
 This method is also synchronous (like Realtime), but instead of using our service via a RESTful interface, you **can use our endpoint like a proxy**. Use Proxy Endpoint if you've used proxies before and would just like to get unblocked content from us.
 
 Since the parameters in this method are sent as as headers there are only a few parameters which this integration method accepts. You can find those parameters at
-https://developers.oxylabs.io/scraper-apis/getting-started/integration-methods/proxy-endpoint#accepted-parameters.
+https://developers.oxylabs.io/scraper-apis/serp-scraper-api/integration-methods/proxy-endpoint#accepted-parameters.
 
 The proxy endpoint integration is very open ended allowing many different use cases. To cater this, the user is provided a pre-configured `http.Client` and they can use it as they deem fit:
 
