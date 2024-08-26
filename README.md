@@ -180,6 +180,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/oxylabs/oxylabs-sdk-go/ecommerce"
 	"github.com/oxylabs/oxylabs-sdk-go/oxylabs"
 )
@@ -288,7 +289,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"net/http"
 
 	"github.com/oxylabs/oxylabs-sdk-go/oxylabs"
 	"github.com/oxylabs/oxylabs-sdk-go/proxy"
@@ -301,7 +301,7 @@ func main() {
 	// Init returns an http client pre configured with the proxy settings.
 	c, _ := proxy.Init(username, password)
 
-	request, _ := http.NewRequest(
+	request, _ := proxy.NewRequest(
 		"GET",
 		"https://www.example.com",
 		nil,
@@ -310,7 +310,6 @@ func main() {
 	// Add relevant Headers.
 	proxy.AddUserAgentHeader(request, oxylabs.UA_DESKTOP)
 	proxy.AddRenderHeader(request, oxylabs.HTML)
-	proxy.AddParseHeader(request, "google_search")
 
 	request.SetBasicAuth(username, password)
 	response, _ := c.Do(request)

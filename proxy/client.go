@@ -3,8 +3,11 @@ package proxy
 import (
 	"crypto/tls"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/oxylabs/oxylabs-sdk-go/internal"
 )
 
 // Init initializes and returns an HTTP client configured with Oxylabs proxy settings.
@@ -19,7 +22,7 @@ func Init(
 	// Prepare proxy URL.
 	proxyUrl, err := url.Parse(
 		fmt.Sprintf(
-			"http://%s:%s@realtime.oxylabs.io:60000",
+			"https://%s:%s@realtime.oxylabs.io:60000",
 			encodedUsername,
 			encodedPassword,
 		),
@@ -35,4 +38,8 @@ func Init(
 	client := &http.Client{Transport: customTransport}
 
 	return client, nil
+}
+
+func NewRequest(method, url string, body io.Reader) (*http.Request, error) {
+	return internal.NewRequest(method, url, body)
 }

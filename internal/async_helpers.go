@@ -10,11 +10,11 @@ import (
 	"time"
 )
 
-// Helper function to make a POST req and retrieve the Job ID.
+// GetJobID Helper function to make a POST req and retrieve the Job ID.
 func (c *Client) GetJobID(
 	jsonPayload []byte,
 ) (string, error) {
-	req, _ := http.NewRequest(
+	req, _ := NewRequest(
 		"POST",
 		c.BaseUrl,
 		bytes.NewBuffer(jsonPayload),
@@ -48,13 +48,13 @@ func (c *Client) GetJobID(
 	return job.ID, nil
 }
 
-// Helper function for getting the http response from the request.
+// GetHttpResp Helper function for getting the http response from the request.
 func (c *Client) GetHttpResp(
 	jobID string,
 	httpChan chan *http.Response,
 	errChan chan error,
 ) {
-	req, _ := http.NewRequest(
+	req, _ := NewRequest(
 		"GET",
 		fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s/results", jobID),
 		nil,
@@ -90,9 +90,9 @@ func (c *Client) PollJobStatus(
 ) {
 	// Add default timeout if ctx has no deadline.
 	if _, ok := ctx.Deadline(); !ok {
-		context, cancel := context.WithTimeout(ctx, DefaultTimeout)
+		ctxWithTimeout, cancel := context.WithTimeout(ctx, DefaultTimeout)
 		defer cancel()
-		ctx = context
+		ctx = ctxWithTimeout
 	}
 
 	// Set wait time between requests.
@@ -103,7 +103,7 @@ func (c *Client) PollJobStatus(
 
 	for {
 		// Perform a req to query job status.
-		req, _ := http.NewRequest(
+		req, _ := NewRequest(
 			"GET",
 			fmt.Sprintf("https://data.oxylabs.io/v1/queries/%s", jobID),
 			nil,
