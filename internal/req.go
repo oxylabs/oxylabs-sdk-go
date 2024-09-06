@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 )
@@ -18,7 +19,7 @@ func (c *Client) Req(
 	method string,
 ) (*http.Response, error) {
 	// Prepare req.
-	req, err := http.NewRequestWithContext(
+	req, err := NewRequestWithContext(
 		ctx,
 		method,
 		c.BaseUrl,
@@ -39,4 +40,23 @@ func (c *Client) Req(
 	}
 
 	return resp, nil
+}
+
+func NewRequest(method, url string, body io.Reader) (*http.Request, error) {
+	return NewRequestWithContext(context.Background(), method, url, body)
+}
+
+func NewRequestWithContext(ctx context.Context, method, url string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	WithSdkIdentifier(req)
+
+	return req, nil
+}
+
+func WithSdkIdentifier(r *http.Request) {
+	r.Header.Set("x-oxylabs-sdk", sdkIdentifier)
 }

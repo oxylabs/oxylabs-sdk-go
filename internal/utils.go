@@ -3,8 +3,17 @@ package internal
 import (
 	"fmt"
 	"net/url"
+	"runtime"
 	"strings"
 )
+
+var (
+	sdkVersion    = "1.0.0" // SDK version. Needs to be updated manually along with new tag.
+	sdkIdentifier = fmt.Sprintf(identifierTmpl, sdkVersion, runtime.Version(), runtime.GOOS, runtime.GOARCH)
+)
+
+// sdkIdentifier template. E.g. "oxylabs-sdk-go/1.0.0 (go1.22.6; linux/amd64)"
+const identifierTmpl = "oxylabs-sdk-go/%s (%s; %s/%s)"
 
 // InList checks if a value is present in the given slice.
 func InList[T comparable](val T, list []T) bool {
