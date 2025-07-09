@@ -100,7 +100,7 @@ There are currently four search engines you can scrape with the Oxylabs SERP API
 
 | Search Engine | Sources
 | ------------- | --------------
-| **Google**    | `google`, `google_search`, `google_ads`, `google_hotels`, `google_travel_hotels`, `google_images`, `google_suggest`, `google_trends_explore`
+| **Google**    | `google`, `google_search`, `google_ads`, `google_hotels`, `google_travel_hotels`, `google_suggest`, `google_trends_explore`, `google_lens`
 | **Bing**      | `bing`, `bing_search`
 
 In the SDK you'll just need to call the relevant function name from the client.
