@@ -128,7 +128,6 @@ func (c *EcommerceClient) ScrapeGoogleShoppingUrlCtx(
 
 // GoogleShoppingSearchOpts contains all the query parameters available for google shopping search.
 type GoogleShoppingSearchOpts struct {
-	Domain            oxylabs.Domain
 	StartPage         int
 	Pages             int
 	Locale            oxylabs.Locale
@@ -210,7 +209,6 @@ func (c *EcommerceClient) ScrapeGoogleShoppingSearchCtx(
 	// Set defaults.
 	internal.SetDefaultSortBy(context)
 	internal.SetDefaultPages(&opt.Pages)
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
 
@@ -223,7 +221,6 @@ func (c *EcommerceClient) ScrapeGoogleShoppingSearchCtx(
 	// Prepare payload with common parameters.
 	payload := map[string]interface{}{
 		"source":           oxylabs.GoogleShoppingSearch,
-		"domain":           opt.Domain,
 		"query":            query,
 		"start_page":       opt.StartPage,
 		"pages":            opt.Pages,
@@ -284,7 +281,6 @@ func (c *EcommerceClient) ScrapeGoogleShoppingSearchCtx(
 
 // GoogleShoppingProductOpts contains all the query parameters available for google shopping product.
 type GoogleShoppingProductOpts struct {
-	Domain            oxylabs.Domain
 	Locale            oxylabs.Locale
 	ResultsLanguage   string
 	GeoLocation       string
@@ -342,7 +338,6 @@ func (c *EcommerceClient) ScrapeGoogleShoppingProductCtx(
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
@@ -354,7 +349,6 @@ func (c *EcommerceClient) ScrapeGoogleShoppingProductCtx(
 	// Prepare payload with common parameters.
 	payload := map[string]interface{}{
 		"source":           oxylabs.GoogleShoppingProduct,
-		"domain":           opt.Domain,
 		"query":            query,
 		"locale":           opt.Locale,
 		"results_language": opt.ResultsLanguage,
@@ -395,7 +389,6 @@ func (c *EcommerceClient) ScrapeGoogleShoppingProductCtx(
 
 // GoogleShoppingPricingOpts contains all the query parameters available for google shopping pricing.
 type GoogleShoppingPricingOpts struct {
-	Domain            oxylabs.Domain
 	StartPage         int
 	Pages             int
 	Locale            oxylabs.Locale
@@ -460,7 +453,6 @@ func (c *EcommerceClient) ScrapeGoogleShoppingPricingCtx(
 
 	// Set defaults.
 	internal.SetDefaultPages(&opt.Pages)
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
 
@@ -473,7 +465,6 @@ func (c *EcommerceClient) ScrapeGoogleShoppingPricingCtx(
 	// Prepare payload with common parameters.
 	payload := map[string]interface{}{
 		"source":           oxylabs.GoogleShoppingPricing,
-		"domain":           opt.Domain,
 		"query":            query,
 		"start_page":       opt.StartPage,
 		"pages":            opt.Pages,
