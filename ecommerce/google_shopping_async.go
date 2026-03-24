@@ -155,7 +155,6 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 	// Set defaults.
 	internal.SetDefaultSortBy(context)
 	internal.SetDefaultPages(&opt.Pages)
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
 
@@ -168,7 +167,6 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingSearchCtx(
 	// Prepare payload with common parameters.
 	payload := map[string]interface{}{
 		"source":           oxylabs.GoogleShoppingSearch,
-		"domain":           opt.Domain,
 		"query":            query,
 		"start_page":       opt.StartPage,
 		"pages":            opt.Pages,
@@ -280,7 +278,6 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
 
 	// Check validity of parameters.
@@ -292,7 +289,6 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingProductCtx(
 	// Prepare payload with common parameters.
 	payload := map[string]interface{}{
 		"source":           oxylabs.GoogleShoppingProduct,
-		"domain":           opt.Domain,
 		"query":            query,
 		"locale":           opt.Locale,
 		"results_language": opt.ResultsLanguage,
@@ -384,7 +380,6 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 
 	// Set defaults.
 	internal.SetDefaultPages(&opt.Pages)
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
 
@@ -397,7 +392,6 @@ func (c *EcommerceClientAsync) ScrapeGoogleShoppingPricingCtx(
 	// Prepare payload with common parameters.
 	payload := map[string]interface{}{
 		"source":           oxylabs.GoogleShoppingPricing,
-		"domain":           opt.Domain,
 		"query":            query,
 		"start_page":       opt.StartPage,
 		"pages":            opt.Pages,
