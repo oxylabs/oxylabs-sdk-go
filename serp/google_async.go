@@ -54,7 +54,6 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
 	internal.SetDefaultPages(&opt.Pages)
@@ -69,7 +68,6 @@ func (c *SerpClientAsync) ScrapeGoogleSearchCtx(
 	// Prepare payload with common parameters.
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleSearch,
-		"domain":          opt.Domain,
 		"query":           query,
 		"locale":          opt.Locale,
 		"geo_location":    opt.GeoLocation,
@@ -311,7 +309,6 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultPages(&opt.Pages)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
@@ -324,7 +321,6 @@ func (c *SerpClientAsync) ScrapeGoogleAdsCtx(
 
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleAds,
-		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
@@ -541,7 +537,6 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
 	internal.SetDefaultPages(&opt.Pages)
@@ -556,7 +551,6 @@ func (c *SerpClientAsync) ScrapeGoogleHotelsCtx(
 	// Prepare payload.
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleHotels,
-		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
@@ -674,7 +668,6 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 
 	// Check validity of parameters.
@@ -686,7 +679,6 @@ func (c *SerpClientAsync) ScrapeGoogleTravelHotelsCtx(
 	// Prepare payload.
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleTravelHotels,
-		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"locale":          opt.Locale,
@@ -805,7 +797,6 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 
 	// Set defaults.
 	internal.SetDefaultUserAgent(&opt.UserAgent)
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultPages(&opt.Pages)
 
@@ -818,7 +809,6 @@ func (c *SerpClientAsync) ScrapeGoogleImagesCtx(
 	// Prepare payload.
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleImages,
-		"domain":          opt.Domain,
 		"query":           url,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
