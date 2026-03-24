@@ -228,7 +228,6 @@ func (opt *GoogleImagesOpts) checkParameterValidity() error {
 
 // GoogleSearchOpts contains all the query parameters available for google_search.
 type GoogleSearchOpts struct {
-	Domain            oxylabs.Domain
 	StartPage         int
 	Pages             int
 	Limit             int
@@ -281,7 +280,6 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
 	internal.SetDefaultPages(&opt.Pages)
@@ -296,7 +294,6 @@ func (c *SerpClient) ScrapeGoogleSearchCtx(
 	// Prepare payload with common parameters.
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleSearch,
-		"domain":          opt.Domain,
 		"query":           query,
 		"locale":          opt.Locale,
 		"geo_location":    opt.GeoLocation,
@@ -464,7 +461,6 @@ func (c *SerpClient) ScrapeGoogleUrlCtx(
 
 // GoogleAdsOpts contains all the query parameters available for google_ads.
 type GoogleAdsOpts struct {
-	Domain            oxylabs.Domain
 	StartPage         int
 	Pages             int
 	Locale            string
@@ -509,7 +505,6 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultPages(&opt.Pages)
 	internal.SetDefaultUserAgent(&opt.UserAgent)
@@ -522,7 +517,6 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleAds,
-		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
@@ -665,7 +659,6 @@ func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
 
 // GoogleHotelsOpts contains all the query parameters available for google_hotels.
 type GoogleHotelsOpts struct {
-	Domain            oxylabs.Domain
 	StartPage         int
 	Pages             int
 	Limit             int
@@ -710,7 +703,6 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultLimit(&opt.Limit, internal.DefaultLimit_SERP)
 	internal.SetDefaultPages(&opt.Pages)
@@ -726,7 +718,6 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 	// Prepare payload.
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleHotels,
-		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
@@ -787,7 +778,6 @@ func (c *SerpClient) ScrapeGoogleHotelsCtx(
 
 // GoogleTravelHotelsOpts contains all the query parameters available for google_travel_hotels.
 type GoogleTravelHotelsOpts struct {
-	Domain            oxylabs.Domain
 	StartPage         int
 	Locale            string
 	GeoLocation       string
@@ -830,7 +820,6 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	}
 
 	// Set defaults.
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 
 	// Check validity of parameters.
@@ -842,7 +831,6 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 	// Prepare payload.
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleTravelHotels,
-		"domain":          opt.Domain,
 		"query":           query,
 		"start_page":      opt.StartPage,
 		"locale":          opt.Locale,
@@ -897,7 +885,6 @@ func (c *SerpClient) ScrapeGoogleTravelHotelsCtx(
 
 // GoogleImagesOpts contains all the query parameters available for google_images.
 type GoogleImagesOpts struct {
-	Domain            oxylabs.Domain
 	StartPage         int
 	Pages             int
 	Locale            string
@@ -943,7 +930,6 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 
 	// Set defaults.
 	internal.SetDefaultUserAgent(&opt.UserAgent)
-	internal.SetDefaultDomain(&opt.Domain)
 	internal.SetDefaultStartPage(&opt.StartPage)
 	internal.SetDefaultPages(&opt.Pages)
 
@@ -956,7 +942,6 @@ func (c *SerpClient) ScrapeGoogleImagesCtx(
 	// Prepare payload.
 	payload := map[string]interface{}{
 		"source":          oxylabs.GoogleImages,
-		"domain":          opt.Domain,
 		"query":           url,
 		"start_page":      opt.StartPage,
 		"pages":           opt.Pages,
