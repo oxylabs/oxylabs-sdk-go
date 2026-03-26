@@ -103,25 +103,6 @@ func (opt *GoogleAdsOpts) checkParameterValidity(ctx oxylabs.ContextOption) erro
 	return nil
 }
 
-// checkParameterValidity checks validity of ScrapeGoogleSuggestions parameters.
-func (opt *GoogleSuggestionsOpts) checkParameterValidity() error {
-	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
-		return fmt.Errorf("invalid user agent parameter: %v", opt.UserAgent)
-	}
-
-	if opt.Render != "" && !oxylabs.IsRenderValid(opt.Render) {
-		return fmt.Errorf("invalid render parameter: %v", opt.Render)
-	}
-
-	if opt.ParseInstructions != nil {
-		if err := oxylabs.ValidateParseInstructions(opt.ParseInstructions); err != nil {
-			return fmt.Errorf("invalid parse instructions: %w", err)
-		}
-	}
-
-	return nil
-}
-
 // checkParameterValidity checks validity of ScrapeGoogleHotels parameters.
 func (opt *GoogleHotelsOpts) checkParameterValidity(ctx oxylabs.ContextOption) error {
 	if !oxylabs.IsUserAgentValid(opt.UserAgent) {
@@ -567,89 +548,6 @@ func (c *SerpClient) ScrapeGoogleAdsCtx(
 
 	// Unmarshal the http Response and get the response.
 	resp, err := GetResp(httpResp, opt.Parse, customParserFlag)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
-}
-
-// GoogleSuggestionsOpts contains all the query parameters available for google_shopping.
-type GoogleSuggestionsOpts struct {
-	Locale            string
-	GeoLocation       string
-	UserAgent         oxylabs.UserAgent
-	Render            oxylabs.Render
-	ParseInstructions *map[string]interface{}
-	PollInterval      time.Duration
-	CallbackUrl       string
-}
-
-// ScrapeGoogleSuggestions scrapes google via Oxylabs SERP API with google_suggestions as source.
-func (c *SerpClient) ScrapeGoogleSuggestions(
-	query string,
-	opts ...*GoogleSuggestionsOpts,
-) (*Resp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), internal.DefaultTimeout)
-	defer cancel()
-
-	return c.ScrapeGoogleSuggestionsCtx(ctx, query, opts...)
-}
-
-// ScrapeGoogleSuggestionsCtx scrapes google via  Oxylabs SERP API with google_suggestions as source.
-// The provided context allows customization of the HTTP req, including setting timeouts.
-func (c *SerpClient) ScrapeGoogleSuggestionsCtx(
-	ctx context.Context,
-	query string,
-	opts ...*GoogleSuggestionsOpts,
-) (*Resp, error) {
-	// Prepare options.
-	opt := &GoogleSuggestionsOpts{}
-	if len(opts) > 0 && opts[len(opts)-1] != nil {
-		opt = opts[len(opts)-1]
-	}
-
-	// Set defaults.
-	internal.SetDefaultUserAgent(&opt.UserAgent)
-
-	// Check validity of parameters.
-	err := opt.checkParameterValidity()
-	if err != nil {
-		return nil, err
-	}
-
-	// Prepare payload.
-	payload := map[string]interface{}{
-		"source":          oxylabs.GoogleSuggestions,
-		"query":           query,
-		"locale":          opt.Locale,
-		"geo_location":    opt.GeoLocation,
-		"user_agent_type": opt.UserAgent,
-		"render":          opt.Render,
-		"callback_url":    opt.CallbackUrl,
-	}
-
-	// Add custom parsing instructions to the payload if provided.
-	customParserFlag := false
-	if opt.ParseInstructions != nil {
-		payload["parsing_instructions"] = &opt.ParseInstructions
-		customParserFlag = true
-	}
-
-	// Marshal.
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling payload: %v", err)
-	}
-
-	// Req.
-	httpResp, err := c.C.Req(ctx, jsonPayload, "POST")
-	if err != nil {
-		return nil, err
-	}
-
-	// Unmarshal the http Response and get the response.
-	resp, err := GetResp(httpResp, customParserFlag, customParserFlag)
 	if err != nil {
 		return nil, err
 	}
