@@ -64,7 +64,6 @@ const (
 	GoogleHotels        Source = "google_hotels"
 	GoogleSearch        Source = "google_search"
 	GoogleImages        Source = "google_images"
-	GoogleSuggestions   Source = "google_suggest"
 	GoogleTravelHotels  Source = "google_travel_hotels"
 	GoogleTrendsExplore Source = "google_trends_explore"
 
