@@ -4,7 +4,7 @@
 
 [![](https://dcbadge.limes.pink/api/server/Pds3gBmKMH?style=for-the-badge&theme=discord)](https://discord.gg/Pds3gBmKMH) [![YouTube](https://img.shields.io/badge/YouTube-Oxylabs-red?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@oxylabs)
 
-This is a Go SDK for the [Oxylabs](https://oxylabs.io) [Scraper APIs](https://developers.oxylabs.io/scraper-apis/serp-scraper-api#getting-started).
+This is a Go SDK for the [Oxylabs](https://oxylabs.io) [Scraper APIs](https://developers.oxylabs.io/products/web-scraper-api#getting-started).
 
 This will help simplify integrating with Oxylabs's APIs, which can help you with retrieving search engine results (SERP), eCommerce data, real estate data, and more.
 
@@ -90,7 +90,7 @@ There are three integration method for the Oxylabs SERP API, each exposed via di
 - Push-Pull (Async) - `serp.InitAsync(username, password)`
 - Proxy Endpoint - `proxy.Init(username, password)`
 
-Learn more about integration methods [on the official documentation](https://developers.oxylabs.io/scraper-apis/serp-scraper-api/integration-methods) and how this SDK uses them [here](#integration-methods-1).
+Learn more about integration methods [on the official documentation](https://developers.oxylabs.io/products/web-scraper-api/integration-methods) and how this SDK uses them [here](#integration-methods-1).
 
 ### Sources
 
@@ -113,7 +113,7 @@ res, err := c.ScrapeGoogleSearch("football")
 
 ### Query Parameters
 
-Each source has different accepted query parameters. For a detailed list of accepted parameters by each source you can head over to https://developers.oxylabs.io/scraper-apis/serp-scraper-api#request-parameter-values.
+Each source has different accepted query parameters. For a detailed list of accepted parameters by each source you can head over to hhttps://developers.oxylabs.io/products/web-scraper-api#request-parameter-values.
 
 By default, scrape functions will use default parameters. If you need to send specific query parameters, here is an example of how to do it:
 
@@ -176,7 +176,7 @@ res, err := c.ScrapeGoogleSearch(
 
 ### Parse instructions
 
-SDK supports [custom parsing](https://developers.oxylabs.io/scraper-apis/custom-parser).
+SDK supports [custom parsing](https://developers.oxylabs.io/products/web-scraper-api/features/custom-parser).
 There are 2 ways to provide `parsing_instructions` `_fns`:
 
 ```go
@@ -283,7 +283,7 @@ func main() {
 This method is also synchronous (like Realtime), but instead of using our service via a RESTful interface, you **can use our endpoint like a proxy**. Use Proxy Endpoint if you've used proxies before and would just like to get unblocked content from us.
 
 Since the parameters in this method are sent as as headers there are only a few parameters which this integration method accepts. You can find those parameters at
-https://developers.oxylabs.io/scraper-apis/serp-scraper-api/integration-methods/proxy-endpoint#accepted-parameters.
+https://developers.oxylabs.io/products/web-scraper-api/integration-methods/proxy-endpoint.
 
 The proxy endpoint integration is very open ended allowing many different use cases. To cater this, the user is provided a pre-configured `http.Client` and they can use it as they deem fit:
 
