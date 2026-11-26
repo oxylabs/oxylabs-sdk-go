@@ -1,14 +1,14 @@
 # Oxylabs Go SDK
 
-[![Oxylabs promo code](https://raw.githubusercontent.com/oxylabs/product-integrations/refs/heads/master/Affiliate-Universal-1090x275.png)](https://oxylabs.io/pages/gitoxy?utm_source=877&utm_medium=affiliate&groupid=877&utm_content=oxylabs-sdk-go-github&transaction_id=102f49063ab94276ae8f116d224b67)
+[![Oxylabs promo code](https://raw.githubusercontent.com/oxylabs/product-integrations/refs/heads/master/Affiliate-Universal-1090x275.png)](https://oxylabs.io/pages/gitoxy?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&utm_campaign=banner&groupid=877)
 
-<a href="https://oxylabs.io"><img src="https://img.shields.io/badge/🚀_Get_Started-FF6B35?style=for-the-badge" alt="Get started"></a>
+<a href="https://oxylabs.io/?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&utm_campaign=banner&groupid=877"><img src="https://img.shields.io/badge/🚀_Get_Started-FF6B35?style=for-the-badge" alt="Get started"></a>
 <a href="https://developers.oxylabs.io"><img src="https://img.shields.io/badge/📚_Documentation-4A90E2?style=for-the-badge" alt="Documentation"></a>
 <a href="https://dashboard.oxylabs.io"><img src="https://img.shields.io/badge/📊_Dashboard-2EA44F?style=for-the-badge" alt="Dashboard"></a>
 <a href="https://discord.gg/Pds3gBmKMH"><img src="https://img.shields.io/badge/💬_Discord-5865F2?style=for-the-badge" alt="Discord"></a>
 <a href="https://www.youtube.com/@oxylabs"><img src="https://img.shields.io/badge/▶️_YouTube-FF0000?style=for-the-badge" alt="YouTube"></a>
 
-This is a Go SDK for the [Oxylabs](https://oxylabs.io) [Scraper APIs](https://developers.oxylabs.io/products/web-scraper-api#getting-started).
+This is a Go SDK for the [Oxylabs](https://oxylabs.io/?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877) [Scraper APIs](https://developers.oxylabs.io/products/web-scraper-api#getting-started).
 
 This will help simplify integrating with Oxylabs's APIs, which can help you with retrieving search engine results (SERP), eCommerce data, real estate data, and more.
 
@@ -33,7 +33,7 @@ If you need to install or update go you can do so by following the steps mention
 
 ## Authentication
 
-You will need an Oxylabs API username and password which you can get by signing up at https://oxylabs.io. You can check things out with a free trial at https://oxylabs.io/products/scraper-api/serp.
+You will need an Oxylabs API username and password which you can get by signing up at https://oxylabs.io./?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877 You can check things out with a free trial at https://oxylabs.io/products/scraper-api/serp.?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877
 
 ## Installation
 
@@ -350,4 +350,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 Established in 2015, Oxylabs are a market-leading web intelligence collection platform, driven by the highest business, ethics, and compliance standards, enabling companies worldwide to unlock data-driven insights.
 
-[![image](https://oxylabs.io/images/og-image.png)](https://oxylabs.io/)
+[![image](https://oxylabs.io/images/og-image.png)](https://oxylabs.io/?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&utm_campaign=banner&groupid=877)
