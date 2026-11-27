@@ -3,12 +3,12 @@
 [![Oxylabs promo code](https://raw.githubusercontent.com/oxylabs/product-integrations/refs/heads/master/Affiliate-Universal-1090x275.png)](https://oxylabs.io/pages/gitoxy?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&utm_campaign=banner&groupid=877)
 
 <a href="https://oxylabs.io/?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&utm_campaign=banner&groupid=877"><img src="https://img.shields.io/badge/🚀_Get_Started-FF6B35?style=for-the-badge" alt="Get started"></a>
-<a href="https://developers.oxylabs.io"><img src="https://img.shields.io/badge/📚_Documentation-4A90E2?style=for-the-badge" alt="Documentation"></a>
+<a href="https://developers.oxylabs.io/?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&utm_campaign=banner&groupid=877"><img src="https://img.shields.io/badge/📚_Documentation-4A90E2?style=for-the-badge" alt="Documentation"></a>
 <a href="https://dashboard.oxylabs.io"><img src="https://img.shields.io/badge/📊_Dashboard-2EA44F?style=for-the-badge" alt="Dashboard"></a>
 <a href="https://discord.gg/Pds3gBmKMH"><img src="https://img.shields.io/badge/💬_Discord-5865F2?style=for-the-badge" alt="Discord"></a>
 <a href="https://www.youtube.com/@oxylabs"><img src="https://img.shields.io/badge/▶️_YouTube-FF0000?style=for-the-badge" alt="YouTube"></a>
 
-This is a Go SDK for the [Oxylabs](https://oxylabs.io/?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877) [Scraper APIs](https://developers.oxylabs.io/products/web-scraper-api#getting-started).
+This is a Go SDK for the [Oxylabs](https://oxylabs.io/?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877) [Scraper APIs](https://developers.oxylabs.io/products/web-scraper-api?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877#getting-started).
 
 This will help simplify integrating with Oxylabs's APIs, which can help you with retrieving search engine results (SERP), eCommerce data, real estate data, and more.
 
@@ -94,7 +94,7 @@ There are three integration method for the Oxylabs SERP API, each exposed via di
 - Push-Pull (Async) - `serp.InitAsync(username, password)`
 - Proxy Endpoint - `proxy.Init(username, password)`
 
-Learn more about integration methods [on the official documentation](https://developers.oxylabs.io/products/web-scraper-api/integration-methods) and how this SDK uses them [here](#integration-methods-1).
+Learn more about integration methods [on the official documentation](https://developers.oxylabs.io/products/web-scraper-api/integration-methods?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877) and how this SDK uses them [here](#integration-methods-1).
 
 ### Sources
 
@@ -117,7 +117,7 @@ res, err := c.ScrapeGoogleSearch("football")
 
 ### Query Parameters
 
-Each source has different accepted query parameters. For a detailed list of accepted parameters by each source you can head over to hhttps://developers.oxylabs.io/products/web-scraper-api#request-parameter-values.
+Each source has different accepted query parameters. For a detailed list of accepted parameters by each source you can head over to hhttps://developers.oxylabs.io/products/web-scraper-api?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877#request-parameter-values.
 
 By default, scrape functions will use default parameters. If you need to send specific query parameters, here is an example of how to do it:
 
@@ -180,7 +180,7 @@ res, err := c.ScrapeGoogleSearch(
 
 ### Parse instructions
 
-SDK supports [custom parsing](https://developers.oxylabs.io/products/web-scraper-api/features/custom-parser).
+SDK supports [custom parsing](https://developers.oxylabs.io/products/web-scraper-api/features/custom-parser?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877).
 There are 2 ways to provide `parsing_instructions` `_fns`:
 
 ```go
@@ -287,7 +287,7 @@ func main() {
 This method is also synchronous (like Realtime), but instead of using our service via a RESTful interface, you **can use our endpoint like a proxy**. Use Proxy Endpoint if you've used proxies before and would just like to get unblocked content from us.
 
 Since the parameters in this method are sent as as headers there are only a few parameters which this integration method accepts. You can find those parameters at
-https://developers.oxylabs.io/products/web-scraper-api/integration-methods/proxy-endpoint.
+https://developers.oxylabs.io/products/web-scraper-api/integration-methods/proxy-endpoint?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877.
 
 The proxy endpoint integration is very open ended allowing many different use cases. To cater this, the user is provided a pre-configured `http.Client` and they can use it as they deem fit:
 
@@ -329,7 +329,7 @@ func main() {
 
 ## Additional Resources
 
-See the official [API Documentation](https://developers.oxylabs.io/) for
+See the official [API Documentation](https://developers.oxylabs.io/?utm_source=github&utm_medium=referral&utm_content=oxylabs-sdk-go&groupid=877) for
 details on each API's actual interface, which is implemented by this SDK.
 
 ## Contributing
